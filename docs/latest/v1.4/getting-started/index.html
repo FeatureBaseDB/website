@@ -1,0 +1,4825 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Getting Started &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Getting Started Pilosa supports an HTTP interface which uses JSON by default. Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use curl which is available by default on many UNIX-like systems including Linux and MacOS. However, the best way to interface with the Pilosa server is through one of our three official client libraries. Pilosa currently supports Go, Java, and Python.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Getting Started"/>
+    <meta property="og:description" content="Getting Started Pilosa supports an HTTP interface which uses JSON by default. Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use curl which is available by default on many UNIX-like systems including Linux and MacOS. However, the best way to interface with the Pilosa server is through one of our three official client libraries. Pilosa currently supports Go, Java, and Python." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/latest/v1.4/getting-started/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Getting Started
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+      <h2 id="getting-started">Getting Started</h2>
+<p>Pilosa supports an HTTP interface which uses JSON by default.
+Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use <a href="https://curl.haxx.se/">curl</a> which is available by default on many UNIX-like systems including Linux and MacOS. However, the best way to interface with the Pilosa server is through one of our three official client libraries. Pilosa currently supports <a href="https://github.com/pilosa/go-pilosa">Go</a>, <a href="https://github.com/pilosa/java-pilosa">Java</a>, and <a href="https://github.com/pilosa/python-pilosa">Python</a>.</p>
+<!-- raw HTML omitted -->
+<h3 id="starting-pilosa">Starting Pilosa</h3>
+<p>Follow the steps in the <a href="../installation/">Installation</a> document to install Pilosa.
+Execute the following in a terminal to run Pilosa with the default configuration (Pilosa will be available at <a href="http://localhost:10101">localhost:10101</a>):</p>
+<pre><code>pilosa server
+</code></pre><p>Let&rsquo;s make sure Pilosa is running:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/status
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;91715a50-7d50-4c54-9a03-873801da1cd1&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;localhost&quot;,&quot;port
+&quot;:10101},&quot;isCoordinator&quot;:true}],&quot;localID&quot;:&quot;91715a50-7d50-4c54-9a03-873801da1cd1&quot;}
+</code></pre><h3 id="sample-project">Sample Project</h3>
+<p>In order to better understand Pilosa&rsquo;s capabilities, we will create a sample project called &ldquo;Star Trace&rdquo; containing information about 1,000 popular Github repositories which have &ldquo;go&rdquo; in their name. The Star Trace index will include data points such as programming language and stargazers—people who have starred a project.</p>
+<p>Although Pilosa doesn&rsquo;t keep the data in a tabular format, we still use the terms &ldquo;columns&rdquo; and &ldquo;rows&rdquo; when describing the data model. We put the primary objects in columns, and the properties of those objects in rows. For example, the Star Trace project will contain an index called &ldquo;repository&rdquo; which contains columns representing Github repositories, and rows representing properties like programming languages and stargazers. We can better organize the rows by grouping them into sets called Fields. So the &ldquo;repository&rdquo; index might have a &ldquo;languages&rdquo; field as well as a &ldquo;stargazers&rdquo; field. You can learn more about indexes and fields in the <a href="../data-model/">Data Model</a> section of the documentation.</p>
+<!-- raw HTML omitted -->
+<pre><code class="language-request" data-lang="request">curl localhost:10101/schema
+</code></pre><pre><code class="language-response" data-lang="response">{
+  &quot;indexes&quot;: [
+    {
+      &quot;name&quot;: &quot;repository&quot;,
+      &quot;options&quot;: {
+        &quot;keys&quot;: false,
+        &quot;trackExistence&quot;: true
+      },
+      &quot;fields&quot;: [
+        {
+          &quot;name&quot;: &quot;language&quot;,
+          &quot;options&quot;: {
+            &quot;type&quot;: &quot;set&quot;,
+            &quot;cacheType&quot;: &quot;ranked&quot;,
+            &quot;cacheSize&quot;: 50000,
+            &quot;keys&quot;: false
+          }
+        },
+        {
+          &quot;name&quot;: &quot;stargazer&quot;,
+          &quot;options&quot;: {
+            &quot;type&quot;: &quot;time&quot;,
+            &quot;timeQuantum&quot;: &quot;YMDH&quot;,
+            &quot;keys&quot;: false,
+            &quot;noStandardView&quot;: false
+          }
+        }
+      ],
+      &quot;shardWidth&quot;: 1048576
+    }
+  ]
+}
+</code></pre><!-- raw HTML omitted -->
+<h4 id="using-curl">Using Curl</h4>
+<h5 id="create-the-schema">Create the Schema</h5>
+<p>Before we can import data or run queries, we need to create our indexes and the fields within them. Let&rsquo;s create the <code>repository</code> index first:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository -X POST
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;success&quot;:true}
+</code></pre><p>The index name must be 64 characters or fewer, start with a letter, and consist only of lowercase alphanumeric characters or <code>_-</code>. The same goes for field names.</p>
+<p>Let&rsquo;s create the <code>stargazer</code> field which has user IDs of stargazers as its rows:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/field/stargazer \
+     -X POST \
+     -d '{&quot;options&quot;: {&quot;type&quot;: &quot;time&quot;, &quot;timeQuantum&quot;: &quot;YMD&quot;}}'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;success&quot;:true}
+</code></pre><p>Since our data contains time stamps which represent the time users starred repos, we set the field type to <code>time</code>. Time quantum is the resolution of the time we want to use, and we set it to <code>YMD</code> (year, month, day) for <code>stargazer</code>.</p>
+<p>Next up is the <code>language</code> field, which will contain IDs for programming languages:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/field/language \
+     -X POST
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;success&quot;:true}
+</code></pre><p>The <code>language</code> is a <code>set</code> field, but since the default field type is <code>set</code>, we didn&rsquo;t specify it in field options.</p>
+<h5 id="import-data-from-csv-files">Import Data From CSV Files</h5>
+<p>Download the <code>stargazer.csv</code> and <code>language.csv</code> files here:</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/stargazer.csv
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.csv
+</code></pre><p>Run the following commands to import the data into Pilosa:</p>
+<pre><code>pilosa import -i repository -f stargazer stargazer.csv
+pilosa import -i repository -f language language.csv
+</code></pre><p>If you are using a Docker container for Pilosa (with name <code>pilosa</code>), you should instead copy the <code>*.csv</code> file into the container and then import them:</p>
+<pre><code>docker cp stargazer.csv pilosa:/stargazer.csv
+docker exec -it pilosa /pilosa import -i repository -f stargazer /stargazer.csv
+docker cp language.csv pilosa:/language.csv
+docker exec -it pilosa /pilosa import -i repository -f language /language.csv
+</code></pre><p>Note that both the user IDs and the repository IDs were remapped to sequential integers in the data files, they don&rsquo;t correspond to actual Github IDs anymore. You can check out <a href="https://github.com/pilosa/getting-started/blob/master/languages.txt">languages.txt</a> to see the mapping for languages.</p>
+<h5 id="make-some-queries">Make Some Queries</h5>
+<p>Which repositories did user 14 star:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Row(stargazer=14)'
+</code></pre><pre><code class="language-response" data-lang="response">{
+    &quot;results&quot;:[
+        {
+            &quot;attrs&quot;:{},
+            &quot;columns&quot;:[1,2,3,362,368,391,396,409,416,430,436,450,454,460,461,464,466,469,470,483,484,486,490,491,503,504,514]
+        }
+    ]
+}
+</code></pre><p>What are the top 5 languages in the sample data:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'TopN(language, n=5)'
+</code></pre><pre><code class="language-response" data-lang="response">{
+    &quot;results&quot;:[
+        [
+            {&quot;id&quot;:5,&quot;count&quot;:119},
+            {&quot;id&quot;:1,&quot;count&quot;:50},
+            {&quot;id&quot;:4,&quot;count&quot;:48},
+            {&quot;id&quot;:9,&quot;count&quot;:31},
+            {&quot;id&quot;:13,&quot;count&quot;:25}
+        ]
+    ]
+}
+</code></pre><p>Which repositories were starred by user 14 and 19:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Intersect(
+            Row(stargazer=14), 
+            Row(stargazer=19)
+        )'
+</code></pre><pre><code class="language-response" data-lang="response">{
+    &quot;results&quot;:[
+        {
+            &quot;attrs&quot;:{},
+            &quot;columns&quot;:[2,3,362,396,416,461,464,466,470,486]
+        }
+    ]
+}
+</code></pre><p>Which repositories were starred by user 14 or 19:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Union(
+            Row(stargazer=14), 
+            Row(stargazer=19)
+        )'
+</code></pre><pre><code class="language-response" data-lang="response">{
+    &quot;results&quot;:[
+        {
+            &quot;attrs&quot;:{},
+            &quot;columns&quot;:[1,2,3,361,362,368,376,377,378,382,386,388,391,396,398,400,409,411,412,416,426,428,430,435,436,450,452,453,454,456,460,461,464,465,466,469,470,483,484,486,487,489,490,491,500,503,504,505,512,514]
+        }
+    ]
+}
+</code></pre><p>Which repositories were starred by user 14 and 19 and also were written in language 1:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Intersect(
+            Row(stargazer=14), 
+            Row(stargazer=19),
+            Row(language=1)
+        )'
+</code></pre><pre><code class="language-response" data-lang="response">{
+    &quot;results&quot;:[
+        {
+            &quot;attrs&quot;:{},
+            &quot;columns&quot;:[2,362,416,461]
+        }
+    ]
+}
+</code></pre><p>Set user 99999 as a stargazer for repository 77777:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Set(77777, stargazer=99999)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>Please note that while user ID 99999 may not be sequential with the other column IDs, it is still a relatively low number.
+Don&rsquo;t try to use arbitrary 64-bit integers as column or row IDs in Pilosa - this will lead to problems such as poor performance and out of memory errors.</p>
+<h4 id="using-go">Using Go</h4>
+<p>Pilosa follows the Go policy of supporting the two most recent major versions of Go.</p>
+<h5 id="create-the-environment">Create the Environment</h5>
+<p>Interacting with Pilosa in your go program is best accomplished using our client, go-pilosa. To install go-pilosa, open a new  terminal and download the library to your <code>GOPATH</code> using:</p>
+<pre><code>go get github.com/pilosa/go-pilosa
+</code></pre><p>Create a project folder:</p>
+<pre><code>mkdir getting-started &amp;&amp; cd getting-started
+</code></pre><p>In this folder, we will download two CSV files to provide data to our fields later on. Download the <code>stargazer.csv</code> and <code>language.csv</code> files here:</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/stargazer.csv
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.csv
+</code></pre><p>We will also create a file called <code>startrace.go</code> as follows:</p>
+<pre><code>touch startrace.go
+</code></pre><p>This file will be used in the following sections.</p>
+<h5 id="create-the-schema-1">Create the Schema</h5>
+<p>Before we can import data or run queries, we need to create our schema. You can see two imports from the go-pilosa repo, go-pilosa for the client, and csv for the CSV reader. Create the schema by creating a client (which will communicate our schema to Pilosa), creating a schema locally (which will contain our indexes and fields), and syncing with Pilosa. This is all done in the <code>startrace.go</code> file:</p>
+<pre><code>package main
+
+import (
+	&quot;bytes&quot;
+	&quot;fmt&quot;
+	&quot;github.com/pilosa/go-pilosa&quot;
+	&quot;github.com/pilosa/go-pilosa/csv&quot;
+	&quot;io/ioutil&quot;
+	&quot;log&quot;
+)
+
+func main() {
+	// Create the Schema
+	client := pilosa.DefaultClient()
+	schema, _ := client.Schema()
+	// This is where the index will go later
+	// This is where the fields will go later
+	err := client.SyncSchema(schema)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+</code></pre><p>Next, let&rsquo;s create the <code>repository</code> index:</p>
+<pre><code>	repository := schema.Index(&quot;repository&quot;)
+</code></pre><p>The index name must be 64 characters or fewer, start with a letter, and consist only of lowercase alphanumeric characters or <code>_-</code>. The same goes for field names.</p>
+<p>Let&rsquo;s create the <code>stargazer</code> field which has user IDs of stargazers as its rows:</p>
+<pre><code>	stargazer := repository.Field(&quot;stargazer&quot;)
+</code></pre><p>Next up is the <code>language</code> field, which will contain IDs for programming languages:</p>
+<pre><code>	language := repository.Field(&quot;language&quot;)
+</code></pre><p>Your <code>startrace.go</code> file should look like:</p>
+<pre><code>package main
+
+import (
+	&quot;bytes&quot;
+	&quot;fmt&quot;
+	&quot;github.com/pilosa/go-pilosa&quot;
+	&quot;github.com/pilosa/go-pilosa/csv&quot;
+	&quot;io/ioutil&quot;
+	&quot;log&quot;
+)
+
+func main() {
+	// Create the Schema
+	client := pilosa.DefaultClient()
+	schema, _ := client.Schema()
+	repository := schema.Index(&quot;repository&quot;)
+	stargazer := repository.Field(&quot;stargazer&quot;)
+	language := repository.Field(&quot;language&quot;)
+	err := client.SyncSchema(schema)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+</code></pre><h5 id="import-data-from-csv-files-1">Import Data From CSV Files</h5>
+<p>Now that we have our index and our fields, we can import the data we downloaded earlier and be on our way to making our own queries.</p>
+<p>First, we will load our data into the <code>stargazer</code> field:</p>
+<pre><code>	stargazerFile, err := ioutil.ReadFile(&quot;stargazer.csv&quot;)
+	if err != nil {
+		log.Fatal(err)
+	}
+	format := &quot;2006-01-02T15:04&quot;
+	iterator = csv.NewColumnIteratorWithTimestampFormat(csv.RowIDColumnID, bytes.NewReader(stargazerFile), format)
+	err = client.ImportField(stargazer, iterator)
+	if err != nil {
+		log.Fatal(err)
+	}
+</code></pre><p>Since our <code>stargazer</code> data contains time stamps, which represent the time users starred repos, we will be using the <code>csv.NewColumnIteratorWithTimeStampFormat</code> function from the go-pilosa/csv package. This function takes the format of the csv files (<code>csv.RowIDColumnID</code>), an <code>io.Reader</code> (<code>bytes.NewReader(stargazerFile)</code>), and the time quantum format (<code>format</code>) and translates the csv file into a format Pilosa can read. Time quantum is the resolution of the time we want to use.</p>
+<p>Next, we will load our data into the <code>language</code> field:</p>
+<pre><code>	languageFile, err := ioutil.ReadFile(&quot;language.csv&quot;)
+	if err != nil {
+		log.Fatal(err)
+	}
+	iterator := csv.NewColumnIterator(csv.RowIDColumnID, bytes.NewReader(languageFile))
+	err = client.ImportField(language, iterator)
+	if err != nil {
+		log.Fatal(err)
+	}
+</code></pre><p>Since our <code>language</code> data doesn&rsquo;t contain time stamps, we will use the <code>csv.NewColumnIterator</code> function in place of <code>csv.NewColumnIteratorWithTimeStampFormat</code>.</p>
+<p>Note that both the user IDs and the repository IDs were remapped to sequential integers in the data files, they don&rsquo;t correspond to actual Github IDs anymore. You can check out <a href="https://github.com/pilosa/getting-started/blob/master/languages.txt">languages.txt</a> to see the mapping for languages.</p>
+<p>For more information on imports in go-pilosa, please see the go-pilosa <a href="https://github.com/pilosa/go-pilosa/blob/master/docs/imports-exports.md">site</a>.</p>
+<h5 id="make-some-queries-1">Make Some Queries</h5>
+<p>Now that we have a working schema, we can query it.</p>
+<p>Which repositories did user 14 star:</p>
+<pre><code class="language-request" data-lang="request">response, err := client.Query(stargazer.Row(14))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;User 14 starred: &quot;, response.Result().Row().Columns)
+</code></pre><pre><code class="language-response" data-lang="response">User 14 starred:  [1 2 3 362 368 391 396 409 416 430 436 450 454 460 461 464 466 469 470 483 484 486 490 491 503 504 514]
+</code></pre><p>What are the top 5 languages in the sample data:</p>
+<pre><code class="language-request" data-lang="request">response, err = client.Query(language.TopN(5))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;Top Languages: &quot;, response.Result().CountItems())
+</code></pre><pre><code class="language-response" data-lang="response">Top Languages:  [{5  119} {1  50} {4  48} {9  31} {13  25}]
+</code></pre><p>Which repositories were starred by user 14 and 19:</p>
+<pre><code class="language-request" data-lang="request">response, err = client.Query(repository.Intersect(stargazer.Row(14), stargazer.Row(19)))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;Both user 14 and 19 starred: &quot;, response.Result().Row().Columns)
+</code></pre><pre><code class="language-response" data-lang="response">Both user 14 and 19 starred:  [2 3 362 396 416 461 464 466 470 486]
+</code></pre><p>Which repositories were starred by user 14 or 19:</p>
+<pre><code class="language-request" data-lang="request">response, err = client.Query(repository.Union(stargazer.Row(14), stargazer.Row(19)))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;User 14 or 19 starred: &quot;, response.Result().Row().Columns)
+</code></pre><pre><code class="language-response" data-lang="response">User 14 or 19 starred:  [1 2 3 361 362 368 376 377 378 382 386 388 391 396 398 400 409 411 412 416 426 428 430 435 436 450 452 453 454 456 460 461 464 465 466 469 470 483 484 486 487 489 490 491 500 503 504 505 512 514]
+</code></pre><p>Which repositories were starred by user 14 and 19 and also were written in language 1:</p>
+<pre><code class="language-request" data-lang="request">response, err = client.Query(repository.Intersect(stargazer.Row(14), stargazer.Row(19), language.Row(1)))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;Both user 14 and 19 starred and were written in language 1: &quot;, response.Result().Row().Columns)
+</code></pre><pre><code class="language-response" data-lang="response">Both user 14 and 19 starred and were written in language 1:  [2 362 416 461]
+</code></pre><p>Set user 99999 as a stargazer for repository 77777:</p>
+<pre><code class="language-request" data-lang="request">client.Query(stargazer.Set(99999, 77777))
+response, err = client.Query(stargazer.Row(99999))
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(&quot;Set user 99999 as a stargazer for repository 77777&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">Set user 99999 as a stargazer for repository 77777
+</code></pre><p>Please note that while user ID 99999 may not be sequential with the other column IDs, it is still a relatively low number.
+Don&rsquo;t try to use arbitrary 64-bit integers as column or row IDs in Pilosa - this will lead to problems such as poor performance and out of memory errors.</p>
+<p>For more information about go-pilosa, please see our Go client library at <a href="https://github.com/pilosa/go-pilosa">go-pilosa</a> or checkout the go-pilosa <a href="https://github.com/pilosa/go-pilosa/blob/master/docs/data-model-queries.md">Data Model and Queries</a> section for more query options.</p>
+<h4 id="using-java">Using Java</h4>
+<p>Pilosa requires Java 8 or higher and Maven 3 or higher.</p>
+<h5 id="create-the-environment-1">Create the Environment</h5>
+<p>Create a project folder:</p>
+<pre><code>mkdir getting-started &amp;&amp; cd getting-started
+</code></pre><p>In this folder, we will download two CSV files to provide data to our fields later on. Download the <code>stargazer.csv</code> and <code>language.csv</code> files here:</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/stargazer.csv
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.csv
+</code></pre><p>We will now create the java directory that will contain our <code>pom.xml</code> file and create the <code>pom.xml</code> file:</p>
+<pre><code>mkdir startrace &amp;&amp; cd startrace
+touch pom.xml
+</code></pre><p>For this specific project, the <code>pom.xml</code> file needs to contain:</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.pilosa&lt;/groupId&gt;
+    &lt;artifactId&gt;getting-started&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.pilosa&lt;/groupId&gt;
+            &lt;artifactId&gt;pilosa-client&lt;/artifactId&gt;
+            &lt;version&gt;1.3.1&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.6.1&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;source&gt;1.8&lt;/source&gt;
+                    &lt;target&gt;1.8&lt;/target&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+
+            &lt;!-- Build an executable JAR --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.0.2&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;archive&gt;
+                        &lt;manifest&gt;
+                            &lt;addClasspath&gt;true&lt;/addClasspath&gt;
+                            &lt;classpathPrefix&gt;lib/&lt;/classpathPrefix&gt;
+                            &lt;mainClass&gt;main.java.StarTrace&lt;/mainClass&gt;
+                        &lt;/manifest&gt;
+                    &lt;/archive&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+
+            &lt;!-- create an uber JAR --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.0.0&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;phase&gt;package&lt;/phase&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;shade&lt;/goal&gt;
+                        &lt;/goals&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre><p>We will now create the java directory that will contain our <code>StarTrace.java</code> file and create the <code>StarTrace.java</code> file:</p>
+<pre><code>mkdir -p src/main/java &amp;&amp; cd src/main/java
+touch StarTrace.java
+</code></pre><p>This file will be used in the following sections.</p>
+<h5 id="create-the-schema-2">Create the Schema</h5>
+<p>Before we can import data or run queries, we need to create our schema. You can see the first six dependencies are imported from the java-pilosa library. Create the schema by creating a client which will communicate our schema to Pilosa, creating a schema which will contain our indexes and fields, and syncing with Pilosa. This is all done in the <code>StarTrace.java</code> file:</p>
+<pre><code>package main.java;
+
+import com.pilosa.client.PilosaClient;
+import com.pilosa.client.QueryResponse;
+import com.pilosa.client.exceptions.PilosaException;
+import com.pilosa.client.orm.*;
+import com.pilosa.client.csv.FileRecordIterator; 
+import com.pilosa.client.TimeQuantum;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+public class StarTrace {
+    public static void main(String []args) throws IOException {
+        // Create the Schema
+        PilosaClient client = PilosaClient.defaultClient();
+        Schema schema = client.readSchema();
+        // This is were the index will go later
+	// This is were the fields will go later
+        client.syncSchema(schema);
+    }
+}
+</code></pre><p>Next, let&rsquo;s create the <code>repository</code> index:</p>
+<pre><code>	Index repository = schema.index(&quot;repository&quot;);
+</code></pre><p>The index name must be 64 characters or fewer, start with a letter, and consist only of lowercase alphanumeric characters or <code>_-</code>. The same goes for field names.</p>
+<p>Let&rsquo;s create the <code>stargazer</code> field which has user IDs of stargazers as its rows:</p>
+<pre><code>	FieldOptions stargazerOptions = FieldOptions.builder()
+            .fieldTime(TimeQuantum.YEAR_MONTH_DAY)
+            .build();
+        Field stargazer = repository.field(&quot;stargazer&quot;, stargazerOptions);
+</code></pre><p>Since our data contains time stamps which represent the time users starred repos, we set the field type to <code>time</code> using <code>fieldTime()</code>. Time quantum is the resolution of the time we want to use, and we set it to <code>YEAR_MONTH_DAY</code> for <code>stargazer</code>.</p>
+<p>Next up is the <code>language</code> field, which will contain IDs for programming languages:</p>
+<pre><code>	Field language = repository.field(&quot;language&quot;);
+</code></pre><p>The <code>language</code> field is a <code>set</code> field, but since the default field type is <code>set</code>, we don&rsquo;t need to specify it</p>
+<p>Your <code>StarTrace.java</code> file should look like:</p>
+<pre><code>package main.java;
+
+import com.pilosa.client.PilosaClient;
+import com.pilosa.client.QueryResponse;
+import com.pilosa.client.exceptions.PilosaException;
+import com.pilosa.client.orm.*;
+import com.pilosa.client.csv.FileRecordIterator; 
+import com.pilosa.client.TimeQuantum;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+public class StarTrace {
+    public static void main(String []args) throws IOException {
+        // Create the Schema
+        PilosaClient client = PilosaClient.defaultClient();
+        Schema schema = client.readSchema();
+        Index repository = schema.index(&quot;repository&quot;);
+
+        FieldOptions stargazerOptions = FieldOptions.builder()
+            .fieldTime(TimeQuantum.YEAR_MONTH_DAY)
+            .build();
+        Field stargazer = repository.field(&quot;stargazer&quot;, stargazerOptions);
+        
+        Field language = repository.field(&quot;language&quot;);
+        client.syncSchema(schema);
+    }
+}
+</code></pre><h5 id="import-data-from-csv-files-2">Import Data From CSV Files</h5>
+<p>Now that we have our index and our fields, we can import the data we downloaded earlier and be on our way to making our own queries.</p>
+<p>First, we will load our data into the <code>stargazer</code> field:</p>
+<pre><code>	SimpleDateFormat timestampFormat = new SimpleDateFormat(&quot;yyyy-MM-dd'T'hh:mm&quot;);
+        FileRecordIterator iterator = FileRecordIterator.fromPath(&quot;stargazer.csv&quot;, stargazer, timestampFormat);
+        client.importField(stargazer, iterator);
+</code></pre><p>Due to the time aspect of the <code>stargazer</code> csv file, we have to specify the time stamp format in the <code>fromPath</code> function. We set the variable <code>timestampFormat</code> to the format present in the csv file using the function <code>SimpleDateFormat()</code> and pass the variable to the <code>fromPath</code> function, which will take the csv file name, the field name, and the time stamp format and translate the csv file into a format Pilosa can read.</p>
+<p>Next, we will load our data into the <code>language</code> field:</p>
+<pre><code>	iterator = FileRecordIterator.fromPath(&quot;language.csv&quot;, language);
+        client.importField(language, iterator);
+</code></pre><p>Since our <code>language</code> data doesn&rsquo;t have a time aspect, the time stamp format doesn&rsquo;t need to be specified.</p>
+<p>Note that both the user IDs and the repository IDs were remapped to sequential integers in the data files, they don&rsquo;t correspond to actual Github IDs anymore. You can check out <a href="https://github.com/pilosa/getting-started/blob/master/languages.txt">languages.txt</a> to see the mapping for languages.</p>
+<p>For more information on imports in java-pilosa, please see the java-pilosa <a href="https://github.com/pilosa/java-pilosa/blob/master/docs/imports.md">site</a>.</p>
+<h5 id="make-some-queries-2">Make Some Queries</h5>
+<p>Now that we have a working schema, we can query it.</p>
+<p>Which repositories did user 14 star:</p>
+<pre><code class="language-request" data-lang="request">QueryResponse response = client.query(stargazer.row(14));
+System.out.println(&quot;User 14 starred: &quot; + response.getResult().getRow().getColumns());
+</code></pre><pre><code class="language-response" data-lang="response">User 14 starred: [1, 2, 3, 362, 368, 391, 396, 409, 416, 430, 436, 450, 454, 460, 461, 464, 466, 469, 470, 483, 484, 486, 490, 491, 503, 504, 514]
+</code></pre><p>What are the top 5 languages in the sample data:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(language.topN(5));
+System.out.println(&quot;Top Languages: &quot; + response.getResult().getCountItems());
+</code></pre><pre><code class="language-response" data-lang="response">Top Languages: [CountResultItem(id=5, count=119), CountResultItem(id=1, count=50), CountResultItem(id=4, count=48), CountResultItem(id=9, count=31), CountResultItem(id=13, count=25)]
+</code></pre><p>Which repositories were starred by user 14 and 19:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(repository.intersect(stargazer.row(14), stargazer.row(19)));
+System.out.println(&quot;Both user 14 and 19 starred: &quot; + response.getResult().getRow().getColumns());
+</code></pre><pre><code class="language-response" data-lang="response">Both user 14 and 19 starred: [2, 3, 362, 396, 416, 461, 464, 466, 470, 486]
+</code></pre><p>Which repositories were starred by user 14 or 19:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(repository.union(stargazer.row(14), stargazer.row(19)));
+System.out.println(&quot;User 14 or 19 starred: &quot; + response.getResult().getRow().getColumns());
+</code></pre><pre><code class="language-response" data-lang="response">User 14 or 19 starred: [1, 2, 3, 361, 362, 368, 376, 377, 378, 382, 386, 388, 391, 396, 398, 400, 409, 411, 412, 416, 426, 428, 430, 435, 436, 450, 452, 453, 454, 456, 460, 461, 464, 465, 466, 469, 470, 483, 484, 486, 487, 489, 490, 491, 500, 503, 504, 505, 512, 514]
+</code></pre><p>Which repositories were starred by user 14 and 19 and also were written in language 1:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(repository.intersect(stargazer.row(14), stargazer.row(19), language.row(1)));
+System.out.println(&quot;Both user 14 and 19 starred and were written in language 1: &quot; + response.getResult().getRow().getColumns());
+</code></pre><pre><code class="language-response" data-lang="response">Both user 14 and 19 starred and were written in language 1: [2, 362, 416, 461]
+</code></pre><p>Set user 99999 as a stargazer for repository 77777:</p>
+<pre><code class="language-request" data-lang="request">client.query(stargazer.set(99999, 77777));
+System.out.println(&quot;Set user 99999 as a stargazer for repository 77777&quot;);
+</code></pre><pre><code class="language-response" data-lang="response">Set user 99999 as a stargazer for repository 77777
+</code></pre><p>Please note that while user ID 99999 may not be sequential with the other column IDs, it is still a relatively low number.
+Don&rsquo;t try to use arbitrary 64-bit integers as column or row IDs in Pilosa - this will lead to problems such as poor performance and out of memory errors.</p>
+<p>For more information about java-pilosa, please see our Java client library at <a href="https://github.com/pilosa/java-pilosa">java-pilosa</a> or checkout the java-pilosa <a href="https://github.com/pilosa/java-pilosa/blob/master/docs/data-model-queries.md">Data Model and Queries</a> section for more query options.</p>
+<h4 id="python-users">Python Users</h4>
+<p>Pilosa requires Python 2.7 or higher or Python 3.4 or higher.</p>
+<h5 id="create-the-environment-2">Create the Environment</h5>
+<p>Create a new project folder:</p>
+<pre><code>mkdir getting-started &amp;&amp; cd getting-started
+</code></pre><p>In this folder, we will download two CSV files to provide data to our fields later on. Download the <code>stargazer.csv</code> and <code>language.csv</code> files here:</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/stargazer.csv
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.csv
+</code></pre><p>We will also download two text files. One is the <code>requirements.txt</code> that will install python-pilosa later on and the other is <code>languages.txt</code> which will provide context to the <code>language</code> field.</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/python/requirements.txt
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.txt
+</code></pre><p>We will now create the python environment:</p>
+<pre><code>python3 -m venv startrace
+</code></pre><p>Next, we activate the python environment we created and install the single dependency, python-pilosa:</p>
+<pre><code>source startrace/bin/activate
+pip install -r requirements.txt
+</code></pre><p>We will also create a file called <code>startrace.py</code> as follows:</p>
+<pre><code>touch startrace.py
+</code></pre><p>This file will be used in the following sections.</p>
+<h5 id="create-the-schema-3">Create the Schema</h5>
+<p>Before we can import data or run queries, we need to create our schema. You can see the dependencies dealing with <code>pilosa</code> are from the python-pilosa library. Create the schema by creating a client which will communicate our schema to Pilosa, creating a schema which will contain our indexes and fields, and syncing with Pilosa. This is all done in the <code>startrace.py</code> file:</p>
+<pre><code>from __future__ import print_function
+
+import os
+import sys
+import time
+import pilosa
+
+from pilosa import Client, Index, TimeQuantum
+from pilosa.imports import csv_column_reader, csv_row_id_column_id
+
+try:
+	# Python 2.7 and 3
+	from io import StringIO
+except ImportError:
+	# Python 2.6 and 2.7
+	from StringIO import StringIO
+
+# Create the Schema
+client = pilosa.Client()
+schema = client.schema()
+# This is where the index will go later
+# This is where the fields will go later
+client.sync_schema(schema)
+</code></pre><p>Next, let&rsquo;s create the <code>repository</code> index:</p>
+<pre><code>repository = schema.index(&quot;repository&quot;)
+</code></pre><p>The index name must be 64 characters or fewer, start with a letter, and consist only of lowercase alphanumeric characters or <code>_-</code>. The same goes for field names.</p>
+<p>Let&rsquo;s create the <code>stargazer</code> field which has user IDs of stargazers as its rows:</p>
+<pre><code>stargazer = repository.field(&quot;stargazer&quot;, time_quantum=pilosa.TimeQuantum.YEAR_MONTH_DAY)
+</code></pre><p>Since our data contains time stamps which represent the time users starred repos, we establish the time aspect by using <code>time_quantum</code>. Time quantum is the resolution of the time we want to use, and we set it to <code>YEAR_MONTH_DAY</code> for <code>stargazer</code>.</p>
+<p>Next up is the <code>language</code> field, which will contain IDs for programming languages:</p>
+<pre><code>language = repository.field(&quot;language&quot;)
+</code></pre><p>The <code>language</code> field is a <code>set</code> field, but since the defualt field is <code>set</code>, we didn&rsquo;t need to specify any options.</p>
+<p>Your <code>StarTrace.py</code> file should look like:</p>
+<pre><code>from __future__ import print_function
+
+import os
+import sys
+import time
+import pilosa
+
+from pilosa import Client, Index, TimeQuantum
+from pilosa.imports import csv_column_reader, csv_row_id_column_id
+
+try:
+        # Python 2.7 and 3
+        from io import StringIO
+except ImportError:
+        # Python 2.6 and 2.7
+        from StringIO import StringIO
+
+# Create the Schema
+client = pilosa.Client()
+schema = client.schema()
+repository = schema.index(&quot;repository&quot;)
+stargazer = repository.field(&quot;stargazer&quot;, time_quantum=pilosa.TimeQuantum.YEAR_MONTH_DAY)
+language = repository.field(&quot;language&quot;)
+client.sync_schema(schema)
+</code></pre><h5 id="import-data-from-csv-files-3">Import Data From CSV Files</h5>
+<p>Now that we have our index and our fields, we can import the data we downloaded earlier and be on our way to making our own queries.</p>
+<p>First, we will load our data into the <code>stargazer</code> field:</p>
+<pre><code>time_func = lambda s: int(time.mktime(time.strptime(s, &quot;%Y-%m-%dT%H:%M&quot;)))
+with open(&quot;stargazer.csv&quot;) as f:
+    stargazer_reader = csv_column_reader(f, timefunc=time_func)
+    client.import_field(stargazer, stargazer_reader)
+</code></pre><p>Due to the time aspect of the <code>stargazer</code> csv file, we have to specify the time stamp format in the <code>csv_column_reader</code> function. We set the variable <code>time_func</code> to the format present in the csv file and call it in the <code>csv_column_reader</code> function, which will take the csv file and the time stamp format and translate the csv file into a format Pilosa can read</p>
+<p>Next, we will load our data into the <code>language</code> field:</p>
+<pre><code>with open(&quot;language.csv&quot;) as f:
+    language_reader = csv_column_reader(f, csv_row_id_column_id)
+    client.import_field(language, language_reader)
+</code></pre><p>The <code>language</code> is a <code>set</code> field, but since the default field type is <code>set</code>, we didn&rsquo;t need to specify it.</p>
+<p>For more information on imports in python-pilosa, please see the python-pilosa <a href="https://github.com/pilosa/python-pilosa/blob/master/docs/imports.md">site</a>.</p>
+<p>Note that both the user IDs and the repository IDs were remapped to sequential integers in the data files, they don&rsquo;t correspond to actual Github IDs anymore. You can check out <a href="https://github.com/pilosa/getting-started/blob/master/languages.txt">languages.txt</a> to see the mapping for languages.</p>
+<h5 id="make-some-queries-3">Make Some Queries</h5>
+<p>Now that we have a working schema, we can query it.</p>
+<p>Which repositories did user 14 star:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(stargazer.row(14))
+print(&quot;User 14 starred: &quot;, response.result.row.columns)
+</code></pre><pre><code class="language-response" data-lang="response">User 14 starred:  [1, 2, 3, 362, 368, 391, 396, 409, 416, 430, 436, 450, 454, 460, 461, 464, 466, 469, 470, 483, 484, 486, 490, 491, 503, 504, 514]
+</code></pre><p>What are the top 5 languages in the sample data:</p>
+<pre><code class="language-request" data-lang="request">def load_language_names():
+    with open(&quot;languages.txt&quot;) as f:
+        return [line.strip() for line in f]
+
+def print_topn(items):
+    lines = [&quot;\t{i}. {s[0]}: {s[1]} stars&quot;.format(s=s, i=i + 1) for i, s in enumerate(items)]
+    print(&quot;\n&quot;.join(lines))
+
+language_names = load_language_names()
+top_languages = client.query(language.topn(5)).result.count_items
+language_items = [(language_names[item.id], item.count) for item in top_languages]
+print(&quot;Top languages: &quot;)
+print_topn(language_items)
+</code></pre><pre><code class="language-response" data-lang="response">Top languages: 
+        1. Go: 119 stars
+        2. Shell: 50 stars
+        3. Makefile: 48 stars
+        4. HTML: 31 stars
+        5. JavaScript: 25 stars
+</code></pre><p>Which repositories were starred by user 14 and 19:</p>
+<pre><code class="language-request" data-lang="request">repsonse = client.query(repository.intersect(stargazer.row(14), stargazer.row(19)))
+print(&quot;Both user 14 and 19 starred: &quot;, response.result.row.columns)
+</code></pre><pre><code class="language-resposne" data-lang="resposne">Both user 14 and 19 starred:  [1, 2, 3, 362, 368, 391, 396, 409, 416, 430, 436, 450, 454, 460, 461, 464, 466, 469, 470, 483, 484, 486, 490, 491, 503, 504, 514]
+</code></pre><p>Which repositories were starred by user 14 or 19:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(repository.union(stargazer.row(14), stargazer.row(19)))
+print(&quot;User 14 or 19 starred: &quot;, response.result.row.columns)
+</code></pre><pre><code class="language-response" data-lang="response">User 14 or 19 starred:  [1, 2, 3, 361, 362, 368, 376, 377, 378, 382, 386, 388, 391, 396, 398, 400, 409, 411, 412, 416, 426, 428, 430, 435, 436, 450, 452, 453, 454, 456, 460, 461, 464, 465, 466, 469, 470, 483, 484, 486, 487, 489, 490, 491, 500, 503, 504, 505, 512, 514]
+</code></pre><p>Which repositories were starred by user 14 and 19 and also were written in language 1:</p>
+<pre><code class="language-request" data-lang="request">response = client.query(repository.intersect(stargazer.row(14), stargazer.row(19), language.row(1)))
+print(&quot;Both user 14 and 19 starred and were written in language 1: &quot;, response.result.row.columns)
+</code></pre><pre><code class="language-response" data-lang="response">Both user 14 and 19 starred and were written in language 1:  [2, 362, 416, 461]
+</code></pre><p>Set user 99999 as a stargazer for repository 77777:</p>
+<pre><code class="language-request" data-lang="request">client.query(stargazer.set(99999, 77777))
+print(&quot;Set user 99999 as a stargazer for repository 77777&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">Set user 99999 as a stargazer for repository 77777
+</code></pre><p>Please note that while user ID 99999 may not be sequential with the other column IDs, it is still a relatively low number.
+Don&rsquo;t try to use arbitrary 64-bit integers as column or row IDs in Pilosa - this will lead to problems such as poor performance and out of memory errors.</p>
+<p>For more information about python-pilosa, please see our Python client library at <a href="https://github.com/pilosa/python-pilosa">python-pilosa</a> or checkout the python-pilosa <a href="https://github.com/pilosa/python-pilosa/blob/master/docs/data-model-queries.md">Data Model and Queries</a> section for more query options.</p>
+<h3 id="whats-next">What&rsquo;s Next?</h3>
+<p>You can jump to <a href="../data-model/">Data Model</a> for an in-depth look at Pilosa&rsquo;s data model, or <a href="../query-language/">Query Language</a> for more details about <strong>PQL</strong>, the query language of Pilosa. Check out the <a href="../examples/">Examples</a> page for example implementations of real world use cases for Pilosa. Ready to get going in your favorite language? Have a peek at our small but expanding set of official <a href="../client-libraries/">Client Libraries</a>.</p>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v1.4.0/docs/getting-started.md">View markdown source</a> on Github. Last updated 1 year, 9 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,3533 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Getting Started &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Getting Started Pilosa supports an HTTP interface which uses JSON by default. Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use curl which is available by default on many UNIX-like systems including Linux and MacOS. Windows users can download curl here.
+Starting Pilosa Follow the steps in the Install document to install Pilosa. Execute the following in a terminal to run Pilosa with the default configuration (Pilosa will be available at localhost:10101):">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Getting Started"/>
+    <meta property="og:description" content="Getting Started Pilosa supports an HTTP interface which uses JSON by default. Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use curl which is available by default on many UNIX-like systems including Linux and MacOS. Windows users can download curl here.
+Starting Pilosa Follow the steps in the Install document to install Pilosa. Execute the following in a terminal to run Pilosa with the default configuration (Pilosa will be available at localhost:10101):" />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v0.4/getting-started/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Getting Started
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#input-definition">Input Definition</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/tutorials/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/tutorials/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/pdk/#library">Library</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/pdk/#examples">Examples</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#imports-and-exports">Imports and Exports</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/getting-started/"  class="docs-active" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#input-definition">Input Definition</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/tutorials/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/tutorials/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/pdk/#library">Library</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/pdk/#examples">Examples</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#imports-and-exports">Imports and Exports</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.4/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.4/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v0.4. View the <a href="/docs/latest/getting-started/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="getting-started">Getting Started</h2>
+<p>Pilosa supports an HTTP interface which uses JSON by default.
+Any HTTP tool can be used to interact with the Pilosa server. The examples in this documentation will use <a href="https://curl.haxx.se/">curl</a> which is available by default on many UNIX-like systems including Linux and MacOS. Windows users can download curl <a href="https://curl.haxx.se/download.html">here</a>.</p>
+<!-- raw HTML omitted -->
+<h3 id="starting-pilosa">Starting Pilosa</h3>
+<p>Follow the steps in the <a href="https://www.pilosa.com/docs/v0.4/installation/">Install</a> document to install Pilosa.
+Execute the following in a terminal to run Pilosa with the default configuration (Pilosa will be available at <code>localhost:10101</code>):</p>
+<pre><code>pilosa server
+</code></pre><p>If you are using the Docker image, you can run an ephemeral Pilosa container on the default address using the following command:</p>
+<pre><code>docker run -it --rm --name pilosa -p 10101:10101 pilosa/pilosa:latest
+</code></pre><p>Let&rsquo;s make sure Pilosa is running:</p>
+<pre><code>curl localhost:10101/status
+</code></pre><p>Which should output: <code>{&quot;status&quot;:{&quot;Nodes&quot;:[{&quot;Host&quot;:&quot;:10101&quot;,&quot;State&quot;:&quot;UP&quot;}]}}</code></p>
+<h3 id="sample-project">Sample Project</h3>
+<p>In order to better understand Pilosa&rsquo;s capabilities, we will create a sample project called &ldquo;Star Trace&rdquo; containing information about the top 1,000 most recently updated Github repositories which have &ldquo;go&rdquo; in their name. The Star Trace index will include data points such as programming language, tags, and stargazers—people who have starred a project.</p>
+<p>Although Pilosa doesn&rsquo;t keep the data in a tabular format, we still use the terms &ldquo;columns&rdquo; and &ldquo;rows&rdquo; when describing the data model. We put the primary objects in columns, and the properties of those objects in rows. For example, the Star Trace project will contain an index called &ldquo;repository&rdquo; which contains columns representing Github repositories, and rows representing properties like programming languages and tags. We can better organize the rows by grouping them into sets called Frames. So the &ldquo;repository&rdquo; index might have a &ldquo;languages&rdquo; frame as well as a &ldquo;tags&rdquo; frame. You can learn more about indexes and frames in the <a href="../data-model">Data Model</a> section of the documentation.</p>
+<h4 id="create-the-schema">Create the Schema</h4>
+<p>Note:
+The queries in this section which are used to set up the indexes in Pilosa just the empty object on success: <code>{}</code> - if you would like to verify that a query worked as you expected, you can request the schema as follows:</p>
+<pre><code>curl localhost:10101/schema
+{&quot;indexes&quot;:null}
+</code></pre><p>Before we can import data or run queries, we need to create our indexes and the frames within them. Let&rsquo;s create the repository index first:</p>
+<pre><code>curl localhost:10101/index/repository \
+     -X POST \
+     -d '{&quot;options&quot;: {&quot;columnLabel&quot;: &quot;repo_id&quot;}}'
+</code></pre><p>Repository IDs are the main focus of the <code>repository</code> index, so we chose <code>repo_id</code> as the column label.</p>
+<p>Let&rsquo;s create the <code>stargazer</code> frame which has user IDs of stargazers as its rows:</p>
+<pre><code>curl localhost:10101/index/repository/frame/stargazer \
+     -X POST \
+     -d '{&quot;options&quot;: {&quot;rowLabel&quot;: &quot;stargazer_id&quot;, 
+                      &quot;timeQuantum&quot;: &quot;YMD&quot;,
+                      &quot;inverseEnabled&quot;: true}}'
+</code></pre><p>Since our data contains time stamps for the time users starred repos, we set the <em>time quantum</em> for the <code>stargazer</code> frame in the options as well. Time quantum is the resolution of the time we want to use, and we set it to <code>YMD</code> (year, month, day) for <code>stargazer</code>.</p>
+<p>We set <code>inverseEnabled</code> to <code>true</code> in order to allow queries over columns as well as rows.</p>
+<p>Next up is the <code>language</code> frame, which will contain IDs for programming languages:</p>
+<pre><code>curl localhost:10101/index/repository/frame/language \
+     -X POST \
+     -d '{&quot;options&quot;: {&quot;rowLabel&quot;: &quot;language_id&quot;,
+                      &quot;inverseEnabled&quot;: true}}'
+</code></pre><h4 id="import-some-data">Import Some Data</h4>
+<p>The sample data for the &ldquo;Star Trace&rdquo; project is at <a href="https://github.com/pilosa/getting-started">Pilosa Getting Started repository</a>. Download the <code>stargazer.csv</code> and <code>language.csv</code> files in that repo.</p>
+<pre><code>curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/stargazer.csv
+curl -O https://raw.githubusercontent.com/pilosa/getting-started/master/language.csv
+</code></pre><p>Run the following commands to import the data into Pilosa:</p>
+<pre><code>pilosa import -i repository -f stargazer stargazer.csv
+pilosa import -i repository -f language language.csv
+</code></pre><p>If you are using a Docker container for Pilosa (with name <code>pilosa</code>), you should instead copy the <code>*.csv</code> file into the container and then import them:</p>
+<pre><code>docker cp stargazer.csv pilosa:/stargazer.csv
+docker exec -it pilosa /pilosa import -i repository -f stargazer /stargazer.csv
+docker cp language.csv pilosa:/language.csv
+docker exec -it pilosa /pilosa import -i repository -f language /language.csv
+</code></pre><p>Note that, both the user IDs and the repository IDs were remapped to sequential integers in the data files, they don&rsquo;t correspond to actual Github IDs anymore. You can check out <code>language.txt</code> to see the mapping for languages.</p>
+<h4 id="make-some-queries">Make Some Queries</h4>
+<!-- raw HTML omitted -->
+<p>Which repositories did user 14 star:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Bitmap(frame=&quot;stargazer&quot;, stargazer_id=14)'
+</code></pre><p>What are the top 5 languages in the sample data:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'TopN(frame=&quot;language&quot;, n=5)'
+</code></pre><p>Which repositories were starred by user 14 and 19:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Intersect(Bitmap(frame=&quot;stargazer&quot;, stargazer_id=14), Bitmap(frame=&quot;stargazer&quot;, stargazer_id=19))'
+</code></pre><p>Which repositories were starred by user 14 or 19:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Union(Bitmap(frame=&quot;stargazer&quot;, stargazer_id=14), Bitmap(frame=&quot;stargazer&quot;, stargazer_id=19))'
+</code></pre><p>Which repositories were starred by user 14 and 19 and also were written in language 1:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Intersect(Bitmap(frame=&quot;stargazer&quot;, stargazer_id=14), Bitmap(frame=&quot;stargazer&quot;, stargazer_id=19), Bitmap(frame=&quot;language&quot;, language_id=1))'
+</code></pre><p>Set user 99999 as a stargazer for repository 77777:</p>
+<pre><code>curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'SetBit(frame=&quot;stargazer&quot;, repo_id=77777, stargazer_id=99999)'
+</code></pre><h3 id="whats-next">What&rsquo;s Next?</h3>
+<p>You can jump to <a href="../data-model/">Data Model</a> for an in-depth look at Pilosa&rsquo;s data model, or <a href="../query-language/">Query Language</a> for more details about <strong>PQL</strong>, the query language of Pilosa. Check out the <a href="../tutorials/">Tutorials</a> for example implementations of real world use cases for Pilosa. Ready to get going in your favorite language? Have a peek at our small but expanding set of official <a href="../client-libraries/">Client Libraries</a>.</p>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v0.4/docs/getting-started.md">View markdown source</a> on Github. Last updated 1 year, 9 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v0.4"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v0.4"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

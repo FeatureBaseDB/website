@@ -1,0 +1,3924 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Tutorials &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting the communication between and to nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is out of the scope of this tutorial.
+This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Tutorials"/>
+    <meta property="og:description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting the communication between and to nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is out of the scope of this tutorial.
+This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v0.10/tutorials/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Tutorials
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/tutorials/"  class="docs-active" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/tutorials/"  class="docs-active" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v0.10. View the <a href="/docs/latest/tutorials/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="tutorials">Tutorials</h2>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<h3 id="setting-up-a-secure-cluster">Setting Up a Secure Cluster</h3>
+<h4 id="introduction">Introduction</h4>
+<p>Pilosa supports encrypting the communication between and to nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is out of the scope of this tutorial.</p>
+<p>This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS. <a href="https://msdn.microsoft.com/en-us/commandline/wsl/about">Windows Subsystem for Linux (WSL)</a> works equally well on Windows 10 systems.</p>
+<h4 id="installing-pilosa-and-creating-the-directory-structure">Installing Pilosa and Creating the Directory Structure</h4>
+<p>If you haven&rsquo;t already done so, install Pilosa server on your computer. For Linux and WSL (Windows Subsystem for Linux) use the <a href="../installation/#installing-on-linux">Installing on Linux</a> instructions. For MacOS use the <a href="../installation/#installing-on-macos">Installing on MacOS</a>. We do not support precompiled releases for other platforms, but you can always compile it yourself from source. See <a href="../installation/#build-from-source">Build from Source</a>.</p>
+<p>After installing Pilosa, you may have to add it to your <code>$PATH</code>. Check that you can run Pilosa from the command line:</p>
+<pre><code>pilosa --help
+</code></pre><p>Let&rsquo;s create a directory for the tutorial to put all of our files and switch to that directory:</p>
+<pre><code>mkdir $HOME/pilosa-tls-tutorial &amp;&amp; cd $_
+</code></pre><h4 id="creating-the-tls-certificate-and-gossip-key">Creating the TLS Certificate and Gossip Key</h4>
+<p>Securing a Pilosa cluster consists of securing the communication between nodes using TLS and Gossip encryption. <a href="https://www.pilosa.com/enterprise/">Pilosa Enterprise</a> additionally supports authentication and other security features, but those are not covered in this tutorial.</p>
+<p>The first step is acquiring an SSL certificate. You can buy a commercial certificate or retrieve a Let&rsquo;s Encrypt certificate but we will be using a self signed certificate for practical reasons. Using self-signed certificates is not recommended in production, since it makes man in the middle attacks easy.</p>
+<p>The following command creates a 2048bit self-signed wildcard certificate for <code>*.pilosa.local</code> which expires 10 years later.</p>
+<pre><code>openssl req -x509 -newkey rsa:2048 -keyout pilosa.local.key -out pilosa.local.crt -days 3650 -nodes -subj &quot;/C=US/ST=Texas/L=Austin/O=Pilosa/OU=Com/CN=*.pilosa.local&quot;
+</code></pre><p>The command above creates two files in the current directory:</p>
+<ul>
+<li><code>pilosa.local.crt</code> is the SSL certificate.</li>
+<li><code>pilosa.local.key</code> is the private key file which must be kept as secret.</li>
+</ul>
+<p>Having created the SSL certificate, we can now create the gossip encryption key. Gossip encryption key file must be exactly 16, 24, or 32 bytes to select one of AES-128, AES-192, or AES-256 encryption. Reading random bytes from cryptographically secure <code>/dev/random</code> serves our purpose very well:</p>
+<pre><code>head -c 32 /dev/random &gt; pilosa.local.gossip32
+</code></pre><p>We now should have <code>pilosa.local.gossip32</code> in the current directory with 32 random bytes.</p>
+<h4 id="creating-the-configuration-files">Creating the Configuration Files</h4>
+<p>Pilosa supports passing configuration items using the command line, environment variables or a configuration file. We will use the last option in this tutorial and create three configuration files for our three nodes.</p>
+<p>One of the nodes in the cluster must be chosen as the <em>coordinator</em>. We choose the first node as the coordinator in this tutorial. The coordinator is only important during cluster resizing operations, and otherwise acts like any other node in the cluster. In the future, the coordinator will be chosen transparently by distributed consensus, and this option will be deprecated.</p>
+<p>Create <code>node1.config.toml</code> in the project directory and paste the following in it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#75715e"># node1.config.toml</span>
+
+<span style="color:#a6e22e">data</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">dir</span> = <span style="color:#e6db74">&#34;node1_data&#34;</span>
+<span style="color:#a6e22e">bind</span> = <span style="color:#e6db74">&#34;https://01.pilosa.local:10501&#34;</span>
+
+[<span style="color:#a6e22e">cluster</span>]
+<span style="color:#a6e22e">coordinator</span> = <span style="color:#66d9ef">true</span>
+
+[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+
+[<span style="color:#a6e22e">gossip</span>]
+<span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
+<span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">15000</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.gossip32&#34;</span>
+</code></pre></div><p>Create <code>node2.config.toml</code> in the project directory and paste the following in it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#75715e"># node2.config.toml</span>
+
+<span style="color:#a6e22e">data</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">dir</span> = <span style="color:#e6db74">&#34;node2_data&#34;</span>
+<span style="color:#a6e22e">bind</span> = <span style="color:#e6db74">&#34;https://02.pilosa.local:10502&#34;</span>
+
+[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+
+[<span style="color:#a6e22e">gossip</span>]
+<span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
+<span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">16000</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.gossip32&#34;</span>
+</code></pre></div><p>Create <code>node3.config.toml</code> in the project directory and paste the following in it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#75715e"># node3.config.toml</span>
+
+<span style="color:#a6e22e">data</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">dir</span> = <span style="color:#e6db74">&#34;node3_data&#34;</span>
+<span style="color:#a6e22e">bind</span> = <span style="color:#e6db74">&#34;https://03.pilosa.local:10503&#34;</span>
+
+[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+
+[<span style="color:#a6e22e">gossip</span>]
+<span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
+<span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">17000</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.gossip32&#34;</span>
+</code></pre></div><p>Here is some explanation of the configuration items:</p>
+<ul>
+<li><code>data-dir</code> points to the directory where the Pilosa server writes its data. If it doesn&rsquo;t exist, the server will create it.</li>
+<li><code>bind</code> is the address to which the server listens for incoming requests. The address is composed of three parts: scheme, host, and port. The default scheme is <code>http</code> so we explicitly specify <code>https</code> to use the HTTPS protocol for communication between nodes.</li>
+<li><code>[cluster]</code> section contains the settings for a cluster. We set <code>coordinator = true</code> for only the first node to choose that as the coordinator node. See <a href="../configuration/#cluster-coordinator">Cluster Configuration</a> for other settings.</li>
+<li><code>[tls]</code> section contains the TLS settings, including the path to the SSL certificate and the corresponding key. Set <code>skip-verify</code> to <code>true</code> in order to disable host name verification and other security measures. Do not set <code>skip-verify</code> to <code>true</code> on production servers.</li>
+<li><code>[gossip]</code> section contains settings for the Gossip protocol. <code>seeds</code> contain the seed nodes which other nodes gather cluster topology. There must be at least one gossip seed. The <code>port</code> setting is the gossip listen address for the node. It should be different for each node, if the cluster is running on the same computer, otherwise you can set it to the same value. Finally, the <code>key</code> points to the gossip encryption key we created before.</li>
+</ul>
+<h4 id="final-touches-before-running-the-cluster">Final Touches Before Running the Cluster</h4>
+<p>Before running the cluster, let&rsquo;s make sure that <code>01.pilosa.local</code>, <code>02.pilosa.local</code> and <code>03.pilosa.local</code> resolve to an IP address. If you are running the cluster on your computer, it is adequate to add them to your <code>/etc/hosts</code>. Below is one of the many ways of doing that (mind the <code>&gt;&gt;</code>):</p>
+<pre><code>sudo sh -c 'printf &quot;\n127.0.0.1 01.pilosa.local 02.pilosa.local 03.pilosa.local\n&quot; &gt;&gt; /etc/hosts'
+</code></pre><p>Ensure we can access the hosts in the cluster:</p>
+<pre><code>ping -c 1 01.pilosa.local
+ping -c 1 02.pilosa.local
+ping -c 1 03.pilosa.local
+</code></pre><p>If any of the commands above return <code>ping: unknown host</code>, make sure your <code>/etc/hosts</code> contains the failed hostname.</p>
+<h4 id="running-the-cluster">Running the Cluster</h4>
+<p>Let&rsquo;s open three terminal windows and run each node in its window. This will enable us to better observe what&rsquo;s happening on which node.</p>
+<p>Switch to the first terminal window, change to the project directory and start the first node:</p>
+<pre><code>cd $HOME/pilosa-tls-tutorial
+pilosa server -c node1.config.toml
+</code></pre><p>Switch to the second terminal window, change to the project directory and start the second node:</p>
+<pre><code>cd $HOME/pilosa-tls-tutorial
+pilosa server -c node2.config.toml
+</code></pre><p>Switch to the third terminal window, change to the project directory and start the third node:</p>
+<pre><code>cd $HOME/pilosa-tls-tutorial
+pilosa server -c node3.config.toml
+</code></pre><p>Let&rsquo;s ensure that all three Pilosa servers are running and they are connected:</p>
+<pre><code>curl -k --ipv4 https://01.pilosa.local:10501/status
+</code></pre><p>The <code>-k</code> flag is used to tell curl that it shouldn&rsquo;t bother with checking the certificate the server provides and <code>--ipv4</code> workarounds an issue on MacOS where the curl requests take a long time if the address resolves to <code>127.0.0.1</code>. You can leave it out on Linux and WSL.</p>
+<p>All nodes should be in the <code>NORMAL</code> state:</p>
+<pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;98ebd177-c082-4c54-8d48-7e7c75857b52&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;02.pilosa.local&quot;,&quot;port&quot;:10502},&quot;isCoordinator&quot;:false},{&quot;id&quot;:&quot;a33dc0d6-c35f-4559-984a-e582bf032a21&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;03.pilosa.local&quot;,&quot;port&quot;:10503},&quot;isCoordinator&quot;:false},{&quot;id&quot;:&quot;e24ac014-ee2f-4cb0-b565-74df6c551f0a&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;01.pilosa.local&quot;,&quot;port&quot;:10501},&quot;isCoordinator&quot;:true}]}
+</code></pre><h4 id="running-queries">Running Queries</h4>
+<p>Having confirmed that our cluster is running OK, let&rsquo;s run a few queries. But before that, we need to create an index and a frame:</p>
+<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://01.pilosa.local:10501/index/sample-index -d ''
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>This will create index <code>sample-index</code> with default options. Let&rsquo;s create the frame now:</p>
+<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://01.pilosa.local:10501/index/sample-index/frame/sample-frame -d ''
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>We just created frame <code>sample-frame</code> with default options.</p>
+<p>Let&rsquo;s run a <code>SetBit</code> query:</p>
+<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://01.pilosa.local:10501/index/sample-index/query -d 'SetBit(frame=&quot;sample-frame&quot;, row=1, col=100)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>Confirm that the bit was indeed set:</p>
+<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://01.pilosa.local:10501/index/sample-index/query -d 'Bitmap(frame=&quot;sample-frame&quot;, row=1)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[100]}]}
+</code></pre><p>The same response should be returned when querying other nodes in the cluster:</p>
+<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://02.pilosa.local:10502/index/sample-index/query -d 'Bitmap(frame=&quot;sample-frame&quot;, row=1)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[100]}]}
+</code></pre><h4 id="whats-next">What&rsquo;s Next?</h4>
+<p>Check out our <a href="https://www.pilosa.com/docs/latest/administration/">Administration Guide</a> to learn more about making the most of your Pilosa cluster and <a href="https://www.pilosa.com/docs/latest/configuration/">Configuration Documentation</a> to see the available options to configure Pilosa.</p>
+<h3 id="setting-up-a-docker-cluster">Setting Up a Docker Cluster</h3>
+<p>In this tutorial, we will be setting up a 2-node Pilosa cluster using Docker containers.</p>
+<h4 id="running-a-docker-cluster-on-a-single-server">Running a Docker Cluster on a Single Server</h4>
+<p>The instructions below require Docker 1.13 or better.</p>
+<p>Let&rsquo;s first be sure that the Pilosa image is up to date:</p>
+<pre><code>docker pull pilosa/pilosa:latest
+</code></pre><p>Then, create a virtual network to attach our containers. We are going to name our network <code>pilosanet</code>:</p>
+<pre><code>docker network create pilosanet
+</code></pre><p>Let&rsquo;s run the first Pilosa node and attach it to that virtual network. We set the first node as the cluster coordinator and use its address as the gossip seed. And also set the server address to <code>pilosa1</code>:</p>
+<pre><code>docker run -it --rm --name pilosa1 -p 10101:10101 --network=pilosanet pilosa/pilosa:latest server --bind pilosa1 --cluster.coordinator=true --gossip.seeds=pilosa1:14000
+</code></pre><p>Let&rsquo;s run the second Pilosa node and attach it to the virtual network as well. Note that we set the address of the gossip seed to the address of the first node:</p>
+<pre><code>docker run -it --rm --name pilosa2 --network=pilosanet pilosa/pilosa:latest server --bind pilosa2 --gossip.seeds=pilosa1:14000
+</code></pre><p>Let&rsquo;s test that the nodes in the cluster connected with each other:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/status
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;2e8332d0-1fee-44dd-a359-e0d6ecbcefc1&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa1&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:true},{&quot;id&quot;:&quot;8c0dbcdc-9503-4265-8ad2-ba85a4bb10fa&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa2&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:false}]}
+</code></pre><p>And similarly for the second node:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10102/status
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;2e8332d0-1fee-44dd-a359-e0d6ecbcefc1&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa1&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:true},{&quot;id&quot;:&quot;8c0dbcdc-9503-4265-8ad2-ba85a4bb10fa&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa2&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:false}]}
+</code></pre><p>The corresponding <a href="https://docs.docker.com/compose/">Docker Compose</a> file is below:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;2&#39;</span>
+<span style="color:#f92672">services</span>: 
+  <span style="color:#f92672">pilosa1</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">pilosa/pilosa:latest</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#e6db74">&#34;10101:10101&#34;</span>
+    <span style="color:#f92672">environment</span>:
+      - <span style="color:#ae81ff">PILOSA_CLUSTER_COORDINATOR=true</span>
+      - <span style="color:#ae81ff">PILOSA_GOSSIP_SEEDS=pilosa1:14000</span>
+    <span style="color:#f92672">networks</span>:
+      - <span style="color:#ae81ff">pilosanet</span>
+    <span style="color:#f92672">entrypoint</span>:
+      - <span style="color:#ae81ff">/pilosa</span>
+      - <span style="color:#ae81ff">server</span>
+      - --<span style="color:#ae81ff">bind</span>
+      - <span style="color:#e6db74">&#34;pilosa1:10101&#34;</span>
+  <span style="color:#f92672">pilosa2</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">pilosa/pilosa:latest</span>
+    <span style="color:#f92672">environment</span>:
+      - <span style="color:#ae81ff">PILOSA_GOSSIP_SEEDS=pilosa1:14000</span>
+    <span style="color:#f92672">networks</span>:
+      - <span style="color:#ae81ff">pilosanet</span>
+    <span style="color:#f92672">entrypoint</span>:
+      - <span style="color:#ae81ff">/pilosa</span>
+      - <span style="color:#ae81ff">server</span>
+      - --<span style="color:#ae81ff">bind</span>
+      - <span style="color:#e6db74">&#34;pilosa2:10101&#34;</span>
+<span style="color:#f92672">networks</span>: 
+  <span style="color:#f92672">pilosanet</span>:
+</code></pre></div><h4 id="running-a-docker-swarm">Running a Docker Swarm</h4>
+<p>It is very easy to run a Pilosa Cluster on different servers using <a href="https://docs.docker.com/engine/swarm/">Docker Swarm mode</a>. All we have to do is creating an overlay network instead of the bridge network.</p>
+<p>The instructions in this section require Docker 17.06 and better. Although it is possible to run a Docker swarm on MacOS or Windows, it is easiest to run it on Linux. So we assume you are trying these instructions on Linux, probably on the cloud.</p>
+<p>We are going to use two servers: the manager node runs in the first server and a worker node in the second server.</p>
+<p>Docker nodes require some ports to be accesible from outside. Before carrying on, make sure the following ports are open on all nodes: TCP/2377, TCP/7946, UDP/7946, UDP/4789.</p>
+<p>Let&rsquo;s initialize the swarm first. Run the following on the manager:</p>
+<pre><code>docker swarm init --advertise-addr=IP-ADDRESS
+</code></pre><p>Virtual machines running on the cloud usually have at least two network interfaces: the external interface and the internal interface. Use the IP of the external interface.</p>
+<p>The output of the command above should be similar to:</p>
+<pre><code>To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SOME-TOKEN MANAGER-IP-ADDRESS:2377
+</code></pre><p>Let&rsquo;s make the worker node join the manager. Copy/paste the command above in a shell on the worker, replacing the token and IP address with the correct values. You may neeed to add <code>--advertise-addr=WORKER-EXTERNAL-IP-ADDRESS</code> parameter if the worker has more than one network interface:</p>
+<pre><code>docker swarm join --token SOME-TOKEN MANAGER-IP-ADDRESS:2377
+</code></pre><p>Run the following on the manager to check that the worker joined to the swarm:</p>
+<pre><code>docker node ls
+</code></pre><p>Which should output:</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>HOSTNAME</th>
+<th>STATUS</th>
+<th>AVAILABILITY</th>
+<th>MANAGER STATUS</th>
+<th>ENGINE VERSION</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MANAGER-ID *</td>
+<td>swarm1</td>
+<td>Ready</td>
+<td>Active</td>
+<td>Leader</td>
+<td>18.05.0-ce</td>
+</tr>
+<tr>
+<td>WORKER-ID</td>
+<td>swarm2</td>
+<td>Ready</td>
+<td>Active</td>
+<td></td>
+<td>18.05.0-ce</td>
+</tr>
+</tbody>
+</table>
+<p>If you have created the <code>pilosanet</code> network before, delete it before carrying on, otherwise skip to the next step:</p>
+<pre><code>docker network rm pilosanet
+</code></pre><p>Let&rsquo;s create the <code>pilosanet</code> network, but with <code>overlay</code> type this time. We should also make this network attachable in order to be able to attach containers to it. Run the following on the manager:</p>
+<pre><code>docker network create -d overlay pilosanet --attachable
+</code></pre><p>We can now create the Pilosa containers. Let&rsquo;s start the coordinator node first. Run the following on one of the servers:</p>
+<pre><code>docker run -it --rm --name pilosa1 --network=pilosanet pilosa/pilosa:latest server --bind pilosa1 --cluster.coordinator=true --gossip.seeds=pilosa1:14000
+</code></pre><p>And the following on the other server:</p>
+<pre><code>docker run -it --rm --name pilosa2 --network=pilosanet pilosa/pilosa:latest server --bind pilosa2 --gossip.seeds=pilosa1:14000
+</code></pre><p>These were the same commands we used in the previous section except the port mapping! Let&rsquo;s run another container on the same virtual network to read the status from the coordinator:</p>
+<pre><code class="language-request" data-lang="request">docker run -it --rm --network=pilosanet --name shell alpine wget -q -O- pilosa1:10101/status
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;3e3b0abd-1945-441a-a01f-5a28272972f5&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa1&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:true},{&quot;id&quot;:&quot;71ed27cc-9443-4f41-88fb-1c22f92bf695&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;http&quot;,&quot;host&quot;:&quot;pilosa2&quot;,&quot;port&quot;:10101},&quot;isCoordinator&quot;:false}]}
+</code></pre><p>You can add as many as worker nodes to both the swarm and the Pilosa cluster using the steps above.</p>
+<h4 id="whats-next-1">What&rsquo;s Next?</h4>
+<p>Check out our <a href="https://www.pilosa.com/docs/latest/administration/">Administration Guide</a> to learn more about making the most of your Pilosa cluster and <a href="https://www.pilosa.com/docs/latest/configuration/">Configuration Documentation</a> to see the available options to configure Pilosa.</p>
+<p>Refer to the <a href="https://docs.docker.com">Docker documentation</a> to see your options about running Docker containers. The <a href="https://docs.docker.com/network/network-tutorial-overlay/">Networking with overlay networks</a> is a detailed overview of the Docket swarm mode and overlay networks.</p>
+<h3 id="using-integer-field-values">Using Integer Field Values</h3>
+<h4 id="introduction-1">Introduction</h4>
+<p>Pilosa can store integer values associated to the columns in an index, and those values are used to support <code>Range</code>, <code>Min</code>, <code>Max</code>, and <code>Sum</code> queries. In this tutorial we will show how to set up integer fields, populate those fields with data, and query the fields. The example index we&rsquo;re going to create will represent fictional patients at a medical facility and various bits of information about those patients.</p>
+<p>First, create an index called <code>patients</code>:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients \
+     -X POST 
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>In addition to storing rows of bits, a frame can also contain fields that store integer values. The next step creates three fields (<code>age</code>, <code>weight</code>, <code>tcells</code>) in the <code>measurements</code> frame.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/frame/measurements \
+     -X POST \
+     -d '{&quot;options&quot;:{
+              &quot;fields&quot;: [
+                  {&quot;name&quot;: &quot;age&quot;, &quot;type&quot;: &quot;int&quot;, &quot;min&quot;: 0, &quot;max&quot;: 120},
+                  {&quot;name&quot;: &quot;weight&quot;, &quot;type&quot;: &quot;int&quot;, &quot;min&quot;: 0, &quot;max&quot;: 500},
+                  {&quot;name&quot;: &quot;tcells&quot;, &quot;type&quot;: &quot;int&quot;, &quot;min&quot;: 0, &quot;max&quot;: 2000}
+              ]
+         }}'
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>If you need to, you can add fields to an existing frame by posting to the <a href="../api-reference/#create-field">Create Field endpoint</a>.</p>
+<p>Next, let&rsquo;s populate our fields with data. There are two ways to get data into fields: use the <code>SetFieldValue()</code> PQL function to set fields individually, or use the <code>pilosa import</code> command to import many values at once. First, let&rsquo;s set some field data using PQL.</p>
+<p>This query sets the age, weight, and t-cell count for the patient with ID <code>1</code> in our system:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'SetFieldValue(col=1, frame=&quot;measurements&quot;, age=34, weight=128, tcells=1145)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>In the case where we need to load a lot of data at once, we can use the <code>pilosa import</code> command. This method lets us import data into Pilosa from a CSV file.</p>
+<p>Assuming we have a file called <code>ages.csv</code> that is structured like this:</p>
+<pre><code>1,34
+2,57
+3,19
+4,40
+5,32
+6,71
+7,28
+8,33
+9,63
+</code></pre><p>where the first column of the CSV represents the patient <code>ID</code> and the second column represents the patient&rsquo;s<code>age</code>, then we can import the data into our <code>age</code> field by running this command:</p>
+<pre><code>pilosa import -i patients -f measurements --field age ages.csv
+</code></pre><p>Now that we have some data in our index, let&rsquo;s run a few queries to demonstrate how to use that data.</p>
+<p>In order to find all patients over the age of 40, then simply run a <code>Range</code> query against the <code>age</code> field.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Range(frame=&quot;measurements&quot;, age &gt; 40)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[2,6,9]}]}
+</code></pre><p>You can find a list of supported range operators in the <a href="../query-language/#range-bsi">Range Query</a> documentation.</p>
+<p>To find the average age of all patients, run a <code>Sum</code> query:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Sum(frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;sum&quot;:377,&quot;count&quot;:9}]}
+</code></pre><p>The results you get from the <code>Sum</code> query contain the <code>sum</code> of all values as well as the <code>count</code> of columns with a value. To get the average you can just divide <code>sum</code> by <code>count</code>.</p>
+<p>You can also provide a filter to the <code>Sum()</code> function to find the average age of all patients over 40.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Sum(Range(frame=&quot;measurements&quot;, age &gt; 40), frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;sum&quot;:191,&quot;count&quot;:3}]}
+</code></pre><p>Notice in this case that the count is only <code>3</code> because of the <code>age &gt; 40</code> filter applied to the query.</p>
+<p>To find the minimum age of all patients, run a <code>Min</code> query:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Min(frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;min&quot;:19,&quot;count&quot;:1}]}
+</code></pre><p>The results you get from the <code>Min</code> query contain the <code>min</code> of all values as well as the <code>count</code> of columns with that value.</p>
+<p>You can also provide a filter to the <code>Min()</code> function to find the minimum age of all patients over 40.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Min(Range(frame=&quot;measurements&quot;, age &gt; 40), frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;min&quot;:57,&quot;count&quot;:1}]}
+</code></pre><p>To find the maximum age of all patients, run a <code>Max</code> query:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Max(frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;max&quot;:71,&quot;count&quot;:1}]}
+</code></pre><p>The results you get from the <code>Max</code> query contain the <code>max</code> of all values as well as the <code>count</code> of columns with that value.</p>
+<p>You can also provide a filter to the <code>Max()</code> function to find the maximum age of all patients under 40.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/patients/query \
+     -X POST \
+     -d 'Max(Range(frame=&quot;measurements&quot;, age &lt; 40), frame=&quot;measurements&quot;, field=&quot;age&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;max&quot;:34,&quot;count&quot;:1}]}
+</code></pre><h3 id="storing-row-and-column-attributes">Storing Row and Column Attributes</h3>
+<h4 id="introduction-2">Introduction</h4>
+<p>Pilosa can store arbitrary values associated to any row or column. In Pilosa, these are referred to as <code>attributes</code>, and they can be of type <code>string</code>, <code>integer</code>, <code>boolean</code>, or <code>float</code>. In this tutorial we will store some attribute data and then run some queries that return that data.</p>
+<p>First, create an index called <code>books</code> to use for this tutorial:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books \
+     -X POST
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>Next, create a frame in the <code>books</code> index called <code>members</code> which will represent library members who have read books.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/frame/members \
+     -X POST \
+     -d '{}'
+</code></pre><pre><code class="language-response" data-lang="response">{}
+</code></pre><p>Now, let&rsquo;s add some books to our index.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query \
+     -X POST \
+     -d 'SetColumnAttrs(col=1, name=&quot;To Kill a Mockingbird&quot;, year=1960)
+         SetColumnAttrs(col=2, name=&quot;No Name in the Street&quot;, year=1972)
+         SetColumnAttrs(col=3, name=&quot;The Tipping Point&quot;, year=2000)
+         SetColumnAttrs(col=4, name=&quot;Out Stealing Horses&quot;, year=2003)
+         SetColumnAttrs(col=5, name=&quot;The Forever War&quot;, year=2008)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null,null,null,null,null]}
+</code></pre><p>And add some members.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query \
+     -X POST \
+     -d 'SetRowAttrs(frame=&quot;members&quot;, row=10001, fullName=&quot;John Smith&quot;)
+         SetRowAttrs(frame=&quot;members&quot;, row=10002, fullName=&quot;Sue Perkins&quot;)
+         SetRowAttrs(frame=&quot;members&quot;, row=10003, fullName=&quot;Jennifer Hawks&quot;)
+         SetRowAttrs(frame=&quot;members&quot;, row=10004, fullName=&quot;Pedro Vazquez&quot;)
+         SetRowAttrs(frame=&quot;members&quot;, row=10005, fullName=&quot;Pat Washington&quot;)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null,null,null,null,null]}
+</code></pre><p>At this point we can query one of the <code>member</code> records by querying that row.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query \
+     -X POST \
+     -d 'Bitmap(frame=&quot;members&quot;, row=10002)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{&quot;fullName&quot;:&quot;Sue Perkins&quot;},&quot;bits&quot;:[]}]}
+</code></pre><p>Now let&rsquo;s add some data to the matrix such that each pair represents a member who has read that book.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query \
+     -X POST \
+     -d 'SetBit(frame=&quot;members&quot;, row=10001, col=3)
+         SetBit(frame=&quot;members&quot;, row=10001, col=5)
+         SetBit(frame=&quot;members&quot;, row=10002, col=1)
+         SetBit(frame=&quot;members&quot;, row=10002, col=2)
+         SetBit(frame=&quot;members&quot;, row=10002, col=4)
+         SetBit(frame=&quot;members&quot;, row=10003, col=3)
+         SetBit(frame=&quot;members&quot;, row=10004, col=4)
+         SetBit(frame=&quot;members&quot;, row=10004, col=5)
+         SetBit(frame=&quot;members&quot;, row=10005, col=1)
+         SetBit(frame=&quot;members&quot;, row=10005, col=2)
+         SetBit(frame=&quot;members&quot;, row=10005, col=3)
+         SetBit(frame=&quot;members&quot;, row=10005, col=4)
+         SetBit(frame=&quot;members&quot;, row=10005, col=5)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true,true,true,true,true,true,true,true,true,true,true,true,true]}
+</code></pre><p>Now pull the record for <code>Sue Perkins</code> again.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query \
+     -X POST \
+     -d 'Bitmap(frame=&quot;members&quot;, row=10002)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{&quot;fullName&quot;:&quot;Sue Perkins&quot;},&quot;bits&quot;:[1,2,4]}]}
+</code></pre><p>Notice that the result set now contains a list of integers in the <code>bits</code> attribute. These integers match the column IDs of the books that Sue has read.</p>
+<p>In order to retrieve the attribute information that we stored for each book, we need to add a URL parameter <code>columnAttrs=true</code> to the query.</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query?columnAttrs=true \
+     -X POST \
+     -d 'Bitmap(frame=&quot;members&quot;, row=10002)'
+</code></pre><pre><code class="language-response" data-lang="response">{
+  &quot;results&quot;:[{&quot;attrs&quot;:{&quot;fullName&quot;:&quot;Sue Perkins&quot;},&quot;bits&quot;:[1,2,4]}],
+  &quot;columnAttrs&quot;:[
+    {&quot;id&quot;:1,&quot;attrs&quot;:{&quot;name&quot;:&quot;To Kill a Mockingbird&quot;,&quot;year&quot;:1960}},
+    {&quot;id&quot;:2,&quot;attrs&quot;:{&quot;name&quot;:&quot;No Name in the Street&quot;,&quot;year&quot;:1972}},
+    {&quot;id&quot;:4,&quot;attrs&quot;:{&quot;name&quot;:&quot;Out Stealing Horses&quot;,&quot;year&quot;:2003}}
+  ]
+}
+</code></pre><p>The <code>book</code> attributes are included in the result set at the <code>columnAttrs</code> attribute.</p>
+<p>Finally, if we want to find out which books were read by both <code>Sue</code> and <code>Pedro</code>, we just perform an <code>Intersect</code> query on those two members:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/books/query?columnAttrs=true \
+     -X POST \
+     -d 'Intersect(Bitmap(frame=&quot;members&quot;, row=10002), Bitmap(frame=&quot;members&quot;, row=10004))'
+</code></pre><pre><code class="language-response" data-lang="response">{
+  &quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[4]}],
+  &quot;columnAttrs&quot;:[
+    {&quot;id&quot;:4,&quot;attrs&quot;:{&quot;name&quot;:&quot;Out Stealing Horses&quot;,&quot;year&quot;:2003}}
+  ]
+}
+</code></pre><p>Notice that we don&rsquo;t get row attributes on a complex query, but we still get the column attributes—in this case book information.</p>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v0.10/docs/tutorials.md">View markdown source</a> on Github. Last updated 1 year ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v0.10"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v0.10"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

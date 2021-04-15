@@ -1,0 +1,3538 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Glossary &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Glossary Index:Indexes are the top level container in Pilosa - similar to a database in an RDBMS. Queries cannot operate across multiple indexes.
+Column:Columns are the fundamental horizontal data axis within Pilosa. Columns are global to all Frames within a Index.
+Row:Rows are the fundamental vertical data axis within Pilosa. They are namespaced to each Frame within a Index.
+Bit:A bit is the intersection of a Row and Column.
+Bitmap:The on-disk and in-memory representation of a Row.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Glossary"/>
+    <meta property="og:description" content="Glossary Index:Indexes are the top level container in Pilosa - similar to a database in an RDBMS. Queries cannot operate across multiple indexes.
+Column:Columns are the fundamental horizontal data axis within Pilosa. Columns are global to all Frames within a Index.
+Row:Rows are the fundamental vertical data axis within Pilosa. They are namespaced to each Frame within a Index.
+Bit:A bit is the intersection of a Row and Column.
+Bitmap:The on-disk and in-memory representation of a Row." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v0.6/glossary/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Glossary
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#input-definition">Input Definition</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/tutorials/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/tutorials/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/input-definition/" >Input Definition</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/input-definition/#create-the-schema">Create the Schema</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/input-definition/#import-data">Import Data</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/pdk/#library">Library</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/pdk/#examples">Examples</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#imports-and-exports">Imports and Exports</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#input-definition">Input Definition</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/tutorials/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/tutorials/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/input-definition/" >Input Definition</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/input-definition/#create-the-schema">Create the Schema</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/input-definition/#import-data">Import Data</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/pdk/#library">Library</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/pdk/#examples">Examples</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#imports-and-exports">Imports and Exports</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.6/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.6/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v0.6. View the <a href="/docs/latest/glossary/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="glossary">Glossary</h2>
+<p><!-- raw HTML omitted -->Index:<!-- raw HTML omitted --> Indexes are the top level container in Pilosa - similar to a database in an RDBMS. Queries cannot operate across multiple indexes.</p>
+<p><!-- raw HTML omitted -->Column:<!-- raw HTML omitted --> Columns are the fundamental horizontal data axis within Pilosa.  Columns are global to all Frames within a Index.</p>
+<p><!-- raw HTML omitted -->Row:<!-- raw HTML omitted --> Rows are the fundamental vertical data axis within Pilosa.  They are namespaced to each Frame within a Index.</p>
+<p><!-- raw HTML omitted -->Bit:<!-- raw HTML omitted --> A bit is the intersection of a Row and Column.</p>
+<p><!-- raw HTML omitted -->Bitmap:<!-- raw HTML omitted --> The on-disk and in-memory representation of a Row.</p>
+<p><!-- raw HTML omitted -->Roaring Bitmap:<!-- raw HTML omitted --> <a href="http://roaringbitmap.org">Roaring Bitmap</a> is the compressed bitmap format which Pilosa uses.</p>
+<p><!-- raw HTML omitted -->Attribute:<!-- raw HTML omitted --> Attributes can be associated to both rows and columns.  This metadata is kept separately from the core binary matrix in a BoltDB store.</p>
+<p><!-- raw HTML omitted -->PQL:<!-- raw HTML omitted --> Pilosa Query Language</p>
+<p><!-- raw HTML omitted -->Index:<!-- raw HTML omitted --> The Index represents a data namespace.</p>
+<p><!-- raw HTML omitted -->Frame:<!-- raw HTML omitted --> Frames are used to segment rows into different categories - row ids are namespaced by frame such that the same row id in a different frame refers to a different row. For Ranked frames, rows are kept in sorted order within the frame.</p>
+<p><!-- raw HTML omitted -->View:<!-- raw HTML omitted --> Views separate the different data layouts within a Frame. The two primary views are Standard and Inverse which represent the typical row/column data and its inverse respectively. Time based Frame Views are automatically generated for each time quantum. Views are internally managed by Pilosa, and never exposed directly via the API. This simplifies the functional interface by separating it from the physical data representation.</p>
+<p><!-- raw HTML omitted -->Fragment:<!-- raw HTML omitted --> A Fragment is the intersection of a frame and slice in an index.</p>
+<p><!-- raw HTML omitted -->Slice:<!-- raw HTML omitted --> Columns are sharded on a preset width. Each shard is referred to as a Slice in Pilosa. Slices are operated on in parallel and are evenly distributed across the cluster via a consistent hash.</p>
+<p><!-- raw HTML omitted -->SliceWidth:<!-- raw HTML omitted --> This is the default number of columns in a slice.</p>
+<p><!-- raw HTML omitted -->MaxSlice:<!-- raw HTML omitted --> The total number of slices allocated to handle current set of columns.  This value is important for all nodes to efficiently distribute queries.</p>
+<p><!-- raw HTML omitted -->Anti-entropy:<!-- raw HTML omitted --> A periodic process that compares each slice and its replicas across the cluster to repair inconsistencies.</p>
+<p><!-- raw HTML omitted -->Node:<!-- raw HTML omitted --> An individual running instance of Pilosa server which belongs to a cluster.</p>
+<p><!-- raw HTML omitted -->Cluster:<!-- raw HTML omitted --> A cluster consists of one or more nodes which share a cluster configuration. The cluster also defines how data is replicated throughout and how internode communication is coordinated. Pilosa does not have a leader node, all data is evenly distributed, and any node can respond to queries.</p>
+<p><!-- raw HTML omitted -->TopN:<!-- raw HTML omitted --> Given a Frame and/or RowID this query returns the ordered set of RowID&rsquo;s by the number of columns that have a bit set in that row.</p>
+<p><!-- raw HTML omitted -->Tanimoto:<!-- raw HTML omitted --> Used for similarity queries on Pilosa data. The Tanimoto Coefficient is the ratio of the intersecting set to the union set as the measure of similarity.</p>
+<p><!-- raw HTML omitted -->Protobuf:<!-- raw HTML omitted -->: <a href="https://developers.google.com/protocol-buffers/">Protocol Buffers</a> is a binary serialization format which Pilosa uses for internal messages, and can be used by clients as an alternative to JSON.</p>
+<p><!-- raw HTML omitted -->TOML:<!-- raw HTML omitted --> We use <a href="https://github.com/toml-lang/toml">TOML</a> for our configuration file format.</p>
+<p><!-- raw HTML omitted -->Jump Consistent Hash:<!-- raw HTML omitted --> A fast, minimal memory, consistent hash algorithm that evenly distributes the workload even when the number of buckets changes.
+<a href="https://arxiv.org/pdf/1406.2294v1.pdf">https://arxiv.org/pdf/1406.2294v1.pdf</a></p>
+<p><!-- raw HTML omitted -->Partition:<!-- raw HTML omitted --> The consistent hash is compiled with a maximum number of partitions or locations on the unit circle that keys are mapped to. Partitions are then evenly mapped to physical nodes. To add nodes to the cluster you simply need to remap the partitions, and associated data across the new cluster topography.</p>
+<p><!-- raw HTML omitted -->Replica:<!-- raw HTML omitted --> A copy of a [fragment] on a different host from the original. The &ldquo;cluster.replicas&rdquo; configuration parameter determines how many replicas of a fragment exist in the cluster (including the original, so a value of 1 means no extra copies are made).</p>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v0.6/docs/glossary.md">View markdown source</a> on Github. Last updated 1 year, 9 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v0.6"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v0.6"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

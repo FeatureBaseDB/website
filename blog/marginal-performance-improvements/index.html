@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>The Effort Behind Marginal Performance Improvements &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="A look at the amount of effort that we sometimes put into pursuing performance.
+Background Pilosa is built on the Roaring bitmaps concept, a high-performance technique for operations on compressed sets of bits. It starts by representing all data in terms of bitmaps, each defined as one of three &ldquo;container types&rdquo;:
+ Array: a list of integers indicating set bit positions. Bitmap: a direct binary representation of the bitmap. Run: a list of intervals, each indicating a contiguous &ldquo;run&rdquo; of set bits.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="The Effort Behind Marginal Performance Improvements"/>
+    <meta property="og:description" content="A look at the amount of effort that we sometimes put into pursuing performance.
+Background Pilosa is built on the Roaring bitmaps concept, a high-performance technique for operations on compressed sets of bits. It starts by representing all data in terms of bitmaps, each defined as one of three &ldquo;container types&rdquo;:
+ Array: a list of integers indicating set bit positions. Bitmap: a direct binary representation of the bitmap. Run: a list of intervals, each indicating a contiguous &ldquo;run&rdquo; of set bits." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/marginal-performance-improvements/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/marginal-performance-improvements/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2020-08-24T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/marginal-performance-improvements/banner.jpg" alt="The Effort Behind Marginal Performance Improvements"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">The Effort Behind Marginal Performance Improvements</h1>
+      <h6 class="h-6-caps-white">8/24/2020 • 5 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=The&#43;Effort&#43;Behind&#43;Marginal&#43;Performance&#43;Improvements%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fmarginal-performance-improvements%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fmarginal-performance-improvements%2F&title=The&#43;Effort&#43;Behind&#43;Marginal&#43;Performance&#43;Improvements&summary=A&#43;look&#43;at&#43;the&#43;amount&#43;of&#43;effort&#43;that&#43;we&#43;sometimes&#43;put&#43;into&#43;pursuing&#43;performance.%0ABackground&#43;Pilosa&#43;is&#43;built&#43;on&#43;the&#43;Roaring&#43;bitmaps&#43;concept%2C&#43;a&#43;high-performance&#43;technique&#43;for&#43;operations&#43;on&#43;compressed&#43;sets&#43;of&#43;bits.&#43;It&#43;starts&#43;by&#43;representing&#43;all&#43;data&#43;in&#43;terms&#43;of&#43;bitmaps%2C&#43;each&#43;defined&#43;as&#43;one&#43;of&#43;three&#43;%26ldquo%3Bcontainer&#43;types%26rdquo%3B%3A%0A&#43;Array%3A&#43;a&#43;list&#43;of&#43;integers&#43;indicating&#43;set&#43;bit&#43;positions.&#43;Bitmap%3A&#43;a&#43;direct&#43;binary&#43;representation&#43;of&#43;the&#43;bitmap.&#43;Run%3A&#43;a&#43;list&#43;of&#43;intervals%2C&#43;each&#43;indicating&#43;a&#43;contiguous&#43;%26ldquo%3Brun%26rdquo%3B&#43;of&#43;set&#43;bits.&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fmarginal-performance-improvements%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>A look at the amount of effort that we sometimes put into pursuing performance.</p>
+<h2 id="background">Background</h2>
+<p>Pilosa is built on the <a href="https://roaringbitmap.org/">Roaring bitmaps</a> concept, a high-performance technique for operations on compressed sets of bits. It starts by representing all data in terms of bitmaps, each defined as one of three &ldquo;container types&rdquo;:</p>
+<ul>
+<li>Array: a list of integers indicating set bit positions.</li>
+<li>Bitmap: a direct binary representation of the bitmap.</li>
+<li>Run: a list of intervals, each indicating a contiguous &ldquo;run&rdquo; of set bits.</li>
+</ul>
+<p>For each bitmap, its container type is chosen to minimize storage space, which keeps memory use low. Queries on the data are defined in terms of basic logical operations on pairs of bitmaps. Time-optimized operations are implemented for each pair of container types, which precludes the need for converting back and forth between container types (a drain on both memory and time).</p>
+<p>What we gain in query performance, we lose in added code complexity. This complexity is explained in a previous <a href="/blog/adding-rle-support/">blog post</a>, where we detail how four logical operations, each supporting three container types for both operands, require 27 implementation functions.</p>
+<p>Now, I&rsquo;d like to describe another dimension of complexity: in-place operations.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>While this proliferation of type-specific implementations does wonders for speed, it can be suboptimal in terms of memory allocation. In an illustrative example, we might execute a union across the containers of two existing rows in a Pilosa index. In this case, it&rsquo;s not uncommon for the union of two containers to result in yet another, newly allocated container. But, in the case that one of the operands can be discarded, there is an opportunity to reduce memory usage by re-using that operand&rsquo;s container: an <a href="https://en.wikipedia.org/wiki/In-place_algorithm">in-place</a> operation.</p>
+<p>When one of our customers' Pilosa clusters started consuming too much memory due to union-in-place operations, we had an opportunity to explore one facet of this problem. Diving into profiler logs, we noticed that most cases were a union-in-place of two <strong>run</strong> containers. In this case, we would always convert the first <em>run container</em> into a <em>bitmap container</em>, and then perform the operation. This union operation is fast (simply iterate over runs and set the appropriate bits), but the prerequisite type conversion has a high memory cost. We needed to eliminate this, while maintaining the speed. And so a new operation function, <code>unionRunRunInPlace</code>, was born.</p>
+<p>Specifically, this function needs to look at a pair of <em>run containers</em>, combine them optimally, and return the result in one of the two original containers. As a graphical example, operating on input containers like this:</p>
+<pre><code>a:            |-----------------|
+
+b:  |------------|              |---------|
+</code></pre><p>should update container <code>a</code> to look like this:</p>
+<pre><code>a:  |-------------------------------------|
+</code></pre><p>While this is <em>essentially</em> a basic algorithm problem, we found that the competing goals of time complexity, space complexity, and code complexity made things a bit more interesting. These functions power Pilosa&rsquo;s core query engine, so keeping them performant and bug-free is a top priority. This partly explains why not all operation-type-type combinations currently have an in-place version; if they did, it would more than double the number of operation functions.</p>
+<h2 id="the-solution">The Solution</h2>
+<p>The new <code>unionRunRunInPlace</code> went through several iterations before it settled into something both performant and maintainable.</p>
+<p>The first attempt was the naive one:</p>
+<ul>
+<li>Join the two slices of intervals into one.</li>
+<li>Sort the joined slice.</li>
+<li>Iterate through intervals in joined slices and merge overlapping or adjacent intervals.</li>
+</ul>
+<p>This resulted in simple, understandable code, which accomplished the goal of avoiding the container type conversion. Adding a sorting step felt like the wrong approach; surely we can avoid all that additional time and memory usage. If nothing else, it became a useful baseline for benchmarking.</p>
+<p>The next attempt looked great in terms of performance. The idea was to iterate over the runs in both containers in parallel, selecting two near-by runs, and then handling each possible case of overlap in a separate branch, updating the values in the first container along the way.</p>
+<p>Unfortunately, it was <strong>so</strong> high-performance that it was nearly unreadable. It sat in limbo for a week while we fought over the responsibility of reviewing it (one reviewer remarking &ldquo;I&rsquo;m not sure if I should be excited or scared by the use of the <code>goto</code>&quot;). I&rsquo;m in favor of commenting code, but when understanding code crucially depends on dense comments, it may be a sign of fragility, and future maintenance problems.</p>
+<p>Fortunately, <a href="https://github.com/kuba--">Kuba</a> stepped in with a much-improved third iteration. In the interest of keeping this post relatively short, we&rsquo;ll just outline the approach here. Rather than iterating over <em>intervals</em>, iteration is done over <em>values</em>, while tracking a state variable indicating whether the current value is inside any interval or not. The shift to a state-based solution simplifies the code, in part by consolidating some logic into a state-update function. The inner loop again requires several branches for different interval-overlap cases, but now each branch calls the state-update function with minor differences. The resulting code is quite a bit more readable. <a href="https://github.com/pilosa/pilosa/blob/55353a256773172284ed58b01c5e3ef49c4b4323/roaring/roaring.go#L3943">See for yourself</a>!</p>
+<h2 id="the-results">The Results</h2>
+<p>Below is a chart comparing performance before and after adding <code>unionRunRunInPlace</code>. Each test case is described with a schematic representation of a bitmap: ■□□□□□□□ represents a bitmap with only the first bit set. Other patterns were also tested, and some cases showed worse performance, but generally they were so pathological as to be meaningless (for example, bit patterns that would never be maintained in <em>run containers</em> due to inefficiency). In practice, we find that <em>run containers</em> often contain a small number of runs, so we expect these cases to be representative of real-world behavior.</p>
+<p><img src="/img/blog/marginal-performance-improvements/performance-chart.png" alt="Performance Improvement">
+<em>Performance Improvement</em></p>
+<p>In short, the performance improvement was consistent and fantastic: an order of magnitude faster, and two orders of magnitude less memory usage. This doesn&rsquo;t look like a &ldquo;marginal improvement,&rdquo; you might say. That&rsquo;s true, for this case in itself. As just one of five union-in-place functions, and one of 23 in-place functions, the overall effect on general query performance is tempered somewhat. Still, we&rsquo;re proud of the progress.</p>
+
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Kuba Podgórski and Alan Bernstein">
+        <div class="body-bold"><a href="https://twitter.com/gsnark">Kuba Podgórski and Alan Bernstein</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

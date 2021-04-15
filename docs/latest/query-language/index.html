@@ -1,0 +1,4702 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Query Language &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Query Language Overview This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single index and are passed to Pilosa through the /index/INDEX_NAME/query endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:
+{&quot;results&quot;:[...]} There will be one item in the results array for each PQL query in the request.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Query Language"/>
+    <meta property="og:description" content="Query Language Overview This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single index and are passed to Pilosa through the /index/INDEX_NAME/query endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:
+{&quot;results&quot;:[...]} There will be one item in the results array for each PQL query in the request." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/latest/query-language/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Query Language
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+      <h2 id="query-language">Query Language</h2>
+<h3 id="overview">Overview</h3>
+<p>This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single <a href="../glossary/#index">index</a> and are passed to Pilosa through the <code>/index/INDEX_NAME/query</code> endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:</p>
+<pre><code>{&quot;results&quot;:[...]}
+</code></pre><p>There will be one item in the <code>results</code> array for each PQL query in the request. The type of each item in the array will depend on the type of query - each query in the reference below lists its result type.</p>
+<h4 id="conventions">Conventions</h4>
+<ul>
+<li>Angle Brackets <code>&lt;&gt;</code> denote required arguments</li>
+<li>Square Brackets <code>[]</code> denote optional arguments</li>
+<li>UPPER_CASE denotes a descriptor that will need to be filled in with a concrete value (e.g. <code>ATTR_NAME</code>, <code>STRING</code>)</li>
+</ul>
+<h5 id="examples">Examples</h5>
+<p>Before running any of the example queries below, follow the instructions in the <a href="../getting-started/">Getting Started</a> section to set up an index and fields, and to populate them with some data.</p>
+<p>The examples just show the PQL quer(ies) needed - to run the query <code>Set(10, stargazer=1)</code> against a server using curl, you would:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'Set(10, stargazer=1)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><h4 id="arguments-and-types">Arguments and Types</h4>
+<ul>
+<li><code>field</code> The field specifies on which Pilosa <a href="../glossary/#field">field</a> the query will operate. Valid field names are lower case strings; they start with an alphanumeric character, and contain only alphanumeric characters and <code>_-</code>. They must be 64 characters or less in length.</li>
+<li><code>TIMESTAMP</code> This is a timestamp in the following format <code>YYYY-MM-DDTHH:MM</code> (e.g. 2006-01-02T15:04)</li>
+<li><code>UINT</code> An unsigned integer (e.g. 42839)</li>
+<li><code>BOOL</code> A boolean value, <code>true</code> or <code>false</code></li>
+<li><code>ATTR_NAME</code> Must be a valid identifier <code>[A-Za-z][A-Za-z0-9._-]*</code></li>
+<li><code>ATTR_VALUE</code> Can be a string, float, integer, or bool.</li>
+<li><code>CALL</code> Any query</li>
+<li><code>ROW_CALL</code> Any query which returns a row, such as <code>Row</code>, <code>Union</code>, <code>Difference</code>, <code>Xor</code>, <code>Intersect</code>, <code>Not</code></li>
+<li><code>[]ATTR_VALUE</code> Denotes an array of <code>ATTR_VALUE</code>s. (e.g. <code>[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code>)</li>
+</ul>
+<h3 id="write-operations">Write Operations</h3>
+<h4 id="set">Set</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Set(&lt;COLUMN&gt;, &lt;FIELD&gt;=&lt;ROW&gt;, [TIMESTAMP])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>Set</code> assigns a value of 1 to a bit in the binary matrix, thus associating the given row (the <code>&lt;ROW&gt;</code> value) in the given field with the given column.</p>
+<!-- raw HTML omitted -->
+<p><strong>Result Type:</strong> boolean</p>
+<p>A return value of <code>true</code> indicates that the bit was changed to 1.</p>
+<p>A return value of <code>false</code> indicates that the bit was already set to 1 and nothing changed.</p>
+<p><strong>Examples:</strong></p>
+<p>Set the bit at row 1, column 10:</p>
+<pre><code class="language-request" data-lang="request">Set(10, stargazer=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>This sets a bit in the stargazer field, representing that the user with id=1 has starred the repository with id=10.</p>
+<p>Set also supports providing a timestamp. To write the date that a user starred a repository:</p>
+<pre><code class="language-request" data-lang="request">Set(10, stargazer=1, 2016-01-01T00:00)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>Set multiple bits in a single request:</p>
+<pre><code class="language-request" data-lang="request">Set(10, stargazer=1) Set(20, stargazer=1) Set(10, stargazer=2) Set(30, stargazer=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[false,true,true,true]}
+</code></pre><p>Set the field &ldquo;pullrequests&rdquo; to integer value 2 at column 10:</p>
+<pre><code class="language-request" data-lang="request">Set(10, pullrequests=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><h4 id="setrowattrs">SetRowAttrs</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetRowAttrs(&lt;FIELD&gt;, &lt;ROW&gt;,
+            &lt;ATTR_NAME=ATTR_VALUE&gt;,
+            [ATTR_NAME=ATTR_VALUE ...])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetRowAttrs</code> associates arbitrary key/value pairs with a row in a field. Setting a value of <code>null</code>, without quotes, deletes an attribute.</p>
+<p><strong>Result Type:</strong> null</p>
+<p>SetRowAttrs queries always return <code>null</code> upon success.</p>
+<p><strong>Examples:</strong></p>
+<p>Set attributes <code>username</code> and <code>active</code> on row 10:</p>
+<pre><code class="language-request" data-lang="request">SetRowAttrs(stargazer, 10, username=&quot;mrpi&quot;, active=true)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>Set username value and active status for user 10. These are arbitrary key/value pairs which have no meaning to Pilosa. You can see the attributes you&rsquo;ve set on a row with a <a href="../query-language/#row">Row</a> query like so <code>Row(stargazer=10)</code>.</p>
+<p>Delete attribute <code>username</code> on row 10:</p>
+<pre><code class="language-request" data-lang="request">SetRowAttrs(stargazer, 10, username=null)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><h4 id="setcolumnattrs">SetColumnAttrs</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetColumnAttrs(&lt;COLUMN&gt;,
+               &lt;ATTR_NAME=ATTR_VALUE&gt;,
+               [ATTR_NAME=ATTR_VALUE ...])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetColumnAttrs</code> associates arbitrary key/value pairs with a column in an index.</p>
+<p><strong>Result Type:</strong> null</p>
+<p>SetColumnAttrs queries always return <code>null</code> upon success. Setting a value of <code>null</code>, without quotes, deletes an attribute.</p>
+<p><strong>Examples:</strong></p>
+<p>Set attributes <code>stars</code>, <code>url</code>, and <code>active</code> on column 10:</p>
+<pre><code class="language-request" data-lang="request">SetColumnAttrs(10, stars=123, url=&quot;http://projects.pilosa.com/10&quot;, active=true)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>Set url value and active status for project 10. These are arbitrary key/value pairs which have no meaning to Pilosa.</p>
+<p>ColumnAttrs can be requested by adding the URL parameter <code>columnAttrs=true</code> to a query. For example:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query?columnAttrs=true -XPOST -d 'Row(stargazer=1) Row(stargazer=2)'
+</code></pre><pre><code class="language-response" data-lang="response">{
+  &quot;results&quot;:[
+    {&quot;attrs&quot;:{},&quot;cols&quot;:[10,20]},
+    {&quot;attrs&quot;:{},&quot;cols&quot;:[10,30]}
+  ],
+  &quot;columnAttrs&quot;:[
+    {&quot;id&quot;:10,&quot;attrs&quot;:{&quot;active&quot;:true,&quot;stars&quot;:123,&quot;url&quot;:&quot;http://projects.pilosa.com/10&quot;}},
+    {&quot;id&quot;:20,&quot;attrs&quot;:{&quot;active&quot;:false,&quot;stars&quot;:456,&quot;url&quot;:&quot;http://projects.pilosa.com/30&quot;}}
+  ]
+}
+</code></pre><p>In this example, ColumnAttrs have been set on columns 10 and 20, but not column 30. The relevant attributes are all returned in a single columnAttrs list. See the <a href="../api-reference/#query-index">query index</a> section for more information.</p>
+<p>Delete the <code>url</code> attribute on column 10:</p>
+<pre><code class="language-request" data-lang="request">SetColumnAttrs(10, url=null)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><h4 id="clear">Clear</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Clear(&lt;COLUMN&gt;, &lt;FIELD&gt;=&lt;ROW&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p><code>Clear</code> assigns a value of 0 to a bit in the binary matrix, thus disassociating the given row in the given field from the given column.</p>
+<p>Note that clearing a column on a time field will remove all data for that column.</p>
+<p><strong>Result Type:</strong> boolean</p>
+<p>A return value of <code>true</code> indicates that the bit was toggled from 1 to 0.</p>
+<p>A return value of <code>false</code> indicates that the bit was already set to 0 and nothing changed.</p>
+<p><strong>Examples:</strong></p>
+<p>Clear the bit at row 1 and column 10 in the stargazer field:</p>
+<pre><code class="language-request" data-lang="request">Clear(10, stargazer=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>This represents removing the relationship between the user with id=1 and the repository with id=10.</p>
+<h4 id="clearrow">ClearRow</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>ClearRow(&lt;FIELD&gt;=&lt;ROW&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p><code>ClearRow</code> sets all bits to 0 in a given row of the binary matrix, thus disassociating the given row in the given field from all columns.</p>
+<p><strong>Result Type:</strong> boolean</p>
+<p>A return value of <code>true</code> indicates that at least one column was toggled from 1 to 0.</p>
+<p>A return value of <code>false</code> indicates that all bits in the row were already 0 and nothing changed.</p>
+<p><strong>Examples:</strong></p>
+<p>Clear all bit in row 1 in the stargazer field:</p>
+<pre><code class="language-request" data-lang="request">ClearRow(stargazer=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>This represents removing the relationship between the user with id=1 and all repositories.</p>
+<h4 id="store">Store</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Store(&lt;ROW_CALL&gt;, &lt;FIELD&gt;=&lt;ROW&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p><code>Store</code> writes the results of <code>&lt;ROW_CALL&gt;</code> to the specified row. If the row already exists, it will be replaced. The destination field must be of field type <code>set</code>.</p>
+<p><strong>Result Type:</strong> boolean</p>
+<p>Upon success, this method always returns <code>true</code>. A future version of Pilosa may use this boolean result to indicate whether or not the data in the destination row was changed by the <code>Store</code> call.</p>
+<p><strong>Examples:</strong></p>
+<p>Store the contents of stargazer row 1 into stargazer row 2:</p>
+<pre><code class="language-request" data-lang="request">Store(Row(stargazer=1), stargazer=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>Store the results of the intersection of stargazer rows 10 and 11 into stargazer row 20.</p>
+<pre><code class="language-request" data-lang="request">Store(Intersect(Row(stargazer=10), Row(stargazer=11)), stargazer=20)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><h3 id="read-operations">Read Operations</h3>
+<h4 id="row">Row</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Row(&lt;FIELD&gt;=&lt;ROW&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p><code>Row</code> retrieves the indices of all the columns in a row. It also retrieves any attributes set on that row.</p>
+<p><strong>Result Type:</strong> object with attrs and columns.</p>
+<p>e.g. <code>{&quot;attrs&quot;:{&quot;username&quot;:&quot;mrpi&quot;,&quot;active&quot;:true},&quot;columns&quot;:[10, 20]}</code></p>
+<p><strong>Examples:</strong></p>
+<p>Query all columns with a bit set in row 1 of the field <code>stargazer</code> (repositories that are starred by user 1):</p>
+<pre><code class="language-request" data-lang="request">Row(stargazer=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{&quot;username&quot;:&quot;mrpi&quot;,&quot;active&quot;:true},&quot;columns&quot;:[10, 20]}
+</code></pre><ul>
+<li>attrs are the attributes for user 1</li>
+<li>columns are the repositories which user 1 has starred.</li>
+</ul>
+<h4 id="row-range">Row (Range)</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Row(&lt;FIELD&gt;=&lt;ROW&gt;, from=&lt;TIMESTAMP&gt;, to=&lt;TIMESTAMP&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Similar to <code>Row</code>, but only returns bits which were set with timestamps between the given <code>from</code> (inclusive) and <code>to</code> (exclusive) timestamps. Both <code>from</code> and <code>to</code> parameters are optional. The default for <code>to</code> timestamp is current time + 1 day. If a later end timestamp is required, specify it explicitly.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p><strong>Examples:</strong></p>
+<p>Query all columns with a bit set in row 1 of a field (repositories that a user has starred), within a date range:</p>
+<pre><code class="language-request" data-lang="request">Row(stargazer=1, from='2010-01-01T00:00', to='2017-03-02T03:00')
+</code></pre><pre><code class="language-response" data-lang="response">{{&quot;attrs&quot;:{},&quot;columns&quot;:[10]}
+</code></pre><p>This example assumes timestamps have been set on some bits.</p>
+<ul>
+<li>columns are repositories which were starred by user 1 in the time range 2010-01-01 to 2017-03-02.</li>
+</ul>
+<h4 id="row-bsi">Row (BSI)</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Row([&lt;COMPARISON_VALUE&gt; &lt;COMPARISON_OPERATOR&gt;] &lt;FIELD&gt; &lt;COMPARISON_OPERATOR&gt; &lt;COMPARISON_VALUE&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>The <code>Row</code> query is overloaded to work on <code>integer</code> values as well as <code>timestamp</code> values.
+Returns bits that are true for the comparison operator.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p><strong>Examples:</strong></p>
+<p>In our source data, commitactivity was counted over the last year.
+The following greater-than <code>Row</code> query returns all columns with a field value greater than 100 (repositories having more than 100 commits):</p>
+<pre><code class="language-request" data-lang="request">Row(commitactivity &gt; 100)
+</code></pre><pre><code class="language-response" data-lang="response">{{&quot;attrs&quot;:{},&quot;columns&quot;:[10]}
+</code></pre><ul>
+<li>columns are repositories which had at least 100 commits in the last year.</li>
+</ul>
+<p>BSI range queries support the following operators:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&gt;</code></td>
+<td>greater-than, GT</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>less-than, LT</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>less-than-or-equal-to, LTE</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>greater-than-or-equal-to, GTE</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>==</code></td>
+<td>equal-to, EQ</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>not-equal-to, NEQ</td>
+<td>integer or <code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p>A bounded interval can be specified by chaining the <code>&lt;</code> and <code>&lt;=</code> operators (but not others). For example:</p>
+<pre><code class="language-request" data-lang="request">Row(50 &lt; commitactivity &lt; 150)
+</code></pre><pre><code class="language-response" data-lang="response">{{&quot;attrs&quot;:{},&quot;columns&quot;:[10]}
+</code></pre><p>As of Pilosa 1.0, the &ldquo;between&rdquo; syntax <code>Row(frame=stats, commitactivity &gt;&lt; [50, 150])</code> is no longer supported.</p>
+<h4 id="union">Union</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Union([ROW_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Union performs a logical OR on the results of all <code>ROW_CALL</code> queries passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in either of two rows (repositories that are starred by either of two users):</p>
+<pre><code class="language-request" data-lang="request">Union(Row(stargazer=1), Row(stargazer=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[10, 20, 30]}
+</code></pre><ul>
+<li>columns are repositories that were starred by user 1 OR user 2</li>
+</ul>
+<h4 id="intersect">Intersect</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Intersect(&lt;ROW_CALL&gt;, [ROW_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Intersect performs a logical AND on the results of all <code>ROW_CALL</code> queries passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in both of two rows (repositories that are starred by both of two users):</p>
+<pre><code class="language-request" data-lang="request">Intersect(Row(stargazer=1), Row(stargazer=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[10]}
+</code></pre><ul>
+<li>columns are repositories that were starred by user 1 AND user 2</li>
+</ul>
+<h4 id="difference">Difference</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Difference(&lt;ROW_CALL&gt;, [ROW_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Difference returns all of the bits from the first <code>ROW_CALL</code> argument passed to it, without the bits from each subsequent <code>ROW_CALL</code>.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in one row and not another (repositories that are starred by one user and not another):</p>
+<pre><code class="language-request" data-lang="request">Difference(Row(stargazer=1), Row(stargazer=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[20]}]}
+</code></pre><ul>
+<li>columns are repositories that were starred by user 1 BUT NOT user 2</li>
+</ul>
+<p>Query for the opposite difference:</p>
+<pre><code class="language-request" data-lang="request">Difference(Row(stargazer=2), Row(stargazer=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[30]}
+</code></pre><ul>
+<li>columns are repositories that were starred by user 2 BUT NOT user 1</li>
+</ul>
+<h4 id="xor">Xor</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Xor(&lt;ROW_CALL&gt;, [ROW_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Xor performs a logical XOR on the results of each <code>ROW_CALL</code> query passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in exactly one of two rows (repositories that are starred by only one of two users):</p>
+<pre><code class="language-request" data-lang="request">Xor(Row(stargazer=2), Row(stargazer=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[20,30]}]}
+</code></pre><ul>
+<li>columns are repositories that were starred by user 1 XOR user 2 (user 1 or user 2, but not both)</li>
+</ul>
+<h4 id="not">Not</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Not(&lt;ROW_CALL&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Not returns the inverse of all of the bits from the <code>ROW_CALL</code> argument. The Not query requires that <code>trackExistence</code> has been enabled on the Index.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query existing columns that do not have a bit set in the given row.</p>
+<pre><code class="language-request" data-lang="request">Not(Row(stargazer=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[30]}]}
+</code></pre><ul>
+<li>columns are repositories that were not starred by user 1</li>
+</ul>
+<h4 id="count">Count</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Count(&lt;ROW_CALL&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the number of set bits in the <code>ROW_CALL</code> passed in.</p>
+<p><strong>Result Type:</strong> int</p>
+<p><strong>Examples:</strong></p>
+<p>Query the number of bits set in a row (the number of repositories a user has starred):</p>
+<pre><code class="language-request" data-lang="request">Count(Row(stargazer=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[1]}
+</code></pre><ul>
+<li>Result is the number of repositories that user 1 has starred.</li>
+</ul>
+<h4 id="shift">Shift</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Shift(&lt;ROW_CALL&gt;, [n=UINT])
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the row specified by <code>ROW_CALL</code> shifted by <code>n</code> bits.</p>
+<p><strong>Result Type:</strong> object with attrs and columns</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query all columns with a bit set in row 1 of the field <code>stargazer</code>
+and shift the result by 2:</p>
+<pre><code class="language-request" data-lang="request">Shift(Row(stargazer=1), n=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[12, 22]}
+</code></pre><ul>
+<li>columns are the repositories which user 1 has starred shifted by 2 bits.</li>
+</ul>
+<h4 id="topn">TopN</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>TopN(&lt;FIELD&gt;, [ROW_CALL], [n=UINT],
+     [attrName=&lt;ATTR_NAME&gt;, attrValues=&lt;[]ATTR_VALUE&gt;])
+</code></pre><p><strong>Description:</strong></p>
+<p>Return the id and count of the top <code>n</code> rows (by count of bits) in the field.
+The <code>attrName</code> and <code>attrValues</code> arguments work together to only return rows which
+have the attribute specified by <code>attrName</code> with one of the values specified in
+<code>attrValues</code>.</p>
+<p><strong>Result Type:</strong> array of key/count objects</p>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Performing a TopN() query on a field with cache type ranked will return the top rows sorted by count in descending order.</li>
+<li>Fields with cache type lru will maintain an LRU (Least Recently Used replacement policy) cache, thus a TopN query on this type of field will return rows sorted in order of most recently set bit.</li>
+<li>The field&rsquo;s cache size determines the number of sorted rows to maintain in the cache for purposes of TopN queries. There is a tradeoff between performance and accuracy; increasing the cache size will improve accuracy of results at the cost of performance.</li>
+<li>Once full, the cache will truncate the set of rows according to the field option CacheSize. Rows that straddle the limit and have the same count will be truncated in no particular order.</li>
+<li>The TopN query&rsquo;s attribute filter is applied to the existing sorted cache of rows. Rows that fall outside of the sorted cache range, even if they would normally pass the filter, are ignored.</li>
+</ul>
+<p>See <a href="../api-reference/#create-field">field creation</a> for more information about the cache.</p>
+<p><strong>Examples:</strong></p>
+<p>Basic TopN query:</p>
+<pre><code class="language-request" data-lang="request">TopN(stargazer)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:102},{&quot;id&quot;:4734,&quot;count&quot;:100},{&quot;id&quot;:12709,&quot;count&quot;:93},...]]}
+</code></pre><ul>
+<li><code>id</code> is a row ID (user ID)</li>
+<li><code>count</code> is a count of columns (repositories)</li>
+<li>Results are the number of bits set in the corresponding row (repositories that each user starred) in descending order for all rows (users) in the stargazer field. For example user 1240 starred 102 repositories, user 4734 starred 100 repositories, user 12709 starred 93 repository.</li>
+</ul>
+<p>Limit the number of results:</p>
+<pre><code class="language-request" data-lang="request">TopN(stargazer, n=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:102},{&quot;id&quot;:4734,&quot;count&quot;:100}]]}
+</code></pre><ul>
+<li>Results are the top two rows (users) sorted by number of bits set (repositories they&rsquo;ve starred) in descending order.</li>
+</ul>
+<p>Filter based on an existing row:</p>
+<pre><code class="language-request" data-lang="request">TopN(stargazer, Row(language=1), n=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:35},{&quot;id&quot;:7508,&quot;count&quot;:32}]]}
+</code></pre><ul>
+<li>Results are the top two users (rows) sorted by the number of bits set in the intersection with row 1 of the language field (repositories that they&rsquo;ve starred which are written in language 1).</li>
+</ul>
+<p>Filter based on attributes:</p>
+<pre><code class="language-request" data-lang="request">TopN(stargazer, n=2, attrName=active, attrValues=[true])
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:10,&quot;count&quot;:1},{&quot;id&quot;:13,&quot;count&quot;:1}]]}
+</code></pre><ul>
+<li>Results are the top two users (rows) which have the &ldquo;active&rdquo; attribute set to &ldquo;true&rdquo;, sorted by the number of bits set (repositories that they&rsquo;ve starred).</li>
+</ul>
+<h4 id="min">Min</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Min([ROW_CALL], field=&lt;FIELD&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the minimum value of all BSI integer values in this <code>field</code>. If the optional <code>Row</code> call is supplied, only columns with set bits are considered, otherwise all columns are considered.</p>
+<p><strong>Result Type:</strong> object with the min and count of columns containing the min value.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the minimum value of a field (minimum size of all repositories):</p>
+<pre><code class="language-request" data-lang="request">Min(field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:4,&quot;count&quot;:2}
+</code></pre><ul>
+<li>Result is the smallest value (repository size in kilobytes, here), plus the count of columns with that value.</li>
+</ul>
+<h4 id="max">Max</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Max([ROW_CALL], field=&lt;FIELD&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the maximum value of all BSI integer values in this <code>field</code>. If the optional <code>Row</code> call is supplied, only columns with set bits are considered, otherwise all columns are considered.</p>
+<p><strong>Result Type:</strong> object with the max and count of columns containing the max value.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the maximum value of a field (maximum size of all repositories):</p>
+<pre><code class="language-request" data-lang="request">Max(field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:88,&quot;count&quot;:13}
+</code></pre><ul>
+<li>Result is the largest value (repository size in kilobytes, here), plus the count of columns with that value.</li>
+</ul>
+<h4 id="sum">Sum</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Sum([ROW_CALL], field=&lt;FIELD&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the count and computed sum of all BSI integer values in the <code>field</code>. If the optional <code>Row</code> call is supplied, columns with set bits are summed, otherwise the sum is across all columns.</p>
+<p><strong>Result Type:</strong> object with the computed sum and count of the values in the integer field.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the size of all repositories.</p>
+<pre><code class="language-request" data-lang="request">Sum(field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:10,&quot;count&quot;:3}
+</code></pre><ul>
+<li>Result is the sum of all values (total size of all repositories in kilobytes, here), plus the count of columns.</li>
+</ul>
+<h3 id="other-operations">Other Operations</h3>
+<h4 id="options">Options</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Options(&lt;CALL&gt;, columnAttrs=&lt;BOOL&gt;, excludeColumns=&lt;BOOL&gt;, excludeRowAttrs=&lt;BOOL&gt;, shards=[UINT ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Modifies the given query as follows:</p>
+<ul>
+<li><code>columnAttrs</code>: Include column attributes in the result (Default: <code>false</code>).</li>
+<li><code>excludeColumns</code>: Exclude column IDs from the result (Default: <code>false</code>).</li>
+<li><code>excludeRowAttrs</code>: Exclude row attributes from the result (Default: <code>false</code>).</li>
+<li><code>shards</code>: Run the query using only the data from the given shards. By default, the entire data set (i.e. data from all shards) is used.</li>
+</ul>
+<p><strong>Result Type:</strong> Same result type as <code>&lt;CALL&gt;</code>.</p>
+<p><strong>Examples:</strong></p>
+<p>Return column attributes:</p>
+<pre><code class="language-request" data-lang="request">Options(Row(f1=10), columnAttrs=true)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[100]}],&quot;columnAttrs&quot;:[{&quot;id&quot;:100,&quot;attrs&quot;:{&quot;foo&quot;:&quot;bar&quot;}}
+</code></pre><p>Run the query against shards 0 and 2 only:</p>
+<pre><code class="language-request" data-lang="request">Options(Row(f1=10), shards=[0, 2])
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;columns&quot;:[100, 2097152]}
+</code></pre><h4 id="rows">Rows</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Rows(&lt;FIELD&gt;, previous=&lt;UINT|STRING&gt;, limit=&lt;UINT&gt;, column=&lt;UINT|STRING&gt;, from=&lt;TIMESTAMP&gt;, to=&lt;TIMESTAMP&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Rows returns a list of row IDs in the given field which have at least one bit
+set. The field argument is mandatory, the others are  optional.</p>
+<p>If <code>previous</code> is given, rows prior to and including the specified row ID or
+key will not be returned. If <code>column</code> is given, only rows which have a set bit
+in the given column will be returned. <code>previous</code> or <code>column</code> must be strings if
+and only if the field or index respectively is using key translation. If <code>limit</code>
+is given, the number of rowIDs returned will be less than or equal to
+<code>limit</code>. The combination of <code>limit</code> and <code>previous</code> allows for paging over large
+result sets. Results are always ordered, so setting <code>previous</code> as the last
+result of the previous request will start from the next available row.</p>
+<p>If the field is of type <code>time</code>, the <code>from</code> and <code>to</code> arguments can be provided
+to restrict the result to a specific time span. If <code>from</code> and <code>to</code> are
+not provided, the full range of existing data will be queried.</p>
+<p><strong>Result Type:</strong> Object with <code>&quot;rows&quot; or &quot;keys&quot; and an array of integers or strings respectively.</code></p>
+<p><strong>Examples:</strong></p>
+<p>Without keys:</p>
+<pre><code class="language-request" data-lang="request">Rows(blah)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;rows&quot;:[1,9,39]}
+</code></pre><p>With keys:</p>
+<pre><code class="language-request" data-lang="request">Rows(blahk)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;rows&quot;:null,&quot;keys&quot;:[&quot;haha&quot;,&quot;zaaa&quot;,&quot;traa&quot;]}
+</code></pre><h4 id="group-by">Group By</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>GroupBy(&lt;RowsCall&gt;, [RowsCall...], limit=&lt;UINT&gt;, filter=&lt;CALL&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>GroupBy returns the count of the intersection of every combination of rows
+taking one row each from the specified <code>Rows</code> calls. It returns only those
+combinations for which the count is greater than 0.</p>
+<p>The optional <code>filter</code> argument takes any type of <code>Row</code> query (e.g. Row, Union,
+Intersect, etc.) which will be intersected with each result prior to returning
+the count. This is analagous to a WHERE clause applied to a relational GROUP BY
+query.</p>
+<p>The optional <code>limit</code> argument limits the number of results returned. The results
+are ordered, so as long as the data isn&rsquo;t changing, the same query will return
+the same result set.</p>
+<p>Paging through results is supported by passing the <code>previous</code> argument to each
+of the <code>Rows</code> calls in the GroupBy. Take the last result from your previous
+<code>GroupBy</code> query, and pass each row ID in that result as the <code>previous</code> argument
+to each of the respective <code>Rows</code> queries in your next <code>GroupBy</code> query.</p>
+<p><strong>Result Type:</strong> Array of &ldquo;groups&rdquo;. Each group is an object with a group key and
+a count key. The count is an integer, and the group is an array of objects which
+specify the field and row for each row that was intersected to get that result.</p>
+<p><strong>Examples:</strong></p>
+<p>A single <code>Rows</code> query.</p>
+<pre><code class="language-request" data-lang="request">GroupBy(Rows(blah))
+</code></pre><pre><code class="language-response" data-lang="response">[{&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:1}],&quot;count&quot;:1},
+{&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:9}],&quot;count&quot;:1},
+{&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:39}],&quot;count&quot;:1}]
+</code></pre><p>With two <code>Rows</code> queries - one with IDs and one with keys.</p>
+<pre><code class="language-request" data-lang="request">GroupBy(Rows(blah), Rows(blahk), limit=7)
+</code></pre><pre><code class="language-response" data-lang="response">[{&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:1},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;haha&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:1},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;zaaa&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:1},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;traa&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:9},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;haha&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:9},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;zaaa&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:9},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;traa&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:39},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;haha&quot;}],&quot;count&quot;:1}]
+</code></pre><p>Getting the rest of the results from the previous example (paging).</p>
+<pre><code class="language-request" data-lang="request">GroupBy(Rows(blah, previous=39), Rows(blahk, previous=&quot;haha&quot;), limit=7)
+</code></pre><pre><code class="language-response" data-lang="response">[{&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:39},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;zaaa&quot;}],&quot;count&quot;:1},
+ {&quot;group&quot;:[{&quot;field&quot;:&quot;blah&quot;,&quot;rowID&quot;:39},{&quot;field&quot;:&quot;blahk&quot;,&quot;rowKey&quot;:&quot;traa&quot;}],&quot;count&quot;:1}]
+</code></pre>
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v1.4.0/docs/query-language.md">View markdown source</a> on Github. Last updated 4 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

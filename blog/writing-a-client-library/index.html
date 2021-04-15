@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Writing a Pilosa Client Library &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="In this post, we will cover creating a Pilosa client library by going through the steps of writing one in Lua.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Writing a Pilosa Client Library"/>
+    <meta property="og:description" content="In this post, we will cover creating a Pilosa client library by going through the steps of writing one in Lua." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/writing-a-client-library/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/client-libraries.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-11-10T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/client-libraries.jpg" alt="Writing a Pilosa Client Library"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Writing a Pilosa Client Library</h1>
+      <h6 class="h-6-caps-white">11/10/2017 • 21 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Writing&#43;a&#43;Pilosa&#43;Client&#43;Library%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-client-library%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-client-library%2F&title=Writing&#43;a&#43;Pilosa&#43;Client&#43;Library&summary=In&#43;this&#43;post%2C&#43;we&#43;will&#43;cover&#43;creating&#43;a&#43;Pilosa&#43;client&#43;library&#43;by&#43;going&#43;through&#43;the&#43;steps&#43;of&#43;writing&#43;one&#43;in&#43;Lua.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-client-library%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>In this post, we will cover creating a Pilosa client library by going through the steps of writing one in Lua.</p>
+<h3 id="introduction">Introduction</h3>
+<p>The Pilosa server has a nice HTTP API which makes interaction with it a breeze. Essentially, a request with one or more <a href="/docs/latest/query-language/">PQL (Pilosa Query Language)</a> queries is sent to the Pilosa server and one or more results are returned. A Pilosa client library makes it easier and less error prone to encode requests and decode responses.</p>
+<p><a href="https://www.lua.org">Lua</a> is an embeddable scripting language which is very prevalent among game programmers due to its expressiveness, simplicity and ease of interoperability with C and C++. It is also supported by Nginx.</p>
+<p>In this article, we are going to write a Pilosa client library in Lua. Although our sample library won&rsquo;t have all of the features of official client libraries, we will cover the fundamentals and have a base to improve upon. Even if you are not interested in creating a client library, you may find it useful to explore the sample client.</p>
+<p>Before delving into client library design, let&rsquo;s have a quick glance at the current official libraries for Pilosa.</p>
+<h3 id="client-libraries-overview">Client Libraries Overview</h3>
+<p>Our primary target is UNIX-like platforms, but our clients run very well on Windows too. Currently we have three official client libraries written in Go, Python and Java.</p>
+<ul>
+<li>
+<p>The Go client is at <a href="https://github.com/pilosa/go-pilosa">https://github.com/pilosa/go-pilosa</a>. We support Go 1.8 and up.</p>
+</li>
+<li>
+<p>Our Java client is at <a href="https://github.com/pilosa/java-pilosa">https://github.com/pilosa/java-pilosa</a>. Java 7 and up is supported. We use Maven as our build and packaging system, so it is available to most JVM based projects and languages like Scala, Clojure and Kotlin.</p>
+</li>
+<li>
+<p>The Python client is at <a href="https://github.com/pilosa/python-pilosa">https://github.com/pilosa/python-pilosa</a> and supports Python 2.7 and Python 3.4 and up. The Python client library is also available on <a href="https://pypi.python.org/pypi">PYPI</a>.</p>
+</li>
+</ul>
+<h3 id="getting-ready">Getting Ready</h3>
+<p>For the purposes of this post, we will assume you&rsquo;re on a UNIX-like platform such as Linux, MacOS or using <a href="https://msdn.microsoft.com/en-us/commandline/wsl/about">Windows Subsystem for Linux (WSL)</a>. If you are on another platform, adapt the instructions to your particular platform.</p>
+<p>Throughout this article, we will need to run queries against the Pilosa server, so let&rsquo;s go ahead and launch a new Pilosa server instance. We provide <a href="https://github.com/pilosa/pilosa/releases">precompiled binaries</a> for MacOS and Linux (works on WSL too), a <a href="http://brewformulas.org/Pilosa">Homebrew package</a> for MacOS and a <a href="https://hub.docker.com/r/pilosa/pilosa/">docker image</a>. See our documentation on <a href="/docs/latest/installation/">acquiring and installing Pilosa</a> and <a href="/docs/latest/getting-started/#starting-pilosa">starting Pilosa</a> if you need help installing Pilosa. We&rsquo;ll assume Pilosa is running on the default address with the default scheme at <code>http://localhost:10101</code>.</p>
+<p>While writing the new client library, we will need to run requests against Pilosa and analyze the responses. <a href="https://curl.haxx.se">curl</a> is probably the most popular tool for calling HTTP endpoints. It is usually preinstalled (or easily installable) in many UNIX-like platforms. Let&rsquo;s confirm that Pilosa is running and curl is installed. In a terminal, execute the following:</p>
+<pre><code>curl http://localhost:10101/version
+</code></pre><p>We should get a response similar to the following:</p>
+<pre><code>{&quot;version&quot;:&quot;v0.7.1&quot;}
+</code></pre><p>If you get the <code>localhost port 10101: Connection refused</code> error, make sure Pilosa is running on the default address.</p>
+<p>Since we are going to write our client library in <a href="https://www.lua.org">Lua</a> we need to install Lua. But which version? When it comes to versioning, Lua takes a different stance than many mainstream languages, and the latest main release may not be compatible with earlier main releases. Version 5.1 seems to be the most supported version in the Lua community so we will target it for this client library.</p>
+<p>Although Lua 5.1 is available with most package managers for UNIX-like platforms and it&rsquo;s easy to compile, it&rsquo;s most convenient to use the Python based <a href="https://github.com/mpeterv/hererocks">Hererocks</a> script to install it. Hererocks requires a compiler to compile Lua, so install one if you didn&rsquo;t already do so. Clang for MacOS, Visual Studio for Windows, and GCC for Linux, WSL and other UNIX-like platforms works great. The following command creates a Lua 5.1 virtual environment with the latest LuaRocks and activates it:</p>
+<pre><code>python hererocks.py lua5.1 -l5.1 -rlatest
+source lua5.1/bin/activate
+</code></pre><p>Run <code>lua -v</code> to confirm that the virtual environment was created with the correct Lua version.</p>
+<p><a href="https://luarocks.org">LuaRocks</a> is the defacto package manager for Lua. We are going to use it to install dependencies of our example client library. If you are using Hererocks then LuaRocks will already be installed in your virtual environment, otherwise make sure to install it.</p>
+<p>Let&rsquo;s install the dependencies for our client library:</p>
+<pre><code>luarocks install luasocket
+luarocks install busted
+luarocks install luacov
+</code></pre><p>LuaSocket provides the internal HTTP client we are going to use in our library. There are other, more advanced HTTP libraries for Lua, but their Windows support is not as good. Busted is a popular testing framework. It can use Luacov for generating a test coverage report.</p>
+<p>The final project is at the <a href="https://github.com/pilosa/lua-pilosa">Lua Client repository</a>. We are going to use the following layout for our client library project:</p>
+<pre><code>lua-pilosa/
+    pilosa/
+    integration-tests/
+    tests/
+    .travis.yml
+    LICENSE
+    Makefile
+    README.md
+    make.cmd
+    pilosa-0.1.0-1.rockspec
+</code></pre><p>We use the <code>LANGUAGE-pilosa</code> convention when naming client libraries at Pilosa. The library code is in the <code>pilosa</code> directory, unit tests are in <code>tests</code> and integration tests are (predictably) in <code>integration-tests</code>. <code>pilosa-0.1.0-1.rockspec</code> is the package definition file for LuaRocks. <code>.travis.yml</code> is the confiration file for Travis CI.</p>
+<h4 id="creating-a-makefile">Creating a Makefile</h4>
+<p>It&rsquo;s convenient to be able to use the same commands to execute tasks for all client libraries. All official Pilosa client library projects use a <code>Makefile</code> (or its Windows equivalent <code>make.cmd</code>) which has the same targets to accomplish the same task.</p>
+<p>We are going to create a trivial <code>Makefile</code> for our client library with the following targets:</p>
+<ul>
+<li><code>test</code>: Runs unit tests.</li>
+<li><code>test-all</code>: Runs both unit tests and integration tests.</li>
+<li><code>cover</code>: Runs all tests with coverage.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile"><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> cover test test-all
+
+<span style="color:#a6e22e">test</span><span style="color:#f92672">:</span>
+	busted tests
+
+<span style="color:#a6e22e">test-all</span><span style="color:#f92672">:</span>
+	busted tests integration-tests
+
+<span style="color:#a6e22e">cover</span><span style="color:#f92672">:</span> luacov.report.out
+	cat luacov.report.out
+
+<span style="color:#a6e22e">luacov.report.out</span><span style="color:#f92672">:</span> luacov.stats.out
+	luacov pilosa/*.lua
+
+<span style="color:#a6e22e">luacov.stats.out</span><span style="color:#f92672">:</span>
+	busted --coverage tests integration-tests
+</code></pre></div><p>You can see the equivalent <code>make.cmd</code> <a href="https://github.com/pilosa/lua-pilosa/blob/master/make.cmd">here</a>.</p>
+<p>We won&rsquo;t use any other targets for this client, but official Pilosa clients make use of the following extra targets:</p>
+<ul>
+<li><code>generate</code>: Creates the protobuf encoder/decoder from definition files.</li>
+<li><code>release</code>: Uploads the client library to the corresponding package manager.</li>
+<li><code>doc</code>: Creates the documentation.</li>
+<li><code>build</code>: Builds the client library.</li>
+</ul>
+<h4 id="a-note-on-class-definitions">A Note on Class Definitions</h4>
+<p>Although we design our client library around <em>classes</em>, Lua doesn&rsquo;t have the concept of a <em>class</em>. Instead, it emulates object orientation through the use of <em>metatables</em> and some syntactic sugar.</p>
+<p>For example, we would define the <code>Schema</code> <em>class</em> as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>.<span style="color:#a6e22e">new</span>()
+    <span style="color:#66d9ef">local</span> self <span style="color:#f92672">=</span> setmetatable({}, Schema)
+    self.indexes <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">return</span> self
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>:<span style="color:#a6e22e">index</span>(name)
+    <span style="color:#66d9ef">return</span> Index(name)
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#75715e">-- Create a Schema instance</span>
+<span style="color:#66d9ef">local</span> schema <span style="color:#f92672">=</span> Schema.new()
+<span style="color:#75715e">-- Note that we use a column instead of a dot.</span>
+<span style="color:#75715e">-- This is equivalent to: local myIndex = schema.index(schema, &#34;my-index&#34;)</span>
+<span style="color:#66d9ef">local</span> myIndex <span style="color:#f92672">=</span> schema:index(<span style="color:#e6db74">&#34;my-index&#34;</span>)
+</code></pre></div><p>How to create a class is not obvious unless you are a Lua programmer, so we use the <em>Lua Classic</em> module in <code>pilosa/classic.lua</code> to make our classes more familiar. The <code>Schema</code> class can be re-defined as:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> Object <span style="color:#f92672">=</span> require <span style="color:#e6db74">&#34;pilosa.classic&#34;</span>
+<span style="color:#66d9ef">local</span> Schema <span style="color:#f92672">=</span> Object:extend()
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>:<span style="color:#a6e22e">new</span>()
+    self.indexes <span style="color:#f92672">=</span> {}
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>:<span style="color:#a6e22e">index</span>(name)
+    <span style="color:#66d9ef">return</span> Index(name)
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#75715e">-- We don&#39;t call new() explicitly anymore</span>
+<span style="color:#66d9ef">local</span> schema <span style="color:#f92672">=</span> Schema()
+<span style="color:#66d9ef">local</span> myIndex <span style="color:#f92672">=</span> schema:index(<span style="color:#e6db74">&#34;my-index&#34;</span>
+</code></pre></div><h3 id="orm">ORM</h3>
+<p>The ORM component provides an API to form PQL (Pilosa Query Language) queries. The advantage of using the ORM against raw queries is that it is usually less verbose and less error prone. Also, parameters are validated on the client side which allows us to catch validation related errors earlier.</p>
+<p>We are going put the ORM related code in <code>pilosa/orm.lua</code>. Let&rsquo;s start with defining <code>PQLQuery</code> which contains a PQL query as well as the index that the query is to be executed against. <code>PQLQuery</code> constructor receives the <code>index</code> of type <code>Index</code> (to be defined a bit further) and <code>pql</code> of type string:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PQLQuery</span>:<span style="color:#a6e22e">new</span>(index, pql)
+    self.pql <span style="color:#f92672">=</span> pql
+    self.index <span style="color:#f92672">=</span> index
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PQLQuery</span>:<span style="color:#a6e22e">serialize</span>()
+    <span style="color:#66d9ef">return</span> self.pql
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The user is not supposed to create <code>PQLQuery</code> instances directly. Instead the <code>Index</code> class is going to have helper methods to create them.</p>
+<p>The <code>serialize</code> method returns the query as a string.</p>
+<p>Pilosa supports many queries in the same request, which cuts down the number of HTTP calls and improves throughput. Let&rsquo;s create the slightly more advanced <code>PQLBatchQuery</code> class which keeps one or more PQL statements. <code>PQLBatchQuery</code> implements the same interface as <code>PQLQuery</code>, so it is usable anywhere a <code>PQLQuery</code> is expected:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PQLBatchQuery</span>:<span style="color:#a6e22e">new</span>(index, ...)
+    <span style="color:#66d9ef">local</span> queries <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">for</span> i, v <span style="color:#66d9ef">in</span> ipairs(arg) <span style="color:#66d9ef">do</span>
+        table.insert(queries, v:serialize())
+    <span style="color:#66d9ef">end</span>
+    self.queries <span style="color:#f92672">=</span> queries
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PQLBatchQuery</span>:<span style="color:#a6e22e">add</span>(query)
+    table.insert(self.queries, query:serialize())
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PQLBatchQuery</span>:<span style="color:#a6e22e">serialize</span>()
+    <span style="color:#75715e">-- concatenate serialized queries as a string</span>
+    <span style="color:#66d9ef">return</span> table.concat(self.queries)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The ORM hierarchy starts with the <code>Schema</code> class, which is used to create and cache <code>Index</code> objects:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>:<span style="color:#a6e22e">new</span>()
+    self.indexes <span style="color:#f92672">=</span> {}
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Schema</span>:<span style="color:#a6e22e">index</span>(name)
+    index <span style="color:#f92672">=</span> self.indexes[name]
+    <span style="color:#66d9ef">if</span> index <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        index <span style="color:#f92672">=</span> Index(name)
+        self.indexes[name] <span style="color:#f92672">=</span> index
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">return</span> index
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>A <code>Schema</code> object can be instantiated directly, but usually the user loads the schema from the Pilosa server:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#75715e">-- create a schema</span>
+<span style="color:#66d9ef">local</span> schema1 <span style="color:#f92672">=</span> Schema()
+<span style="color:#75715e">-- load a schema</span>
+<span style="color:#66d9ef">local</span> schema2 <span style="color:#f92672">=</span> client.schema()
+</code></pre></div><p>Once the user has a <code>Schema</code> object she can create <code>Index</code> instances. Note that the changes in the ORM side aren&rsquo;t persisted until the user explicitly synchronizes the schema with the Pilosa server using <code>client.syncSchema(schema)</code>.</p>
+<p>Let&rsquo;s define the <code>Index</code> class:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Index</span>:<span style="color:#a6e22e">new</span>(name)
+    validator.ensureValidIndexName(name)
+    self.name <span style="color:#f92672">=</span> name
+    <span style="color:#75715e">-- frames is a weak table</span>
+    self.frames <span style="color:#f92672">=</span> {}
+    setmetatable(self.frames, { __mode <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;v&#34;</span> })
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Index</span>:<span style="color:#a6e22e">frame</span>(name, options)
+    <span style="color:#66d9ef">local</span> frame <span style="color:#f92672">=</span> self.frames[name]
+    <span style="color:#66d9ef">if</span> frame <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        frame <span style="color:#f92672">=</span> Frame(self, name, options)
+        self.frames[name] <span style="color:#f92672">=</span> frame
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">return</span> frame
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The <code>Index</code> object keeps a cache of frames. The <code>frame</code> method creates a new <code>Frame</code> object or returns an already existing <code>Frame</code> object. We should be careful when caching <code>Frame</code> objects, since <code>Frame</code> objects have to keep a reference to their parent <code>Index</code> object. This creates a circular reference and that can be problematic for languages with a reference counting memory management scheme.</p>
+<p>Let&rsquo;s add a few methods to <code>Index</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Index</span>:<span style="color:#a6e22e">rawQuery</span>(query)
+    <span style="color:#66d9ef">return</span> PQLQuery(self, query)
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Index</span>:<span style="color:#a6e22e">batchQuery</span>(...)
+    <span style="color:#66d9ef">return</span> PQLBatchQuery(self, unpack(arg))
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Index</span>:<span style="color:#a6e22e">union</span>(...)
+    <span style="color:#66d9ef">return</span> bitmapOp(self, <span style="color:#e6db74">&#34;Union&#34;</span>, unpack(arg))
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#75715e">-- ... SNIP ... --</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">bitmapOp</span>(index, name, ...)
+    <span style="color:#66d9ef">local</span> serializedArgs <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">for</span> i, a <span style="color:#66d9ef">in</span> ipairs(arg) <span style="color:#66d9ef">do</span>
+        table.insert(serializedArgs, a:serialize())
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">local</span> pql <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;%s(%s)&#34;</span>, name, table.concat(serializedArgs, <span style="color:#e6db74">&#34;, &#34;</span>))
+    <span style="color:#66d9ef">return</span> PQLQuery(index, pql)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p><code>rawQuery</code> allows the user to send any string to the Pilosa server as a query and <code>batchQuery</code> creates a <code>PQLBatchQuery</code> object with the given queries passed as arguments.</p>
+<p><code>union</code> method creates a <code>Union</code> query with the given bitmap queries. It calls the <code>bitmapOp</code> helper function to create the query. <code>intersect</code>, <code>difference</code> and <code>xor</code> methods are defined similarly.</p>
+<p>Next up, the <code>Frame</code> class:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Frame</span>:<span style="color:#a6e22e">new</span>(index, name, options)
+    validator.ensureValidFrameName(name)
+    self.index <span style="color:#f92672">=</span> index
+    self.name <span style="color:#f92672">=</span> name
+    options <span style="color:#f92672">=</span> options <span style="color:#f92672">or</span> {}
+    self.options <span style="color:#f92672">=</span> {
+        timeQuantum <span style="color:#f92672">=</span> options.timeQuantum <span style="color:#f92672">or</span> TimeQuantum.NONE,
+        inverseEnabled <span style="color:#f92672">=</span> options.inverseEnabled <span style="color:#f92672">or</span> <span style="color:#66d9ef">false</span>,
+        cacheType <span style="color:#f92672">=</span> options.cacheType <span style="color:#f92672">or</span> CacheType.DEFAULT,
+        cacheSize <span style="color:#f92672">=</span> options.cacheSize <span style="color:#f92672">or</span> <span style="color:#ae81ff">0</span>
+    }
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p><code>TimeQuantum</code> and <code>CacheType</code> contain string values accepted by the Pilosa server:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> TimeQuantum <span style="color:#f92672">=</span> {
+    NONE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>,
+    YEAR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Y&#34;</span>,
+    MONTH <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;M&#34;</span>,
+    DAY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;D&#34;</span>,
+    HOUR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;H&#34;</span>,
+    YEAR_MONTH <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;YM&#34;</span>,
+    MONTH_DAY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MD&#34;</span>,
+    DAY_HOUR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DH&#34;</span>,
+    YEAR_MONTH_DAY <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;YMD&#34;</span>,
+    MONTH_DAY_HOUR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;MDH&#34;</span>,
+    YEAR_MONTH_DAY_HOUR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;YMDH&#34;</span>
+}
+
+<span style="color:#66d9ef">local</span> CacheType <span style="color:#f92672">=</span> {
+    DEFAULT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>,
+    LRU <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;lru&#34;</span>,
+    RANKED <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;ranked&#34;</span>
+}
+</code></pre></div><p>The Frame constructor stores the frame&rsquo;s name, its parent index, and any available frame options. Next, a few methods which implement queries that work on frames:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Frame</span>:<span style="color:#a6e22e">bitmap</span>(rowID)
+    <span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;Bitmap(rowID=%d, frame=&#39;%s&#39;)&#34;</span>, rowID, self.name)
+    <span style="color:#66d9ef">return</span> PQLQuery(self.index, query)
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Frame</span>:<span style="color:#a6e22e">setbit</span>(rowID, columnID, timestamp)
+    <span style="color:#66d9ef">local</span> ts <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">if</span> timestamp <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        ts <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;, timestamp=&#39;%s&#39;&#34;</span>, os.date(TIME_FORMAT, timestamp))
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;SetBit(rowID=%d, frame=&#39;%s&#39;, columnID=%d%s)&#34;</span>, rowID, self.name, columnID, ts)
+    <span style="color:#66d9ef">return</span> PQLQuery(self.index, query)
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Frame</span>:<span style="color:#a6e22e">inverseBitmap</span>(columnID)
+    <span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;Bitmap(columnID=%d, frame=&#39;%s&#39;)&#34;</span>, columnID, self.name)
+    <span style="color:#66d9ef">return</span> PQLQuery(self.index, query)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Let&rsquo;s give a try our ORM classes. We define the schema first:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> schema <span style="color:#f92672">=</span> Schema()
+<span style="color:#66d9ef">local</span> index1 <span style="color:#f92672">=</span> schema:index(<span style="color:#e6db74">&#34;index1&#34;</span>)
+<span style="color:#66d9ef">local</span> frame1 <span style="color:#f92672">=</span> index1:frame(<span style="color:#e6db74">&#34;frame1&#34;</span>)
+</code></pre></div><p>Below is the code which creates the equivalent of the PQL query <code>Intersect(Bitmap(frame=&quot;frame1&quot;, rowID=10), Bitmap(frame=&quot;frame1&quot;, rowID=20))</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> index1:intersect(frame1:bitmap(<span style="color:#ae81ff">10</span>), frame1:bitmap(<span style="color:#ae81ff">20</span>))
+</code></pre></div><p>Pretty straightforward. You can check out the rest of <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/orm.lua">pilosa/orm.lua</a> file <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/orm.lua">here</a>.</p>
+<h3 id="client">Client</h3>
+<p>A Pilosa URI (Uniform Resource Identifier) represents the address of a Pilosa node. It consists of three parts: scheme, host and port. <code>https://index2.pilosa.com:10501</code> is a sample URI which points to the Pilosa node running at host <code>index2.pilosa.com</code> port <code>10501</code> and which uses the <code>https</code> scheme. All parts of a Pilosa URI are optional, but at least one of the parts should be specified. The following URIs are equivalent:</p>
+<ul>
+<li><code>http://localhost:10101</code></li>
+<li><code>http://localhost</code></li>
+<li><code>http://:10101</code></li>
+<li><code>localhost:10101</code></li>
+<li><code>localhost</code></li>
+<li><code>:10101</code></li>
+</ul>
+<p>The Lua code below defines the <code>URI</code> class which keeps a Pilosa URI. It lets us write <code>https://index2.pilosa.com:10501</code> as <code>URI(&quot;https&quot;, &quot;index2.pilosa.com&quot;, 10501)</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> DEFAULT_SCHEME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http&#34;</span>
+<span style="color:#66d9ef">local</span> DEFAULT_HOST <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;localhost&#34;</span>
+<span style="color:#66d9ef">local</span> DEFAULT_PORT <span style="color:#f92672">=</span> <span style="color:#ae81ff">10101</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">URI</span>:<span style="color:#a6e22e">new</span>(scheme, host, port)
+    self.scheme <span style="color:#f92672">=</span> scheme
+    self.host <span style="color:#f92672">=</span> host
+    self.port <span style="color:#f92672">=</span> port
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">URI</span>:<span style="color:#a6e22e">default</span>()
+    <span style="color:#66d9ef">return</span> URI(DEFAULT_SCHEME, DEFAULT_HOST, DEFAULT_PORT)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Generally, it is much more convenient to use a Pilosa URI as is. We can easily parse a string address and convert it to a Pilosa URI:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">URI</span>:<span style="color:#a6e22e">address</span>(address)
+    scheme, host, port <span style="color:#f92672">=</span> parseAddress(address)
+    <span style="color:#66d9ef">return</span> URI(scheme, host, port)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The following regular expression captures all parts of a valid Pilosa URI and is used in all official client libraries:</p>
+<pre><code>^(([+a-z]+)://)?([0-9a-z.-]+)?(:([0-9]+))?$
+</code></pre><p>Unfortunately Lua&rsquo;s regular expressions support is not as powerful to capture all groups in that regular expression, so each combination of URI parts should be checked separately. Below are regular expressions which should be checked from top to bottom until a match is found:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> PATTERN_SCHEME_HOST_PORT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([+a-z]+)://([0-9a-z.-]+):([0-9]+)$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_SCHEME_HOST <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([+a-z]+)://([0-9a-z.-]+)$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_SCHEME_PORT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([+a-z]+)://:([0-9]+)$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_HOST_PORT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([0-9a-z.-]+):([0-9]+)$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_SCHEME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([+a-z]+)://$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_PORT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^:([0-9]+)$&#34;</span>
+<span style="color:#66d9ef">local</span> PATTERN_HOST <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;^([0-9a-z.-]+)$&#34;</span>
+</code></pre></div><p>With those regular expressions defined, we can code <code>parseAddress</code> as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">parseAddress</span>(address)
+    scheme, host, port <span style="color:#f92672">=</span> string.match(address, PATTERN_SCHEME_HOST_PORT)
+    <span style="color:#66d9ef">if</span> scheme <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">and</span> host <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">and</span> port <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#66d9ef">return</span> scheme, host, tonumber(port)
+    <span style="color:#66d9ef">end</span>
+    
+    scheme, host <span style="color:#f92672">=</span> string.match(address, PATTERN_SCHEME_HOST)
+    <span style="color:#66d9ef">if</span> scheme <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">and</span> host <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#66d9ef">return</span> scheme, host, DEFAULT_PORT
+    <span style="color:#66d9ef">end</span>
+
+    <span style="color:#75715e">-- ... SNIP ... --</span>
+
+    host <span style="color:#f92672">=</span> string.match(address, PATTERN_HOST)
+    <span style="color:#66d9ef">if</span> host <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#66d9ef">return</span> DEFAULT_SCHEME, host, DEFAULT_PORT
+    <span style="color:#66d9ef">end</span>
+
+    error(<span style="color:#e6db74">&#34;Not a Pilosa URI&#34;</span>)    
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Lastly, we want to convert a <code>URI</code> to a string in a format to be passed to the internal HTTP client. We call that method <code>normalize</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">URI</span>:<span style="color:#a6e22e">normalize</span>()
+    <span style="color:#66d9ef">return</span> string.format(<span style="color:#e6db74">&#34;%s://%s:%d&#34;</span>, self.scheme, self.host, self.port)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Pilosa server supports HTTP requests with JSON or <a href="https://github.com/google/protobuf">protobuf</a> payload for querying, and HTTP requests with JSON payload for other endpoints. It is usually more efficient to encode/decode protobuf payloads but JSON support is more prevalent. Although  all of Pilosa&rsquo;s official client libraries use protobuf payloads for querying,  we will use JSON payloads for this client library.</p>
+<p><code>Content-Type</code> and <code>Accept</code> are two HTTP headers which tell the Pilosa server the type of the payload for requests and responses respectively. Most of the endpoints of Pilosa server don&rsquo;t require explicitly setting those endpoints and default to <code>application/json</code> but we are going to set them anyway in case the default changes in a future release.</p>
+<p>Let&rsquo;s create the <code>PilosaClient</code> class:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PilosaClient</span>:<span style="color:#a6e22e">new</span>(uri, options)
+    self.uri <span style="color:#f92672">=</span> uri <span style="color:#f92672">or</span> URI:default()
+    self.options <span style="color:#f92672">=</span> options <span style="color:#f92672">or</span> {}
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Most Pilosa clients can be initialized with a Pilosa URI or URIs of a cluster. But to keep things a bit simpler, we are going to assign a single URI to the client. If the user doesn&rsquo;t supply a URI or options, we simply use the defaults.</p>
+<p>The actual request to a Pilosa server is not accomplished by the <code>PilosaClient</code> itself, but rather by an underlying HTTP library which we&rsquo;ll refer to as the internal HTTP client. The internal client library we use for this project doesn&rsquo;t support advanced features such as connection pooling.</p>
+<p>Let&rsquo;s write a generic method to call Pilosa which we are going to use shortly:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">httpRequest</span>(client, method, path, data)
+    data <span style="color:#f92672">=</span> data <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">local</span> url <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;%s%s&#34;</span>, client.uri:normalize(), path)
+    <span style="color:#66d9ef">local</span> chunks <span style="color:#f92672">=</span> {}
+
+    <span style="color:#66d9ef">local</span> r, status <span style="color:#f92672">=</span> http.request{
+        url<span style="color:#f92672">=</span>url,
+        method<span style="color:#f92672">=</span>method,
+        source<span style="color:#f92672">=</span>ltn12.source.string(data),
+        sink<span style="color:#f92672">=</span>ltn12.sink.table(chunks),
+        headers<span style="color:#f92672">=</span>getHeaders(data)
+    }
+
+    <span style="color:#66d9ef">if</span> r <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#75715e">-- status contains the error string</span>
+        error({error<span style="color:#f92672">=</span>status, code<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>})
+    <span style="color:#66d9ef">end</span>
+
+    <span style="color:#66d9ef">local</span> response <span style="color:#f92672">=</span> table.concat(chunks)
+
+    <span style="color:#66d9ef">if</span> status <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">200</span> <span style="color:#f92672">or</span> status <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">300</span> <span style="color:#66d9ef">then</span>
+        error({error<span style="color:#f92672">=</span>response, code<span style="color:#f92672">=</span>status})
+    <span style="color:#66d9ef">end</span>
+
+    <span style="color:#66d9ef">return</span> response
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The <code>httpRequest</code> function receives a <code>PilosaClient</code> object, and the method, path and optionally the data for a request. It returns a string response. LuaSocket has the concept of sources and sinks. <code>http.request</code> function reads from a source and saves the response to the sink in chunks. We build the response by concatenating those chunks.</p>
+<p><code>getHeaders</code> function is trivially defined as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getHeaders</span>(data)
+    <span style="color:#66d9ef">return</span> {
+        <span style="color:#75715e">-- Content Length is the size of the data</span>
+        [<span style="color:#e6db74">&#34;content-length&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">#</span>data,
+        [<span style="color:#e6db74">&#34;content-type&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;application/json&#34;</span>,
+        [<span style="color:#e6db74">&#34;accept&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;application/json&#34;</span>
+    }
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>All Pilosa queries require specifying an index, so let&rsquo;s try to create one with default options using <code>curl</code>:</p>
+<pre><code>curl -X POST http://localhost:10101/index/sample-index -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d ''
+</code></pre><p>Outputs <code>{}</code> which indicates that the index was created successfully. If you run the command above again, you will get the <code>index already exists</code> error with the <code>409 Conflict</code> status.</p>
+<p>Using the <code>httpRequest</code> function we defined above, we can define the <code>createIndex</code> method of the <code>PilosaClient</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PilosaClient</span>:<span style="color:#a6e22e">createIndex</span>(index)
+    <span style="color:#66d9ef">local</span> path <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;/index/%s&#34;</span>, index.name)
+    httpRequest(self, <span style="color:#e6db74">&#34;POST&#34;</span>, path, <span style="color:#e6db74">&#34;{}&#34;</span>)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>This method just encodes index options as the payload and creates the HTTP path using the index name.</p>
+<p>When <code>createIndex</code> method is called with an index, it will create the index on the server side if it doesn&rsquo;t already exist. If it does exist, it will raise an error. It would be convenient to have a method which would be more forgiving when trying to create an existing index. Let&rsquo;s call that method <code>ensureIndex</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> HTTP_CONFLICT <span style="color:#f92672">=</span> <span style="color:#ae81ff">409</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PilosaClient</span>:<span style="color:#a6e22e">ensureIndex</span>(index)
+    <span style="color:#66d9ef">local</span> response, err <span style="color:#f92672">=</span> pcall(<span style="color:#66d9ef">function</span>() self:createIndex(index) <span style="color:#66d9ef">end</span>)
+    <span style="color:#66d9ef">if</span> err <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">and</span> err.code <span style="color:#f92672">~=</span> HTTP_CONFLICT <span style="color:#66d9ef">then</span>
+        error(err)
+    <span style="color:#66d9ef">end</span>
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Frames can have options attached to them, so <code>createFrame</code> has to POST those options in the request body: <code>{&quot;options&quot;: { ... }}</code>. <code>createFrame</code> is defined as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PilosaClient</span>:<span style="color:#a6e22e">createFrame</span>(frame)
+    <span style="color:#66d9ef">local</span> data <span style="color:#f92672">=</span> {options <span style="color:#f92672">=</span> frame.options}
+    <span style="color:#66d9ef">local</span> path <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;/index/%s/frame/%s&#34;</span>, frame.index.name, frame.name)
+    httpRequest(self, <span style="color:#e6db74">&#34;POST&#34;</span>, path, json.encode(data))
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The most important method of our <code>PilosaClient</code> class is <code>query</code>, which serializes the ORM query we pass and returns a response. It is defined below:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> QueryResponse <span style="color:#f92672">=</span> require <span style="color:#e6db74">&#34;pilosa.response&#34;</span>.QueryResponse
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">PilosaClient</span>:<span style="color:#a6e22e">query</span>(query, options)
+    options <span style="color:#f92672">=</span> QueryOptions(options)
+    <span style="color:#66d9ef">local</span> data <span style="color:#f92672">=</span> query:serialize()
+    <span style="color:#66d9ef">local</span> path <span style="color:#f92672">=</span> string.format(<span style="color:#e6db74">&#34;/index/%s/query%s&#34;</span>, query.index.name, options:encode())
+    <span style="color:#66d9ef">local</span> response <span style="color:#f92672">=</span> httpRequest(self, <span style="color:#e6db74">&#34;POST&#34;</span>, path, data)
+    <span style="color:#66d9ef">return</span> QueryResponse(response)
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The <code>query</code> method can optionally take a few query options. The user would pass those query options as a table, and we convert it to a <code>QueryOptions</code> object which is defined below:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">QueryOptions</span>:<span style="color:#a6e22e">new</span>(options)
+    options <span style="color:#f92672">=</span> options <span style="color:#f92672">or</span> {}
+    self.options <span style="color:#f92672">=</span> {
+        columnAttrs <span style="color:#f92672">=</span> options.columnAttributes <span style="color:#f92672">==</span> <span style="color:#66d9ef">true</span>,
+        excludeAttrs <span style="color:#f92672">=</span> options.excludeAttributes <span style="color:#f92672">==</span> <span style="color:#66d9ef">true</span>,
+        excludeBits <span style="color:#f92672">=</span> options.excludeBits <span style="color:#f92672">==</span> <span style="color:#66d9ef">true</span>
+    }
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>With the <code>PilosaClient</code> class defined, the user can run queries similar to the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> myFrame:bitmap(<span style="color:#ae81ff">10</span>)
+<span style="color:#66d9ef">local</span> client <span style="color:#f92672">=</span> PilosaClient(URI:default())
+<span style="color:#66d9ef">local</span> response <span style="color:#f92672">=</span> client:query(query, {excludeAttributes <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>})
+</code></pre></div><p>The rest of <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/client.lua">pilosa/client.lua</a> is <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/client.lua">here</a>.</p>
+<h3 id="response">Response</h3>
+<p>The response from the Pilosa server for a query request may be in JSON or protobuf, depending on the <code>Accept</code> header in the HTTP request. The number of results in the response is the same as the number of PQL statements in the query request. Results in a response encoded in protobuf have the same structure with different values for fields. On the other hand, for JSON responses, the structure of a result depends on the corresponding PQL query.</p>
+<p>Since we opted for the JSON payloads for queries, let&rsquo;s try a few queries using <code>curl</code> and check the responses.</p>
+<p>We need to create the index and frame first:</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d ''
+curl -X POST http://localhost:10101/index/test-index/frame/test-frame -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d '{&quot;options&quot;:{&quot;inverseEnabled&quot;:true}}'
+</code></pre><p>Let&rsquo;s see what we get back for the <code>SetBit</code> query:</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index/query -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d 'SetBit(frame=&quot;test-frame&quot;,rowID=5, columnID=100)'
+</code></pre><p>Outputs: <code>{&quot;results&quot;:[true]}</code>. <code>SetBit</code> and <code>ClearBit</code> returns a boolean value, representing whether a bit was set or cleared.</p>
+<p>Now the <code>SetRowAttrs</code> query:</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index/query -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d 'SetRowAttrs(frame=&quot;test-frame&quot;,rowID=5, attr1=1, attr2=&quot;foo&quot;, attr3=true)'
+</code></pre><p>Outputs: <code>{&quot;results&quot;:[null]}</code>. <code>SetRowAttrs</code> and <code>SetColumnAttrs</code> always return <code>null</code>.</p>
+<p>How about the <code>Bitmap</code> query?</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index/query -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d 'Bitmap(frame=&quot;test-frame&quot;,rowID=5)'
+</code></pre><p>Outputs: <code>{&quot;results&quot;:[{&quot;attrs&quot;:{&quot;attr1&quot;:1,&quot;attr2&quot;:&quot;foo&quot;,&quot;attr3&quot;:true},&quot;bits&quot;:[100]}]}</code>. The result for a <code>Bitmap</code> query includes the <code>attrs</code> map if there are any attributes set for the specified row, and the <code>bits</code> array which contains the columns for the row.</p>
+<p>Let&rsquo;s try a <code>TopN</code> query:</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index/query -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d 'TopN(frame=&quot;test-frame&quot;)'
+</code></pre><p>Outputs: <code>{&quot;results&quot;:[[{&quot;id&quot;:5,&quot;count&quot;:1}]]}</code>. The result is a list of count result items composed of a rowID and the count of bits set.</p>
+<p>Next up, the <code>Count</code> query:</p>
+<pre><code>curl -X POST http://localhost:10101/index/test-index/query -H &quot;Content-Type: application/json&quot; -H &quot;Accept: application/json&quot; -d 'Count(Bitmap(frame=&quot;test-frame&quot;,rowID=5))'
+</code></pre><p>Outputs: <code>{&quot;results&quot;:[1]}</code>, which is the number of bits set for the given row.</p>
+<p>Let&rsquo;s define the <code>QueryResponse</code> class in <code>pilosa/response.lua</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">QueryResponse</span>:<span style="color:#a6e22e">new</span>(response)
+    <span style="color:#66d9ef">local</span> jsonResponse <span style="color:#f92672">=</span> json.decode(response)
+    <span style="color:#66d9ef">local</span> results <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">if</span> jsonResponse[<span style="color:#e6db74">&#34;results&#34;</span>] <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#66d9ef">for</span> i, result <span style="color:#66d9ef">in</span> ipairs(jsonResponse[<span style="color:#e6db74">&#34;results&#34;</span>]) <span style="color:#66d9ef">do</span>
+            table.insert(results, QueryResult(result))
+        <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">end</span>
+    self.results <span style="color:#f92672">=</span> results
+    self.result <span style="color:#f92672">=</span> results[<span style="color:#ae81ff">1</span>]
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>The constructor of <code>QueryResponse</code> receives a string response and decodes it. It then extracts the results and stores them in the <code>results</code> property. It is convenient to access a result directly when it is the only one. So we set the <code>result</code> property as the first result.</p>
+<p>As we have seen above, a result may contain different fields depending on the corresponding query. <code>QueryResult</code> class consolidates those fields in a single data structure. Unset fields have a default value.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">QueryResult</span>:<span style="color:#a6e22e">new</span>(result)
+    <span style="color:#75715e">-- SetBit and ClearBit returns boolean values. We currently do not store them in the response.</span>
+    <span style="color:#66d9ef">if</span> result <span style="color:#f92672">==</span> <span style="color:#66d9ef">true</span> <span style="color:#66d9ef">then</span>
+        result <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">else</span>
+        result <span style="color:#f92672">=</span> result <span style="color:#f92672">or</span> {}
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#75715e">-- Queries such as Bitmap, Union, etc. return bitmap results</span>
+    self.bitmap <span style="color:#f92672">=</span> BitmapResult(result)
+    <span style="color:#75715e">-- Count and Sum queries return the count</span>
+    self.count <span style="color:#f92672">=</span> result.count <span style="color:#f92672">or</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#75715e">-- Sum query returns the sum</span>
+    self.sum <span style="color:#f92672">=</span> result.sum <span style="color:#f92672">or</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#75715e">-- TopN returns a list of (ID, count) pairs. We call each of them count result item.</span>
+    <span style="color:#66d9ef">local</span> countItems <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">if</span> <span style="color:#f92672">#</span>result <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> result[<span style="color:#ae81ff">1</span>].id <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">and</span> result[<span style="color:#ae81ff">1</span>].count <span style="color:#f92672">~=</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        <span style="color:#66d9ef">for</span> i, item <span style="color:#66d9ef">in</span> ipairs(result) <span style="color:#66d9ef">do</span>
+            table.insert(countItems, CountResultItem(item))
+        <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">end</span>
+    self.countItems <span style="color:#f92672">=</span> countItems
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Queries such as Bitmap, Union, etc. return bitmap results. A bitmap result contains the bits set for the corresponding row or column and the attributes.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">BitmapResult</span>:<span style="color:#a6e22e">new</span>(result)
+    self.bits <span style="color:#f92672">=</span> result.bits <span style="color:#f92672">or</span> {}
+    self.attributes <span style="color:#f92672">=</span> result.attrs <span style="color:#f92672">or</span> {}
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p><code>TopN</code> queries return a list of (ID, count) pairs. We call each of them a count result item. The <code>CountResultItem</code> is defined below:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">CountResultItem</span>:<span style="color:#a6e22e">new</span>(id, count)
+    self.id <span style="color:#f92672">=</span> id
+    self.count <span style="color:#f92672">=</span> count
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Here&rsquo;s how our users would retrieve results from a response:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">local</span> query <span style="color:#f92672">=</span> myFrame:bitmap(<span style="color:#ae81ff">10</span>)
+<span style="color:#66d9ef">local</span> client <span style="color:#f92672">=</span> PilosaClient(URI:default())
+<span style="color:#66d9ef">local</span> response <span style="color:#f92672">=</span> client:query(query)
+
+<span style="color:#66d9ef">for</span> i, result <span style="color:#66d9ef">in</span> ipairs(response.results) <span style="color:#66d9ef">do</span>
+    print(string.format(<span style="color:#e6db74">&#34;There are %d bits in result %d&#34;</span>, <span style="color:#f92672">#</span>result.bitmap.bits, i))
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#66d9ef">local</span> bitmapResult <span style="color:#f92672">=</span> response.result.bitmap
+</code></pre></div><p>Rest of <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/response.lua">pilosa/response.lua</a> is <a href="https://github.com/pilosa/lua-pilosa/blob/master/pilosa/response.lua">here</a>.</p>
+<h3 id="testing">Testing</h3>
+<p>It&rsquo;s a good idea to separate unit tests from integration tests since integration tests depend on a running Pilosa server, and may take longer to complete. Our <code>Makefile</code> contains two targets for testing, <code>make test</code> runs unit tests and <code>make test-all</code> runs both unit and integration tests.</p>
+<p>Integration tests require the Pilosa server to be running on the default address, but you can change it using the <code>PILOSA_BIND</code> environment variable.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getClient</span>()
+    <span style="color:#66d9ef">local</span> serverAddress <span style="color:#f92672">=</span> os.getenv(<span style="color:#e6db74">&#34;PILOSA_BIND&#34;</span>)
+    <span style="color:#66d9ef">if</span> serverAddress <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> <span style="color:#66d9ef">then</span>
+        serverAddress <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://localhost:10101&#34;</span>
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">return</span> PilosaClient(URI:address(serverAddress))
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>Below is a part of the <code>PilosaClient</code> test case. Note that we create the necessary index and frame in the setup function <code>before_each</code> and delete the index (which deletes the frame too) in the teardown function <code>after_each</code>. <code>before_each</code> and <code>after_each</code> runs before and after each test function respectively.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua">describe(<span style="color:#e6db74">&#34;PilosaClient&#34;</span>, <span style="color:#66d9ef">function</span>()
+    <span style="color:#66d9ef">local</span> client <span style="color:#f92672">=</span> getClient()
+    <span style="color:#66d9ef">local</span> schema <span style="color:#f92672">=</span> orm.Schema()
+    <span style="color:#66d9ef">local</span> index <span style="color:#f92672">=</span> schema:index(<span style="color:#e6db74">&#34;test-index&#34;</span>)
+    <span style="color:#66d9ef">local</span> frame <span style="color:#f92672">=</span> index:frame(<span style="color:#e6db74">&#34;test-frame&#34;</span>)
+
+    before_each(<span style="color:#66d9ef">function</span>()
+        client:ensureIndex(index)
+        client:ensureFrame(frame)
+    <span style="color:#66d9ef">end</span>)
+
+    after_each(<span style="color:#66d9ef">function</span>()
+        client:deleteIndex(index)
+    <span style="color:#66d9ef">end</span>)
+
+    <span style="color:#75715e">-- Tests are here --</span>
+<span style="color:#66d9ef">end</span>)
+</code></pre></div><p>And here is the test function for <code>PilosaClient:query</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua">    it(<span style="color:#e6db74">&#34;can send a query&#34;</span>, <span style="color:#66d9ef">function</span>()
+        <span style="color:#66d9ef">local</span> client <span style="color:#f92672">=</span> getClient()
+        client:query(frame:setbit(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">20</span>))        
+        <span style="color:#66d9ef">local</span> response1 <span style="color:#f92672">=</span> client:query(frame:bitmap(<span style="color:#ae81ff">10</span>))
+        <span style="color:#66d9ef">local</span> bitmap <span style="color:#f92672">=</span> response1.result.bitmap
+        assert.equals(<span style="color:#ae81ff">0</span>, <span style="color:#f92672">#</span>bitmap.attributes)
+        assert.equals(<span style="color:#ae81ff">1</span>, table.getn(bitmap.bits))
+        assert.same(<span style="color:#ae81ff">20</span>, bitmap.bits[<span style="color:#ae81ff">1</span>])
+    <span style="color:#66d9ef">end</span>)
+</code></pre></div><p>All official Pilosa clients have the same structure and similarly named classes and methods. That makes it easy to port tests between client libraries.</p>
+<h3 id="continuous-integration">Continuous Integration</h3>
+<p>Finally we have a basic Lua client library for Pilosa, together with tests. It would be nice if the tests were run automatically when the code changed using a continuous integration service.</p>
+<p>We use Github and Travis CI for our continuous integration infrastructure for our  projects at Pilosa. We provide a precompiled Pilosa binary which tracks the latest master so we can be sure that our client libraries work with the latest Pilosa server.</p>
+<p>Travis CI doesn&rsquo;t directly support Lua, but we can use their Python image and install Lua using HereRocks like we have done in the Getting Started section. Below is the <code>.travis.yml</code> we use for this project:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">language</span>: <span style="color:#ae81ff">python</span>
+<span style="color:#f92672">python</span>:
+  - <span style="color:#e6db74">&#34;2.7&#34;</span>
+<span style="color:#f92672">before_install</span>:
+  - <span style="color:#ae81ff">wget https://s3.amazonaws.com/build.pilosa.com/pilosa-master-linux-amd64.tar.gz &amp;&amp; tar xf pilosa-master-linux-amd64.tar.gz</span>
+  - <span style="color:#ae81ff">./pilosa-master-linux-amd64/pilosa server -d http_data &amp;</span>
+  - <span style="color:#ae81ff">curl -O https://github.com/mpeterv/hererocks/raw/0.17.0/hererocks.py</span>
+  - <span style="color:#ae81ff">python hererocks.py lua5.1 -l5.1 -rlatest</span>
+  - <span style="color:#ae81ff">source lua5.1/bin/activate</span>
+<span style="color:#f92672">install</span>:
+  - <span style="color:#ae81ff">luarocks install luasocket busted</span>
+<span style="color:#f92672">script</span>:
+  - <span style="color:#ae81ff">make test-all</span>
+</code></pre></div><h3 id="conclusion">Conclusion</h3>
+<p>In this article we explored the fundamentals of writing a client library for Pilosa and wrote a simple one in Lua. Hopefully this article has been useful for those of you interested in writing your own Pilosa client library, or even those just looking to better understand the current client libraries.</p>
+<p>We&rsquo;re always looking for feedback, so feel free to reach out if you think there&rsquo;s something we missed, or other topics you&rsquo;d like us to cover.</p>
+<p><em>Yüce is an Independent Software Engineer at Pilosa. When he&rsquo;s not writing Pilosa client libraries, you can find him watching good bad movies. He is <a href="https://github.com/yuce">@yuce</a> on GitHub and <a href="https://twitter.com/tklx?lang=en">@tklx</a> on Twitter.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Yüce Tekol">
+        <div class="body-bold"><a href="https://twitter.com/tklx">Yüce Tekol</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

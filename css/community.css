@@ -1,0 +1,200 @@
+.community-hero{
+  background: #2a4871;
+}
+
+.community-hero-content{
+  display: flex;
+  align-items: center;
+}
+.community-hero-content h2 {
+    text-align: left;
+}
+.community-hero-img {
+    margin-left: 200px;
+}
+@media (max-width: 1000px) {
+  .community-hero-img{
+    display: none;
+
+  }
+}
+
+.community-contribute{
+  padding-top: 90px;
+  padding-bottom: 70px;
+  background-color: #f8fafb;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+
+}
+.community-contribute-text{
+  color: #3c5f8d;
+  width: 40%;
+  margin: auto;
+  text-align: center;
+}
+
+.community-support-grid{
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  max-width: 600px;
+}
+.community-support-card{
+  padding-left: 14px;
+  width: 258px;
+  height:230px;
+}
+.community-support-card1{
+  border-bottom: 2px solid #f8fafb;
+  border-right: 2px solid #f8fafb;
+}
+.community-support-card2{
+  border-bottom: 2px solid #f8fafb;
+  border-left: 2px solid #f8fafb;
+}
+.community-support-card3{
+  border-top: 2px solid #f8fafb;
+  border-right: 2px solid #f8fafb;
+}
+.community-support-card4{
+  border-top: 2px solid #f8fafb;
+  border-left: 2px solid #f8fafb;
+}
+
+.community-support-icon-container{
+  height:70px;
+}
+
+#slothparty {
+    margin-bottom: 30px;
+}
+
+@media (max-width: 1000px) {
+    .community-slothparty-heading {
+        display: none;
+    }
+}
+.community-slothparty-grid{
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  max-width: 600px;
+}
+.community-slothparty-card{
+  padding-left: 14px;
+  width: 258px;
+  height:230px;
+}
+.community-slothparty-card1{
+  border-bottom: 2px solid #f8fafb;
+  border-right: 2px solid #f8fafb;
+}
+.community-slothparty-card2{
+  border-bottom: 2px solid #f8fafb;
+  border-left: 2px solid #f8fafb;
+}
+.community-slothparty-card3{
+  border-top: 2px solid #f8fafb;
+  border-right: 2px solid #f8fafb;
+}
+.community-slothparty-card4{
+  border-top: 2px solid #f8fafb;
+  border-left: 2px solid #f8fafb;
+}
+
+.community-slothparty-icon-container{
+  height:70px;
+}
+.community-slothparty-icon-container img {
+    height: 80px;
+}
+
+
+.community-events{
+  background: #edfdfe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 40px;
+
+}
+
+
+
+
+.communty-events-header{
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.community-events-content{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-image: url("/img/badge.svg") ;
+  background-size: auto 80%;
+  background-repeat: no-repeat;
+  background-position: top right;
+}
+
+@media (max-width: 1200px) {
+  .community-events-content{
+    background: #edfdfe;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.community-events-cards{
+
+  position: relative;
+  z-index: 1;
+  margin-left: 8.5%;
+
+}
+.community-events-cards-container{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  width: 80%;
+
+}
+.community-events-card{
+  width: 360px;
+  height: 190px;
+
+  padding-right: 30px;
+  margin: 15px;
+}
+
+.community-social{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.community-social-btns{
+
+  width:320px;
+
+  display: flex;
+
+  justify-content: space-between;
+}
+.get-more-container-light{
+  background: #f8fafb;
+}

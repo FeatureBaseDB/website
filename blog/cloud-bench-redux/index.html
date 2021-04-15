@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>I Hope You Like Charts: Benchmarks On 4 Clouds &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="This is a follow-on post to multi-cloud benchmarks.
+Previously, we ran a number of Pilosa specific benchmarks across a variety of configurations of hosts on AWS, Azure, and Oracle cloud. Our broad strokes conclusions were that AWS was the fastest, Oracle was the most cost effective, and that while not far behind, Azure didn&rsquo;t stand out - if you work on Azure (or any other cloud incidentally) and want to dig into this, we&rsquo;d love to.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="I Hope You Like Charts: Benchmarks On 4 Clouds"/>
+    <meta property="og:description" content="This is a follow-on post to multi-cloud benchmarks.
+Previously, we ran a number of Pilosa specific benchmarks across a variety of configurations of hosts on AWS, Azure, and Oracle cloud. Our broad strokes conclusions were that AWS was the fastest, Oracle was the most cost effective, and that while not far behind, Azure didn&rsquo;t stand out - if you work on Azure (or any other cloud incidentally) and want to dig into this, we&rsquo;d love to." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/cloud-bench-redux/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/cloud-bench-redux/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2019-02-13T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/cloud-bench-redux/banner.jpg" alt="I Hope You Like Charts: Benchmarks On 4 Clouds"/>
+    </div>
+    
+
+    <div class="single-hero-overlay -overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">I Hope You Like Charts: Benchmarks On 4 Clouds</h1>
+      <h6 class="h-6-caps-white">2/13/2019 • 9 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=I&#43;Hope&#43;You&#43;Like&#43;Charts%3A&#43;Benchmarks&#43;On&#43;4&#43;Clouds%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcloud-bench-redux%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcloud-bench-redux%2F&title=I&#43;Hope&#43;You&#43;Like&#43;Charts%3A&#43;Benchmarks&#43;On&#43;4&#43;Clouds&summary=This&#43;is&#43;a&#43;follow-on&#43;post&#43;to&#43;multi-cloud&#43;benchmarks.%0APreviously%2C&#43;we&#43;ran&#43;a&#43;number&#43;of&#43;Pilosa&#43;specific&#43;benchmarks&#43;across&#43;a&#43;variety&#43;of&#43;configurations&#43;of&#43;hosts&#43;on&#43;AWS%2C&#43;Azure%2C&#43;and&#43;Oracle&#43;cloud.&#43;Our&#43;broad&#43;strokes&#43;conclusions&#43;were&#43;that&#43;AWS&#43;was&#43;the&#43;fastest%2C&#43;Oracle&#43;was&#43;the&#43;most&#43;cost&#43;effective%2C&#43;and&#43;that&#43;while&#43;not&#43;far&#43;behind%2C&#43;Azure&#43;didn%26rsquo%3Bt&#43;stand&#43;out&#43;-&#43;if&#43;you&#43;work&#43;on&#43;Azure&#43;%28or&#43;any&#43;other&#43;cloud&#43;incidentally%29&#43;and&#43;want&#43;to&#43;dig&#43;into&#43;this%2C&#43;we%26rsquo%3Bd&#43;love&#43;to.&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcloud-bench-redux%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p><em>This is a follow-on post to <a href="../why-oci">multi-cloud benchmarks.</a></em></p>
+<p>Previously, we ran a number of <a href="https://github.com/pilosa/pilosa">Pilosa</a>
+specific benchmarks across a variety of configurations of hosts on AWS, Azure,
+and Oracle cloud. Our broad strokes conclusions were that AWS was the fastest,
+Oracle was the most cost effective, and that while not far behind, Azure didn&rsquo;t
+stand out - if you work on Azure (or any other cloud incidentally) and want to
+dig into this, we&rsquo;d <em>love</em> to.</p>
+<p>We&rsquo;ve got a few exciting updates in this second edition:</p>
+<ol>
+<li>We&rsquo;ve added GCP to the mix!</li>
+<li>After getting some feedback from the OCI team, we changed the OS image that
+we&rsquo;re using which provided a pretty good boost in some benchmarks and solved
+the mystery of performance differences between the <code>VM.Standard2.16</code> and the
+<code>BM.Standard2.52</code> instances.</li>
+<li>We re-ran the AWS <code>c5.9xlarge</code> benchmarks on Amazon Linux to be equitable
+with the Oracle benchmarks.</li>
+<li>We ran some low level memory bandwidth benchmarks.</li>
+<li>We&rsquo;ve updated our
+<a href="https://github.com/pilosa/infrastructure/tree/master/terraform/examples">tooling</a>
+to make it significantly easier to add new configurations to our existing
+results on <a href="https://data.world/jaffee/benchmarks">data.world</a>.</li>
+</ol>
+<h3 id="overview">Overview</h3>
+<p>So, if you&rsquo;ll recall, we had a suite of queries that we ran against Pilosa
+clusters configured in each cloud, as well as a set of microbenchmarks that just
+ran on one instance of each cluster.</p>
+<p>So, without further ado, here is the full set of configurations that we&rsquo;ve
+benchmarked against. These are the aggregate numbers across each <em>cluster</em>, not
+for a single instance of the given type.</p>
+<table>
+<thead>
+<tr>
+<th>Cloud</th>
+<th>Instance Type</th>
+<th style="text-align:right">Num</th>
+<th>OS</th>
+<th style="text-align:right">Cost/ Hr</th>
+<th style="text-align:right">CPUs</th>
+<th style="text-align:right">Mem (GB)</th>
+<th style="text-align:right">NVME SSDs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OCI</td>
+<td>VM.Standard2.16</td>
+<td style="text-align:right">3</td>
+<td>Oracle Linux</td>
+<td style="text-align:right">3.06</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">720</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>VM.Standard2.16</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">3.06</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">720</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>GCP</td>
+<td>custom-36-73728-discounted</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">3.18</td>
+<td style="text-align:right">108</td>
+<td style="text-align:right">216</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>BM.Standard2.52</td>
+<td style="text-align:right">1</td>
+<td>Oracle Linux</td>
+<td style="text-align:right">3.32</td>
+<td style="text-align:right">104</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>BM.Standard2.52</td>
+<td style="text-align:right">1</td>
+<td>Ubuntu</td>
+<td style="text-align:right">3.32</td>
+<td style="text-align:right">104</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td>Standard_F32s_v2</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">4.05</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">192</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>GCP</td>
+<td>custom-36-73728</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">4.54</td>
+<td style="text-align:right">108</td>
+<td style="text-align:right">216</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>c5.9xlarge</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">4.59</td>
+<td style="text-align:right">108</td>
+<td style="text-align:right">216</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>c5.9xlarge</td>
+<td style="text-align:right">3</td>
+<td>Amazon Linux</td>
+<td style="text-align:right">4.59</td>
+<td style="text-align:right">108</td>
+<td style="text-align:right">216</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td>Standard_F16</td>
+<td style="text-align:right">6</td>
+<td>Ubuntu</td>
+<td style="text-align:right">4.80</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">192</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>BM.HPC2.36</td>
+<td style="text-align:right">2</td>
+<td>Oracle Linux</td>
+<td style="text-align:right">5.40</td>
+<td style="text-align:right">144</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>BM.HPC2.36</td>
+<td style="text-align:right">2</td>
+<td>Ubuntu</td>
+<td style="text-align:right">5.40</td>
+<td style="text-align:right">144</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>OCI</td>
+<td>VM.DenseIO2.16</td>
+<td style="text-align:right">3</td>
+<td>Ubuntu</td>
+<td style="text-align:right">6.12</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">720</td>
+<td style="text-align:right">6</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>r5d.12xlarge</td>
+<td style="text-align:right">2</td>
+<td>Ubuntu</td>
+<td style="text-align:right">6.91</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>r5d.12xlarge</td>
+<td style="text-align:right">2</td>
+<td>Amazon Linux</td>
+<td style="text-align:right">6.91</td>
+<td style="text-align:right">96</td>
+<td style="text-align:right">768</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td>Standard_E64s_v3</td>
+<td style="text-align:right">2</td>
+<td>Ubuntu</td>
+<td style="text-align:right">7.26</td>
+<td style="text-align:right">128</td>
+<td style="text-align:right">864</td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p><em>&ldquo;CPUs&rdquo; here is the number of logical cores as reported by <code>/proc/cpuinfo</code> - usually that means hyperthreads, though for Azure&rsquo;s F16, it does mean physical cores.</em></p>
+<p>There are a few nuances to note here. Oracle and Amazon provide custom linux
+distributions (both based on CentOS), and we&rsquo;ve run some of the configurations
+on both Ubuntu and CentOS. Azure and GCP didn&rsquo;t seem to have hand curated Linux
+derivatives and they did have official Ubuntu images, so we used those.</p>
+<p>Now, Google does some interesting things with GCP: <a href="https://cloud.google.com/compute/docs/machine-types#custom_machine_types">custom instance types</a>, and
+<a href="https://cloud.google.com/compute/docs/sustained-use-discounts#sud_custom">sustained use discounts</a>.</p>
+<p>We created a <code>custom-36-73728</code> instance to be equivalent to AWS&rsquo;s c5.9xlarge -
+we&rsquo;re even able to specify that we want Skylake class CPUs. Now, the base price
+for this custom instance is about $1.51/hr which is almost exactly the same as
+AWS&rsquo;s c5.9xlarge at $1.53/hr. However, if we run the instance for more than 25%
+of a month, we start getting discounted <em>automatically</em>. Long story short, if we
+keep the instance running for a month, the effective price is $1.06/hr — a 30%
+discount! We look at both the full price and discounted price in our
+cost/performance comparisons, the discounted price is associated with the
+instance type called <code>custom-36-73728-discounted</code>.</p>
+<p>Note that while all the providers have some form of &ldquo;reserved&rdquo; pricing where you
+can commit in advance to a year or more of usage for a steep discount, Google is
+the only one I&rsquo;m aware of with any kind of totally automatic discounting.</p>
+<h3 id="microbenchmarks">Microbenchmarks</h3>
+<p>Let&rsquo;s look first at IntersectionCount which is a simple, single-threaded benchmark with no I/O:</p>
+<p><img src="/img/blog/cloud-bench-redux/perf/benchmarkfragment-intersectioncount.png" alt="IntersectionCount"></p>
+<p>Immediately, we can see the Oracle Linux provided a big boost over Ubuntu for
+the Oracle bare metal instances. <code>BM.HPC2.36</code> has dethroned <code>c5.9xlarge</code> as the
+champion of CPU performance - this is pretty surprising as the AWS instance has
+a faster processor on paper. Is virtualized vs bare metal the culprit? Or
+perhaps differences in the memory subsytems give OCI the edge here.</p>
+<p>Now what about basic disk I/O?</p>
+<p><img src="/img/blog/cloud-bench-redux/perf/benchmarkfilewriterows100000.png" alt="FileWrite"></p>
+<p>Very interesting! The bare metal HPC instance using Oracle Linux with 1 SSD
+outperforms the 2 SSD VM instances (running Ubuntu) both on Oracle and AWS. The
+non-SSD Oracle and AWS instances also show marked improvement running their
+respective official OS images instead of Ubuntu.</p>
+<p>Let&rsquo;s look at the concurrent import benchmark which tests CPU, Memory, and I/O across multiple cores.</p>
+<p><img src="/img/blog/cloud-bench-redux/perf/benchmarkimportroaringconcurrent50rows16concurrency.png" alt="Import16Conc50Rows"></p>
+<p>So it seems like the AWS c5.9xlarge holds up a little bit better under these
+mixed/concurrent conditions. There are quite a few variations on the concurrent
+import in the raw results, and AWS does quite well in all of them. I suspect
+that high EBS bandwidth and having multiple SSDs in the <code>r5d</code> case has something
+to do with this. Possible Oracle&rsquo;s DenseIO2.16 would have fared a bit better if
+we&rsquo;d run it with Oracle Linux.</p>
+<h3 id="cluster-benchmarks">Cluster Benchmarks</h3>
+<p>Let&rsquo;s look at raw performance for the queries - this time around, I&rsquo;ve posted all of the charts for your perusal, and I&rsquo;ll just provide some commentary on a few things:</p>
+<p><img src="/img/blog/cloud-bench-redux/perf/29-way-intersect.png" alt="29WayIntersect"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/countintersectunionrowpickup-year2012-rowpickup-year2013-rowpickup-month3.png" alt="3WayIntersect"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/groupbyrowsfieldcab-type-rowsfieldpickup-year-rowsfieldpassenger-count.png" alt="GroupByCabTypeYearPass"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/groupbyrowsfieldcab-type-rowsfieldpickup-year-rowsfieldpickup-month.png" alt="GroupByCabTypeYearMonth"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/groupbyrowsfieldpickup-year-rowsfieldpassenger-count-rowsfielddist-miles.png" alt="GroupByYearPassDist"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/topncab-type.png" alt="TopNCabType"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/topndist-miles-rowpickup-year2011.png" alt="TopNFiltered"></p>
+<p><img src="/img/blog/cloud-bench-redux/perf/topndist-miles.png" alt="TopNDistMiles"></p>
+<p>We see all 4 clouds making appearances in the top 3 of these query benchmarks
+which have no disk I/O component. AWS wins 6 of 8, and Azure comes in first or
+second in 6. Oracle has 4 top-3 appearances with 1 win, and GCP has 2 3rds and
+some very close 4ths. To be fair, we&rsquo;ve only tested one GCP configuration, so
+they have fewer chances to win.</p>
+<h3 id="cluster-costperformance">Cluster Cost/Performance</h3>
+<p>And now the cost/performance in dollars per megaquery:</p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/29-way-intersect.png" alt="29WayIntersect"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/countintersectunionrowpickup-year2012-rowpickup-year2013-rowpickup-month3.png" alt="3WayIntersect"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/groupbyrowsfieldcab-type-rowsfieldpickup-year-rowsfieldpassenger-count.png" alt="GroupByCabTypeYearPass"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/groupbyrowsfieldcab-type-rowsfieldpickup-year-rowsfieldpickup-month.png" alt="GroupByCabTypeYearMonth"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/groupbyrowsfieldpickup-year-rowsfieldpassenger-count-rowsfielddist-miles.png" alt="GroupByYearPassDist"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/topncab-type.png" alt="TopNCabType"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/topndist-miles-rowpickup-year2011.png" alt="TopNFiltered"></p>
+<p><img src="/img/blog/cloud-bench-redux/dpmq/topndist-miles.png" alt="TopNDistMiles"></p>
+<p>GCP shows its true colors! With that automatic discounting, Google&rsquo;s cloud is
+extremely cost effective when you&rsquo;re running instances the majority of the time
+for periods of 1 month or more.</p>
+<p>Another thing to note is the huge difference that Oracle Linux makes for the
+<code>BM.HPC2.36</code> instance type. In most cases it&rsquo;s way ahead of the version running
+Ubuntu. Except that one GroupBy query where the Ubuntu version gets third and
+the Olinux version is way up in 10th. Weird.</p>
+<h3 id="memory-bandwidth">Memory Bandwidth</h3>
+<p>On OCI, the <code>VM.Standard2.16</code> instance type runs on the <code>BM.Standard2.52</code>
+hardware. We&rsquo;d previously been confused when Pilosa seemed to perform better
+running in a 3-node cluster of <code>VM.Standard2.16</code> than running on a single
+<code>BM.Standard2.52</code> which has slightly more horsepower both in CPU and Memory than
+all 3 VMs combined. One theory was that the three VMs were allocated on
+different physical hosts, and had access to more memory bandwidth in aggregate
+than a single <code>BM.Standard2.52</code>. To test this, we ran a large suite of memory
+bandwidth benchmarks across several configurations using this really excellent
+<a href="https://zsmith.co/bandwidth.php">benchmarking tool by Zack Smith</a>.</p>
+<p>We ran these with varying amounts of concurrency by running multiple instances
+of the <code>bandwidth</code> program in parallel and then summing each result as directed
+by the documentation. However, there doesn&rsquo;t seem to be any mechanism for
+ensuring that the same tests are running simultaneously in each instance.
+Looking at the output, they seem to stay mostly in sync, but one might take the
+results at higher concurrency levels with a grain of salt. What follows are
+charts of a small subset of the results - there are more on
+<a href="https://data.world/jaffee/benchmarks/workspace/query?queryid=57bd3780-e1ac-4dc7-acd7-c282243d9626">data.world</a>,
+and way, way more if you run the entire suite yourself. (one run is 1500 tests,
+and we ran them all on four different concurrency levels):</p>
+<h4 id="random-1mb-reads-at-concurrency-1-16-36-52">Random 1MB reads at concurrency 1, 16, 36, 52</h4>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-read-64-bit-size--1-mb-conc1.png" alt="random-read-1-mb-conc1"></p>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-read-64-bit-size--1-mb-conc16.png" alt="random-read-1-mb-conc16"></p>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-read-64-bit-size--1-mb-conc36.png" alt="random-read-1-mb-conc36"></p>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-read-64-bit-size--1-mb-conc52.png" alt="random-read-1-mb-conc52"></p>
+<p>You can really watch the <code>BM.Standard2.52</code> pull away from the <code>VM.Standard2.16</code> at higher concurrencies.</p>
+<h4 id="random-1mb-writes-at-concurrency-1-and-52">Random 1MB writes at concurrency 1 and 52</h4>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-write-64-bit-size--1-mb-conc1.png" alt="random-write-1-mb-conc1"></p>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwrandom-write-64-bit-size--1-mb-conc52.png" alt="random-write-1-mb-conc52"></p>
+<p>1 MB writes follow the same pattern.</p>
+<h4 id="sequential-1mb-reads-at-1-and-52">Sequential 1MB reads at 1 and 52</h4>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwsequential-read-64-bit-size--1-mb-conc1.png" alt="sequential-read-1-mb-conc1"></p>
+<p><img src="/img/blog/cloud-bench-redux/bw/bwsequential-read-64-bit-size--1-mb-conc52.png" alt="sequential-read-1-mb-conc52"></p>
+<p>More of the same. There are <em>lots</em> of other combinations, but the story is pretty similar all over.</p>
+<h4 id="analysis">Analysis</h4>
+<p>Essentially, it doesn&rsquo;t appear that the performance difference between the
+<code>VM.Standard2.16</code> cluster and the <code>BM.Standard2.52</code> machine are due to memory
+bandwidth constraints. At high concurrency, we often see <code>BM.Standard2.52</code>
+having approximately triple the bandwidth of the <code>VM.Standard2.16</code> system. So,
+for now, this mystery remains unsolved - my next theory would be that something
+in the Golang runtime (perhaps the scheduler) has some performance degredation
+at high core counts and is more efficient on a machine with 32 logical cores
+than one with 104. This is pure speculation, however.</p>
+<h3 id="takeaways">Takeaways</h3>
+<p>Using official Linux images helps pretty consistently on Oracle. The story is a
+lot more mixed on Amazon. I would love to know what sort of specific tuning is
+responsible for this, though I&rsquo;m sure there are myriad kernel parameters that
+one might tweak to get the most out of a specific hardware configuration in a
+multi-tenant virtualized environment.</p>
+<p>Google&rsquo;s automatic discounting is a significant advantage, though in my
+estimation, Oracle still wins on overall cost effectiveness. The GCP instances
+never overtake OCI by much in the $/MQ department, and the <code>VM.Standard2.16</code>
+instances have over 3x (!!) the memory.</p>
+<p>Amazon still takes the best overall raw performance though Azure and OCI do pop
+up. Testing OCI&rsquo;s DenseIO instances with Oracle Linux and figuring out how to
+get NVME SSDs on Azure and GCP would likely make for more equitable all-around
+comparison. It&rsquo;s worth noting that even without NVME, the AWS instances on EBS
+still do pretty well.</p>
+<h3 id="future-work">Future Work</h3>
+<p>I&rsquo;d still like to do some more low level benchmarking (like the memory bandwidth
+stuff) to get baseline performance of each aspect of each configuration&rsquo;s
+hardware.</p>
+<p>More importantly though, I think, I&rsquo;d like to do more repeated runs on the same
+configurations and see what kind of consistency we&rsquo;re getting. Some of the
+results presented here are difficult to explain, but repeated runs can yield
+significant variation.</p>
+<p>Even without taking multi-tenancy into account, there are lots of factors that
+contribute to inconsistency. The language runtime comes immediately to mind -
+especially with garbage collection, but there are also OS tasks and other
+user-level programs potentially taking resources and cluttering up the CPU
+cache. Anything doing I/O is subject to the vagaries of external hardware, which
+is only exacerbated in the case of network mounted storage.</p>
+<p><em>Banner Photo by Victor Rodriguez on Unsplash</em></p>
+
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+        <div class="body-bold"><a href="https://twitter.com/mattjaffee">Matt Jaffee</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

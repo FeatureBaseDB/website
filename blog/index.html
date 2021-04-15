@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Blog &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="See what&#39;s up in the Pilosa Slumber.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Blog"/>
+    <meta property="og:description" content="See what&#39;s up in the Pilosa Slumber." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2020-08-24T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="blog-hero-container py-5 ">
+    <div class='blog-hero-img-container'>
+      <img width='490px' src="/img/splash_blog.svg" alt="Sloth handing pass">
+    </div>
+    <div class='blog-hero-img-overlay'></div>
+    <div class="blog-hero-content mt-4">
+
+      <h1 class="h-1-blue-responsive">Big Ideas</h1>
+
+      <h4 class="h-4-blue ">
+          Follow our adventures as we make data instantly accessible to both humans and machines.
+      </h4>
+      <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf" role="button" class="btn-pilosa btn btn-primary mt-4">Download our whitepaper</a>
+
+    </div>
+  </div>
+
+  <div class="blog-list-container py-5">
+
+    <div  class="blog-cards-container">
+      
+      <div class="blog-card-featured">
+        <a href="/blog/pilosa-1-4-released/">
+          <div class="blog-card-featured-img-container">
+            
+              <div class="blog-card-overlay blog-card-blue"></div>
+            
+
+            <div class="blog-card-img">
+                <a href="/blog/pilosa-1-4-released/">
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/pilosa-1-4-released/banner.png" alt="Pilosa 1.4 Released">
+              </a>
+            </div>
+          </div>
+        </a>
+        <div class="blog-card-featured-content mr-5">
+          <h2 class="h-2-blue mb-4">
+            <a class="unstyled-a" href="/blog/pilosa-1-4-released/">Pilosa 1.4 Released</a>
+          </h2>
+
+          <h6 class="h-6-caps mb-3">Featured • 9/18/2019 • 7 min read</h6>
+          <p class='mb-4'>
+            <p>Yesterday we cut Pilosa v1.4.0 — our first new minor version since
+April! While we haven&rsquo;t made an official release since then, several
+of <a href="https://www.molecula.com/">Molecula&rsquo;s</a> clients have been using
+much of the new Pilosa code for some time and some of the improvements
+are <strong>vast</strong>.</p>
+          <div class="blog-card-author-content">
+              <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matthew Jaffee">
+              <div class="body-bold">Matthew Jaffee</div>
+          </div>
+        </div>
+      </div>
+      
+
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/marginal-performance-improvements/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/marginal-performance-improvements/banner.jpg" alt="The Effort Behind Marginal Performance Improvements">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/marginal-performance-improvements/">The Effort Behind Marginal Performance Improvements</a>
+            </h3>
+            <h6 class="h-6-caps ">8/24/2020 • 5 min read</h6>
+            
+                A look at the amount of effort that we sometimes put into pursuing performance.
+Background Pilosa is built on the Roaring bitmaps ...
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Kuba Podgórski and Alan Bernstein">
+                <div class="body-bold">Kuba Podgórski and Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/engineering-through-failure/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/engineering-through-failure/banner.jpg" alt="The Value in Failed Prototypes">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/engineering-through-failure/">The Value in Failed Prototypes</a>
+            </h3>
+            <h6 class="h-6-caps ">12/20/2019 • 12 min read</h6>
+            
+                <p>To solve hard problems successfully, you usually have to be willing to
+solve them unsuccessfully in order to learn more about ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_07.svg" alt="Avatar for Seebs">
+                <div class="body-bold">Seebs</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/apophenia/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/apophenia/banner.jpg" alt="Apophenia: Seeking Patterns in Randomness">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/apophenia/">Apophenia: Seeking Patterns in Randomness</a>
+            </h3>
+            <h6 class="h-6-caps ">8/29/2019 • 7 min read</h6>
+            
+                <p>Apophenia provides a seekable (but not cryptographically secure) PRNG
+implementation. Because what&rsquo;s the point in random ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_07.svg" alt="Avatar for Seebs">
+                <div class="body-bold">Seebs</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/terraform-experiment/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/experiment/banner.jpg" alt="Building Throwaway Machines with Terraform">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/terraform-experiment/">Building Throwaway Machines with Terraform</a>
+            </h3>
+            <h6 class="h-6-caps ">8/27/2019 • 3 min read</h6>
+            
+                <p>Looking for an easy way to quickly try out some new whiz-bang software safely and securely? Look no further!</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Todd Gruben">
+                <div class="body-bold">Todd Gruben</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/smote/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/smote/banner.jpg" alt="How to Generate an Arbitrarily Large Amount of Test Data">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/smote/">How to Generate an Arbitrarily Large Amount of Test Data</a>
+            </h3>
+            <h6 class="h-6-caps ">8/21/2019 • 6 min read</h6>
+            
+                <p>Have you ever looked at some publicly available data, and thought, &ldquo;I wish this data set was 100 times larger&rdquo;? It ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+                <div class="body-bold">Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/building-on-a-strong-foundation/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/building-on-a-strong-foundation/banner.png" alt="Building On a Strong Foundation">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/building-on-a-strong-foundation/">Building On a Strong Foundation</a>
+            </h3>
+            <h6 class="h-6-caps ">5/23/2019 • 2 min read</h6>
+            
+                In 2017, we open-sourced Pilosa with the goal of transforming the world of big data analytics using the power of bitmap indices ...
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_07.svg" alt="Avatar for Cody Soyland">
+                <div class="body-bold">Cody Soyland</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/writing-a-custom-handler-for-goldengate/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/ogg-handler.jpg" alt="Writing a Custom Handler for Oracle GoldenGate">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/writing-a-custom-handler-for-goldengate/">Writing a Custom Handler for Oracle GoldenGate</a>
+            </h3>
+            <h6 class="h-6-caps ">2/18/2019 • 11 min read</h6>
+            
+                <p>In this post, we will cover creating a custom handler for Oracle GoldenGate which updates the data in a Pilosa server.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Yüce Tekol">
+                <div class="body-bold">Yüce Tekol</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/cloud-bench-redux/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/cloud-bench-redux/banner.jpg" alt="I Hope You Like Charts: Benchmarks On 4 Clouds">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/cloud-bench-redux/">I Hope You Like Charts: Benchmarks On 4 Clouds</a>
+            </h3>
+            <h6 class="h-6-caps ">2/13/2019 • 9 min read</h6>
+            
+                This is a follow-on post to multi-cloud benchmarks.
+Previously, we ran a number of Pilosa specific benchmarks across a variety of ...
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+                <div class="body-bold">Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/why-oci/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/why-oci/banner.jpg" alt="Oracle, AWS, and Azure Benchmarking Shootout">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/why-oci/">Oracle, AWS, and Azure Benchmarking Shootout</a>
+            </h3>
+            <h6 class="h-6-caps ">1/13/2019 • 11 min read</h6>
+            
+                Psst - when you&rsquo;re done with this, check out part 2.
+For those unfamiliar, Pilosa is an open source, distributed index which ...
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+                <div class="body-bold">Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/seed-round/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/seed-round/banner.jpg" alt="We Raised our Seed Round">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/seed-round/">We Raised our Seed Round</a>
+            </h3>
+            <h6 class="h-6-caps ">11/12/2018 • 3 min read</h6>
+            
+                <p>Today, we are excited to announce the first close of a $5.4 million Seed Round led by Skylark Partners. With this investment, John ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_03.svg" alt="Avatar for HO Maycotte">
+                <div class="body-bold">HO Maycotte</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-1-0-released/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/pilosa-1-0-released/banner.png" alt="Pilosa 1.0 Released">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-1-0-released/">Pilosa 1.0 Released</a>
+            </h3>
+            <h6 class="h-6-caps ">7/10/2018 • 2 min read</h6>
+            
+                <p>Pilosa is happy to announce version 1.0, available as of last week! After eight feature-heavy major releases since our launch, ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+                <div class="body-bold">Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/processing-genomes/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/processing-genomes/banner.jpg" alt="Genome Comparisons in 4 Milliseconds">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/processing-genomes/">Genome Comparisons in 4 Milliseconds</a>
+            </h3>
+            <h6 class="h-6-caps ">5/1/2018 • 9 min read</h6>
+            
+                <p>6 Gigabits. That&rsquo;s about how much data is encoded in your DNA. That may sound like a lot, or a little depending on your ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein and Matt Jaffee">
+                <div class="body-bold">Alan Bernstein and Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-featured-on-changelogs-gotime-podcast/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/pilosa-featured-on-changelogs-gotime-podcast/banner.png" alt="Pilosa Featured On Changelog&#39;s GoTime Podcast">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-featured-on-changelogs-gotime-podcast/">Pilosa Featured On Changelog&#39;s GoTime Podcast</a>
+            </h3>
+            <h6 class="h-6-caps ">4/18/2018 • 1 min read</h6>
+            
+                <p>Since we write in Go all day, everyday, we LOVE Changelog’s GoTime Podcast. The show consists of a panel of Go experts and special ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Sarah King">
+                <div class="body-bold">Sarah King</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/cloud-native-landscape/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-light"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/cloud-native-landscape/banner.jpg" alt="Getting On the Map: Joining the Cloud Native Landscape">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/cloud-native-landscape/">Getting On the Map: Joining the Cloud Native Landscape</a>
+            </h3>
+            <h6 class="h-6-caps ">3/13/2018 • 2 min read</h6>
+            
+                <p>In an effort to stay relevant and cutting edge, more enterprises are having to swiftly migrate their monolith to fully distributed ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Sarah King">
+                <div class="body-bold">Sarah King</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/cosmos/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-light"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/cosmos/banner2.jpg" alt="Supercharge Azure Cosmos DB with Pilosa">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/cosmos/">Supercharge Azure Cosmos DB with Pilosa</a>
+            </h3>
+            <h6 class="h-6-caps ">2/22/2018 • 7 min read</h6>
+            
+                <p>Pilosa is already super fast for huge data. Our next step is making it easy.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein and Matt Jaffee">
+                <div class="body-bold">Alan Bernstein and Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-0-8-8-released/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/pilosa-0-8-8-released/banner.png" alt="Pilosa 0.8.8 Released">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-0-8-8-released/">Pilosa 0.8.8 Released</a>
+            </h3>
+            <h6 class="h-6-caps ">2/19/2018 • 2 min read</h6>
+            
+                <p>Pilosa has seen a handful of releases since <a href="/blog/pilosa-0-6-0-released/">v0.6.0</a> was announced. Pilosa <a href="https://github.com/pilosa/pilosa/releases/tag/v0.7.0">v0.7.0</a> was released on October 10, 2017, with a number of ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+                <div class="body-bold">Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/secret-sauce/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/secret-sauce/banner.jpg" alt="Secret Sauce - How is Pilosa Different?">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/secret-sauce/">Secret Sauce - How is Pilosa Different?</a>
+            </h3>
+            <h6 class="h-6-caps ">12/12/2017 • 5 min read</h6>
+            
+                <p>By now, most of us have heard a thousand and one pitches for data products - and
+if you&rsquo;re anything like me, you&rsquo;ve ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+                <div class="body-bold">Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/real-time-data-use-case-series-healthcare/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/real-time-use-case-health-header.jpg" alt="Real-time Data Use Case Series: Healthcare">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/real-time-data-use-case-series-healthcare/">Real-time Data Use Case Series: Healthcare</a>
+            </h3>
+            <h6 class="h-6-caps ">11/17/2017 • 5 min read</h6>
+            
+                <p>The big data landscape is advancing rapidly, and changing healthcare as we know it.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/writing-a-client-library/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/client-libraries.jpg" alt="Writing a Pilosa Client Library">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/writing-a-client-library/">Writing a Pilosa Client Library</a>
+            </h3>
+            <h6 class="h-6-caps ">11/10/2017 • 21 min read</h6>
+            
+                <p>In this post, we will cover creating a Pilosa client library by going through the steps of writing one in Lua.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Yüce Tekol">
+                <div class="body-bold">Yüce Tekol</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/complex-queries-without-sacrificing-latency/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/complex-queries-without-sacrificing-latency.jpg" alt="Real Time Queries Without Compromises">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/complex-queries-without-sacrificing-latency/">Real Time Queries Without Compromises</a>
+            </h3>
+            <h6 class="h-6-caps ">10/24/2017 • 5 min read</h6>
+            
+                <p>The desire to eliminate barriers between raw data and useful insights has driven decades of engineering innovation. Countless ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley and Matt Jaffee">
+                <div class="body-bold">Ali Cooley and Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/range-encoded-bitmaps/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/range-encoded-bitmaps/manatee-skeleton.jpg" alt="Using Bitmaps to Perform Range Queries">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/range-encoded-bitmaps/">Using Bitmaps to Perform Range Queries</a>
+            </h3>
+            <h6 class="h-6-caps ">10/4/2017 • 11 min read</h6>
+            
+                <p>Pilosa stores integer values in Base-2, Range-Encoded, Bit-sliced Indexes. This post explains what all that means.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_05.svg" alt="Avatar for Travis Turner">
+                <div class="body-bold">Travis Turner</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/universe-map/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/universe-map/banner.png" alt="A Map of the Entire Universe">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/universe-map/">A Map of the Entire Universe</a>
+            </h3>
+            <h6 class="h-6-caps ">8/25/2017 • 17 min read</h6>
+            
+                <p>&hellip; the universe of 65536-bit sets in Roaring, that is. This is one part debugging
+postmortem, one part documentation, and ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+                <div class="body-bold">Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-0-6-0-released/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/pilosa-0-6-0-released/banner.png" alt="Pilosa 0.6.0 Released">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-0-6-0-released/">Pilosa 0.6.0 Released</a>
+            </h3>
+            <h6 class="h-6-caps ">8/11/2017 • 1 min read</h6>
+            
+                <p>The Pilosa team is happy to announce the release of <a href="https://github.com/pilosa/pilosa/releases/tag/v0.6.0">Pilosa 0.6.0</a>, massively speeding up Pilosa with <a href="/blog/adding-rle-support/">Run-length Encoding</a>. This ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Cody Soyland">
+                <div class="body-bold">Cody Soyland</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/self-deploying-applications/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/self-deploying/banner.jpg" alt="Self Deploying Applications With Go">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/self-deploying-applications/">Self Deploying Applications With Go</a>
+            </h3>
+            <h6 class="h-6-caps ">8/4/2017 • 7 min read</h6>
+            
+                <p>What if your apps handled their own ops? That&rsquo;s kind of like devops' final form,
+right? Its ultimate evolution? The ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+                <div class="body-bold">Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/gophercon-2017-technical-overview/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/gophercon-2017-technical-overview/banner.png" alt="Gophercon 2017: Technical Overview">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/gophercon-2017-technical-overview/">Gophercon 2017: Technical Overview</a>
+            </h3>
+            <h6 class="h-6-caps ">7/26/2017 • 6 min read</h6>
+            
+                <p>In addition to sponsoring Gophercon 2017, our team sent several of us engineers to Gophercon. Predictably, we all had a blast.</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_03.svg" alt="Avatar for Matt Jaffee, Linh Vo, and Travis Turner">
+                <div class="body-bold">Matt Jaffee, Linh Vo, and Travis Turner</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/how-gophercon-changed-pilosas-approach-to-community/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/how-gophercon-changed-pilosas-approach-to-community/banner.png" alt="How Gophercon Changed Pilosa’s Approach to Community">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/how-gophercon-changed-pilosas-approach-to-community/">How Gophercon Changed Pilosa’s Approach to Community</a>
+            </h3>
+            <h6 class="h-6-caps ">7/21/2017 • 3 min read</h6>
+            
+                <p>Like all avid Gophers, several Pilosa team members made the annual pilgrimage to Denver, CO for this year’s highly anticipated ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/adding-rle-support/">
+          <div class="blog-card-img-container mb-4">
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/adding-rle-support/banner.png" alt="Adding Run Length Encoding Support to Pilosa">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/adding-rle-support/">Adding Run Length Encoding Support to Pilosa</a>
+            </h3>
+            <h6 class="h-6-caps ">7/10/2017 • 6 min read</h6>
+            
+                <!-- raw HTML omitted -->
+<p>Pilosa is built on our 64-bit implementation of <a href="http://roaringbitmap.org/">Roaring bitmaps</a>, generally accepted as the best approach to compressed ...</p></!-->
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein and Matt Jaffee">
+                <div class="body-bold">Alan Bernstein and Matt Jaffee</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/oscon-2017-recap-the-index-as-a-first-class-citizen/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/oscon-2017-recap-the-index-as-a-first-class-citizen/banner.png" alt="OSCON 2017 Recap: The Index As a First Class Citizen">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/oscon-2017-recap-the-index-as-a-first-class-citizen/">OSCON 2017 Recap: The Index As a First Class Citizen</a>
+            </h3>
+            <h6 class="h-6-caps ">6/24/2017 • 2 min read</h6>
+            
+                <p>OSCON 2017 was our first conference as a company. Held in our backyard here in Austin, TX, and coming just days after our official ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/tanimoto-and-chemical-similarity-with-pilosa/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/tanimoto-and-chemical-similarity-with-pilosa/banner.png" alt="Tanimoto &amp; Chemical Similarity with Pilosa">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/tanimoto-and-chemical-similarity-with-pilosa/">Tanimoto &amp; Chemical Similarity with Pilosa</a>
+            </h3>
+            <h6 class="h-6-caps ">6/15/2017 • 5 min read</h6>
+            
+                <p>As we continue to test Pilosa against various types of data (e.g., the <a href="https://www.pilosa.com/blog/billion-taxi-ride-dataset-with-pilosa/">Billion Taxi Ride Dataset</a>), we decided to turn our next ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Linh Vo">
+                <div class="body-bold">Linh Vo</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-0-4-0-released/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/0.4.0-release-banner.png" alt="Pilosa 0.4.0 Released">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-0-4-0-released/">Pilosa 0.4.0 Released</a>
+            </h3>
+            <h6 class="h-6-caps ">6/8/2017 • 2 min read</h6>
+            
+                <p>The Pilosa team is happy to announce the release of <a href="https://github.com/pilosa/pilosa/releases/tag/v0.4.0">Pilosa 0.4.0</a>, marking our second minor release since <a href="/blog/hello-world/">open-sourcing on April 29 ...</a></p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Cody Soyland">
+                <div class="body-bold">Cody Soyland</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/billion-taxi-ride-dataset-with-pilosa/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/billion-taxi-banner.png" alt="The Billion Taxi Ride Dataset with Pilosa">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/billion-taxi-ride-dataset-with-pilosa/">The Billion Taxi Ride Dataset with Pilosa</a>
+            </h3>
+            <h6 class="h-6-caps ">6/2/2017 • 5 min read</h6>
+            
+                <p>Pilosa was originally built for the very specific use case of arbitrary audience
+segmentation on hundreds of millions of people ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee and Alan Bernstein">
+                <div class="body-bold">Matt Jaffee and Alan Bernstein</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/oscon-2017-guide-to-authentic-austin-tacos/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/taco-banner.png" alt="The OSCON 2017 Guide to Authentic Austin Tacos">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/oscon-2017-guide-to-authentic-austin-tacos/">The OSCON 2017 Guide to Authentic Austin Tacos</a>
+            </h3>
+            <h6 class="h-6-caps ">5/10/2017 • 3 min read</h6>
+            
+                <p>Before we begin, OSCONers, let’s get real: If you’re not brave enough to order from a food truck, this list is not for you. Four ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/oscon-2017-the-index-as-a-first-class-citizen/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-green"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/binary-banner.png" alt="OSCON 2017: The Index As a First Class Citizen">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/oscon-2017-the-index-as-a-first-class-citizen/">OSCON 2017: The Index As a First Class Citizen</a>
+            </h3>
+            <h6 class="h-6-caps ">5/5/2017 • 2 min read</h6>
+            
+                <p>Don’t miss Pilosa’s Lead “Slothware” Engineer, Matt Jaffee, at his <a href="https://conferences.oreilly.com/oscon/oscon-tx">O&rsquo;Reilly Open Source Convention</a> speaking debut! Titled ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/pilosa-at-oscon-2017/">
+          <div class="blog-card-img-container mb-4">
+              
+              <div class="blog-card-overlay blog-card-blue"></div>
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/oscon-banner-image.png" alt="Pilosa at OSCON 2017">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/pilosa-at-oscon-2017/">Pilosa at OSCON 2017</a>
+            </h3>
+            <h6 class="h-6-caps ">5/5/2017 • 2 min read</h6>
+            
+                <p>Join us for the official launch of Pilosa at the <a href="https://conferences.oreilly.com/oscon/oscon-tx">O&rsquo;Reilly Open Source Convention</a> in our home town of Austin, Texas!</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+                <div class="body-bold">Ali Cooley</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="blog-card ">
+        <div class="blog-card-container">
+
+          
+          <a  href="/blog/hello-world/">
+          <div class="blog-card-img-container mb-4">
+              
+            <div class="blog-card-img">
+
+                <img style='object-fit: cover;' width='100%' height='100%' src="/img/blog/hello-world.png" alt="Hello, World">
+
+            </div>
+          </a>
+          </div>
+          
+
+          <div class="blog-card-content">
+            <h3 class="h-3-blue mb-4">
+              <a class="unstyled-a" href="/blog/hello-world/">Hello, World</a>
+            </h3>
+            <h6 class="h-6-caps ">4/29/2017 • 2 min read</h6>
+            
+                <p>We are Pilosa, order of the sloth. We make slothware.</p>
+<p>Our slumber (which is what some call a group of sloths) has created a ...</p>
+            
+            <div class="blog-card-author-content">
+                <img class='mr-3' src="/img/author_05.svg" alt="Avatar for Travis Turner">
+                <div class="body-bold">Travis Turner</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+    </div>
+
+    
+
+
+  </div>
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

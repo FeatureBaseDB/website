@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Using Bitmaps to Perform Range Queries &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Pilosa stores integer values in Base-2, Range-Encoded, Bit-sliced Indexes. This post explains what all that means.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Using Bitmaps to Perform Range Queries"/>
+    <meta property="og:description" content="Pilosa stores integer values in Base-2, Range-Encoded, Bit-sliced Indexes. This post explains what all that means." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/range-encoded-bitmaps/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/range-encoded-bitmaps/manatee-skeleton.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-10-04T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/range-encoded-bitmaps/manatee-skeleton.jpg" alt="Using Bitmaps to Perform Range Queries"/>
+    </div>
+    
+
+    <div class="single-hero-overlay green-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Using Bitmaps to Perform Range Queries</h1>
+      <h6 class="h-6-caps-white">10/4/2017 • 11 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Using&#43;Bitmaps&#43;to&#43;Perform&#43;Range&#43;Queries%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Frange-encoded-bitmaps%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Frange-encoded-bitmaps%2F&title=Using&#43;Bitmaps&#43;to&#43;Perform&#43;Range&#43;Queries&summary=Pilosa&#43;stores&#43;integer&#43;values&#43;in&#43;Base-2%2C&#43;Range-Encoded%2C&#43;Bit-sliced&#43;Indexes.&#43;This&#43;post&#43;explains&#43;what&#43;all&#43;that&#43;means.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Frange-encoded-bitmaps%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>Pilosa stores integer values in Base-2, Range-Encoded, Bit-sliced Indexes. This post explains what all that means.</p>
+<h3 id="introduction">Introduction</h3>
+<p>Pilosa is built around the concept of representing everything as bitmaps. Relationships between objects, for example, are treated as boolean values—either the relationship exists or it doesn&rsquo;t—and a set of these boolean values is stored as a series of ones and zeros. These boolean sets are bitmaps, and by using bitmaps in a variety of bitwise operations, we can perform complex queries very quickly. Additionally, bitmap compression techniquies allow us to represent large amounts of data in a very compact format, which reduces the amount of resources we need to store data and perform queries.</p>
+<p>Using bitmaps and <a href="http://roaringbitmap.org/">Roaring bitmap compression</a>, Pilosa is really good at performing segmentation queries on billions of objects. But often we see use-cases where it would be useful to work with integer values. For example, we might want to perform a query that excludes all records with a value of <code>foo</code> greater than 1,000. This post explains, step-by-step, how we added range-encoded bitmaps to Pilosa, giving us the ability to support integer values in our query operations.</p>
+<p>All of the concepts described in this post are based on research done over the last couple of decades by some very smart people. This is my attempt to describe things at a little higher level, but I encourage you to read more about <a href="https://cs.brown.edu/courses/cs227/archives/2008/Papers/Indexing/buchmann98.pdf">Bit-sliced Indexes</a> and <a href="https://link.springer.com/chapter/10.1007/3-540-45675-9_8">Range-Encoding</a>.</p>
+<h3 id="bitmap-encoding">Bitmap Encoding</h3>
+<p>To get started, let&rsquo;s assume that we want to catalog every member of the <a href="https://en.wikipedia.org/wiki/Animal">Animal Kingdom</a> in such a way that we can easily, and efficiently, explore various species based on their traits. Because we&rsquo;re talking about bitmaps, an example data set might look like this:</p>
+<p><img src="/img/blog/range-encoded-bitmaps/example-dataset.png" alt="Example data set">
+<em>Example Data Set</em></p>
+<h4 id="equality-encoded-bitmaps">Equality-encoded Bitmaps</h4>
+<p>The example above shows a set of equality-encoded bitmaps, where each row—each trait—is a bitmap indicating which animals have that trait. Although it&rsquo;s a fairly simple concept, equality-encoding can be pretty powerful. Because it lets us represent everything as a boolean relationship (i.e. a manatee has wings: yes/no), we can perform all sorts of bitwise operations on the data.</p>
+<p>The next diagram shows how we find all animals that are air-breathing invertebrates by performing a logical AND on the <code>Invertebrate</code> and <code>Breathes Air</code> bitmaps. Based on our sample data, we can see that the Banana Slug, Garden Snail, and Wheel Bug all have both of those traits.</p>
+<p><img src="/img/blog/range-encoded-bitmaps/bitwise-intersection.png" alt="Bitwise Intersection example">
+<em>Bitwise Intersection of two traits</em></p>
+<p>You can get pretty far with equality-encoded bitmaps, but what about cases where a boolean value doesn&rsquo;t best represent the original data? What if we want to add a trait called <code>Captivity</code> which represents the total number of specimens that are currently held in captivity, and we want to perform queries filtered by those values? (As you probably suspect, the values that we use for <code>Captivity</code> in the examples below are completely made up, but they help demonstrate the concepts.)</p>
+<p>Given what we know about equality-encoded bitmaps, there are a couple of (admittedly naive) approaches that we could take. One approach would be to create a trait (bitmap) for every possible <code>Captivity</code> value, like this:</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-rows.png" alt="Captivity Counts as individual bitmaps">
+<em>Captivity Counts represented as individual bitmaps</em></p>
+<p>This approach is ok, but it has a couple of limitations. First, it&rsquo;s not very efficient. Depending on the cardinality, you may need to create a lot of bitmaps to represent all possible values. Second, if you want to filter your query by a range of <code>Captivity</code> values, you&rsquo;ll have to perform an <code>OR</code> operation against every possible value in your range. In order to know which animals have fewer than 100 specimens in captivity, your query needs to perform something like (Captivity=99 OR Captivity=98 OR Captivity=97 OR &hellip;). You get the idea.</p>
+<p>Instead of representing every possible value as a unique bitmap, another approach is to create buckets of <code>Captivity</code> ranges. In that case, you might have something like this:</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-buckets.png" alt="Captivity Counts as buckets">
+<em>Captivity Counts represented as buckets</em></p>
+<p>One benefit to this approach is that it&rsquo;s a bit more efficient. It&rsquo;s also easier to query because you don&rsquo;t have to construct a Union of multiple bitmaps in order to represent a range of values. The downside is that it&rsquo;s not as granular; by transforming <code>47</code> into the bucket 0-99, you are losing information.</p>
+<p>Either of those approaches are perfectly valid solutions to some problems, but for cases where cardinality is extremely high and losing information is not acceptable, we need another way to represent non-boolean values. And we need to do it in such a way that we can perform queries on ranges of values without writing really large and cumbersome <code>OR</code> operations. For that, let&rsquo;s talk about range-encoded bitmaps and how they avoid some of the problems that we ran into with the previous approaches.</p>
+<h4 id="range-encoded-bitmaps">Range-Encoded Bitmaps</h4>
+<p>First, let&rsquo;s take our example above and see what it looks like if we use range-encoded bitmaps.</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-range-encoded-rows.png" alt="Captivity Counts as Range-Encoded bitmaps">
+<em>Captivity Counts as Range-Encoded bitmaps</em></p>
+<p>Representing a value with range-encoded bitmaps is similar to what we did with equality-encoding, but instead of just setting the bit that corresponds to a specific value, we also set a bit for every value greater than the actual value. For example, because there are 14 Koala Bears in capitivity, we set the bit in bitmap 14 as well as bitmaps 15, 16, 17, etc. Instead of a bitmap representing all the animals with a specific captivity count, a bitmap now represents all of the animals with a captivity count up to and including that amount.</p>
+<p>This encoding method lets us perform those range queries that we did before, but instead of performing an <code>OR</code> operation on many different bitmaps, we can get what we want from just one or two bitmaps. For example, if we want to know which animals have fewer than 15 specimens in captivity, we just pull the 14 bitmap and we&rsquo;re done. If we want to know which animals have more than 15 specimens in captivity, it&rsquo;s a little more complicated, but not much. For that, we pull the bitmap representing the maximum count (in our case that&rsquo;s the 956 bitmap), and then we subtract the 15 bitmap.</p>
+<p>Those operations are much simpler—and much more efficient—than our previous approach. We have addressed the problem that had us <code>OR</code>&lsquo;ing together dozens of bitmaps in order to find our range, and we aren&rsquo;t losing any information like we did in the bucketing approach. But we still have a couple of issues that make this approach less than ideal. First, we still have to keep a bitmap representing every specific captivity count. And on top of that, we have added the complexity and overhead of having to set a bit not just for the value we&rsquo;re interested in, but also for every value greater than that one. This would very likely introduce performance problems in a write-heavy use-case.</p>
+<p>Ideally what we want is to have the functionality of range-encoded bitmaps with the efficiency of equality-encoding. Next, we&rsquo;ll discuss bit-sliced indexes and see how that helps us achieve what we want.</p>
+<h3 id="bit-sliced-indexes">Bit-sliced Indexes</h3>
+<p>If we want to represent every possible value from 0 to 956 using range-encoded bitmaps, we have to use 957 bitmaps. While this works, it&rsquo;s not the most efficient approach, and when the cardinality of possible values gets really high, the number of bitmaps we need to maintain can become prohibitive. Bit-sliced indexes let us represent those same values in a more efficient way.</p>
+<p>Let&rsquo;s look at our example data and talk about how we would represent it using bit-sliced indexes.</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-bsi-base10.png" alt="Captivity Counts as a Base-10, Bit-sliced Index">
+<em>Base-10, Bit-sliced Index</em></p>
+<p>Notice that we&rsquo;ve broken our values into three, base-10 components. The first column of bits represents the value <code>003</code>, which is the number of Manatees in captivity. Component 0 of <code>003</code> is <code>3</code>, so we set a bit in component 0, row 3. Components 1 and 2 of <code>003</code> are both <code>0</code>, so we set bits in component 1, row 0 and component 2, row 0. Each component in our base-10 index requires 10 bitmaps to represent all possible values, so in our captivity example where we need to represent values ranging from 0 to 956, we only need (3 x 10) = 30 bitmaps (as opposed to 957 bitmaps that would be required if we used a bitmap for every distinct value).</p>
+<p>So that&rsquo;s great, but we&rsquo;ve basically just found a way to be more efficient with our equality-encoding strategy. Let&rsquo;s see what it looks like when we combine bit-sliced indexes with range-encoding.</p>
+<h3 id="range-encoded-bit-slice-indexes">Range-Encoded Bit-Slice Indexes</h3>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-bsi-range-encoded-base10.png" alt="Captivity Counts as a Range-Encoded, Base-10, Bit-sliced Index">
+<em>Range-Encoded, Base-10, Bit-sliced Index</em></p>
+<p>Notice that the most significant value in each component (9 in the base-10 case) is always one. Because of this, we don&rsquo;t need to store the highest value. So for base-10, range-encoded, bit-sliced indexes, we only need 9 bitmaps to represent a component. In addition to that, we need to store one more bitmap, called &ldquo;Not Null&rdquo;, which indicates whether or not a value has been set for that column. The next diagram shows the resulting bitmaps.</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-bsi-range-encoded-base10-not-null.png" alt="Captivity Counts as a Range-Encoded, Base-10, Bit-sliced Index with Not-Null">
+<em>Range-Encoded, Base-10, Bit-sliced Index with Not-Null</em></p>
+<p>So for 3-component values, we need ((3 x 9) + 1) = 28 bitmaps to represent any value in the range 0 to 999. Now we have a pretty efficient way to store values, and we get the benefit of range encoding, so we can perform queries that filter on ranges. Let&rsquo;s take it just one step further and try encoding the base-2 representation of our value range.</p>
+<h4 id="base-2-components">Base-2 Components</h4>
+<p>If, instead of representing our <code>Captivity</code> values as base-10 components, we use base-2 components, then we end up with a range-encoded set of bit-sliced indexes that looks like this:</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-bsi-range-encoded-base2.png" alt="Capacity Counts as a Range-Encoded, Base-2, Bit-sliced Index">
+<em>Range-Encoded, Base-2, Bit-sliced Index</em></p>
+<p>The first column of bits represents the base-2 value <code>000000011</code>, which is the number of Manatees in captivity (3 in base-10). Since component 0 and component 1 of <code>000000011</code> are both <code>1</code>, we set a bit in component 0, row 1 and component 1, row 1. Since the remaining components of <code>000000011</code> are all <code>0</code>, we set a bit in row 0 for components 2 through 9, and also—because these are range-encoded—we set a bit in every value greater than 0. In the case of base-2 components, that means we also set the bit in row 1 for components 2 through 9.</p>
+<p>But remember, just like we saw before with bitmap 9 of the base-10 representation, bitmap 1 is always one so we don&rsquo;t need to store it. That leaves us with this:</p>
+<p><img src="/img/blog/range-encoded-bitmaps/captive-bsi-range-encoded-base2-not-null.png" alt="Captivity Counts as a Range-Encoded, Base-2, Bit-sliced Index with Not-Null">
+<em>Range-Encoded, Base-2, Bit-sliced Index with Not-Null</em></p>
+<p>With this encoding, we can represent the range of sample values with only 10 bitmaps! Also, notice that the base-2, range-encoded, bit-sliced index is the inverse of the binary representation of the integer value. What this tells us is that we can represent any range of values with cardinality n using only (n + 1) bitmaps (where the additional bitmap is the &ldquo;Not Null&rdquo; bitmap). And it means that we can perform range queries on large integer values without needing to store an unreasonable number of bitmaps.</p>
+<h3 id="range-encoded-bitmaps-in-pilosa">Range-Encoded Bitmaps in Pilosa</h3>
+<p>By implementing range-encoded bitmaps in Pilosa, users can now store integer values that pertain to billions of objects, and very quickly perform queries that filter by a range of values. We also support aggregation queries like <code>Sum()</code>. What&rsquo;s the total number of winged vertebrates in captivity? No problem.</p>
+<p>As one last exercise, let&rsquo;s demonstrate how we would store and query our example <code>Captivity</code> data in Pilosa.</p>
+<pre><code># Create an index called &quot;animals&quot;.
+curl -X POST localhost:10101/index/animals
+
+# Create a frame &quot;traits&quot; to hold captivity values.
+curl localhost:10101/index/animals/frame/traits \
+  -X POST \
+  -d '{&quot;options&quot;:{&quot;rangeEnabled&quot;: true,
+                     &quot;fields&quot;: [{&quot;name&quot;: &quot;captivity&quot;,
+                                 &quot;type&quot;: &quot;int&quot;,
+                                 &quot;min&quot;: 0,
+                                 &quot;max&quot;: 956}]
+                    }
+         }'
+
+# Add the captivity values to the field.
+curl localhost:10101/index/animals/query \
+  -X POST \
+  -d 'SetFieldValue(frame=traits, col=1,  captivity=3)
+      SetFieldValue(frame=traits, col=2,  captivity=392)
+      SetFieldValue(frame=traits, col=3,  captivity=47)
+      SetFieldValue(frame=traits, col=4,  captivity=956)
+      SetFieldValue(frame=traits, col=5,  captivity=219)
+      SetFieldValue(frame=traits, col=6,  captivity=14)
+      SetFieldValue(frame=traits, col=7,  captivity=47)
+      SetFieldValue(frame=traits, col=8,  captivity=504)
+      SetFieldValue(frame=traits, col=9,  captivity=21)
+      SetFieldValue(frame=traits, col=10, captivity=0)
+      SetFieldValue(frame=traits, col=11, captivity=123)
+      SetFieldValue(frame=traits, col=12, captivity=318)
+  '
+
+# Query for all animals with more than 100 specimens
+# in captivity.
+curl localhost:10101/index/animals/query \
+  -X POST \
+  -d 'Range(frame=traits, captivity &gt; 100)'
+ 
+# Query for the total number of animals in captivity
+curl localhost:10101/index/animals/query \
+  -X POST \
+  -d 'Sum(frame=traits, field=captivity)'
+</code></pre><h3 id="conclusion">Conclusion</h3>
+<p>The examples that I described in this post showed how we can use Bit-sliced indexes to significantly reduce the number of bitmaps we need to represent a range of integer values. And by applying range-encoding to our indexes, we are able to perform various range queries on our data. The chart below compares the different approaches that we discussed.</p>
+<p><img src="/img/blog/range-encoded-bitmaps/example-comparison.png" alt="Comparison Chart">
+<em>Comparison Chart</em></p>
+<p>We added Range-Encoding support to <a href="https://github.com/pilosa/pilosa/releases/tag/v0.7.0">Release 0.7.0</a>. You should also check out the <a href="/docs/latest/data-model/#bsi-range-encoding">Range-Encoding Documentation</a>.</p>
+<p>Try it out, and let us know what you think. We&rsquo;re always looking to make improvements and appreciate any feedback you have!</p>
+<p><em>Travis is Chief Architect at Pilosa. Find him on Twitter at <a href="https://twitter.com/travislturner?lang=en">@travislturner</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_05.svg" alt="Avatar for Travis Turner">
+        <div class="body-bold"><a href="https://twitter.com/travislturner">Travis Turner</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

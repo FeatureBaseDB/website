@@ -1,0 +1,3905 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Query Language &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Query Language Overview This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single index and are passed to Pilosa through the /index/INDEX_NAME/query endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:
+{&quot;results&quot;:[...]} There will be one item in the results array for each PQL query in the request.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Query Language"/>
+    <meta property="og:description" content="Query Language Overview This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single index and are passed to Pilosa through the /index/INDEX_NAME/query endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:
+{&quot;results&quot;:[...]} There will be one item in the results array for each PQL query in the request." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v0.10/query-language/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Query Language
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#transportation">Transportation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/examples/#chemical-similarity-search">Chemical similarity search</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#frame">Frame</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#slice">Slice</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/query-language/"  class="docs-active" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/webui/" >WebUI</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#console">Console</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/webui/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v0.10/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v0.10/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v0.10. View the <a href="/docs/latest/query-language/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="query-language">Query Language</h2>
+<h3 id="overview">Overview</h3>
+<p>This section will provide a detailed reference and examples for the Pilosa Query Language (PQL). All PQL queries operate on a single <a href="../glossary/#index">index</a> and are passed to Pilosa through the <code>/index/INDEX_NAME/query</code> endpoint. You may pass multiple PQL queries in a single request by simply concatenating the queries together - a space is not needed. The results format is always:</p>
+<pre><code>{&quot;results&quot;:[...]}
+</code></pre><p>There will be one item in the <code>results</code> array for each PQL query in the request. The type of each item in the array will depend on the type of query - each query in the reference below lists its result type.</p>
+<h4 id="conventions">Conventions</h4>
+<ul>
+<li>Angle Brackets <code>&lt;&gt;</code> denote required arguments</li>
+<li>Square Brackets <code>[]</code> denote optional arguments</li>
+<li>UPPER_CASE denotes a descriptor that will need to be filled in with a concrete value (e.g. <code>ATTR_NAME</code>, <code>STRING</code>)</li>
+</ul>
+<h5 id="examples">Examples</h5>
+<p>Before running any of the example queries below, follow the instructions in the <a href="../getting-started/">Getting Started</a> section to set up an index, frames, and populate them with some data.</p>
+<p>The examples just show the PQL quer(ies) needed - to run the query <code>SetBit(frame=&quot;stargazer&quot;, col=10, row=1)</code> against a server using curl, you would:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query \
+     -X POST \
+     -d 'SetBit(frame=&quot;stargazer&quot;, col=10, row=1)'
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><h4 id="arguments-and-types">Arguments and Types</h4>
+<ul>
+<li><code>frame</code> The frame specifies on which Pilosa <a href="../glossary/#frame">frame</a> the query will operate. Valid frame names are lower case strings; they start with an alphanumeric character, and contain only alphanumeric characters and <code>_-</code>. They must be 64 characters or less in length.</li>
+<li><code>TIMESTAMP</code> This is a timestamp in quotes with the following format <code>&quot;YYYY-MM-DDTHH:MM&quot;</code> (e.g. &ldquo;2006-01-02T15:04&rdquo;)</li>
+<li><code>UINT</code> An unsigned integer (e.g. 42839)</li>
+<li><code>ATTR_NAME</code> Must be a valid identifier <code>[A-Za-z][A-Za-z0-9._-]*</code></li>
+<li><code>ATTR_VALUE</code> Can be a string, float, integer, or bool.</li>
+<li><code>BITMAP_CALL</code> Any query which returns a bitmap, such as <code>Bitmap</code>, <code>Union</code>, <code>Difference</code>, <code>Xor</code>, <code>Intersect</code>, <code>Range</code></li>
+<li><code>[]ATTR_VALUE</code> Denotes an array of <code>ATTR_VALUE</code>s. (e.g. <code>[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code>)</li>
+</ul>
+<h3 id="write-operations">Write Operations</h3>
+<h4 id="setbit">SetBit</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetBit(&lt;frame=STRING&gt;, &lt;row=UINT&gt;, &lt;col=UINT&gt;, 
+       [timestamp=TIMESTAMP])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetBit</code> assigns a value of 1 to a bit in the binary matrix, thus associating the given row in the given frame with the given column.</p>
+<p><strong>Result Type:</strong> boolean</p>
+<p>A return value of <code>true</code> indicates that the bit was changed to 1.</p>
+<p>A return value of <code>false</code> indicates that the bit was already set to 1 and nothing changed.</p>
+<p><strong>Examples:</strong></p>
+<p>Set the bit at row 1, column 10:</p>
+<pre><code class="language-request" data-lang="request">SetBit(frame=&quot;stargazer&quot;, col=10, row=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>This sets a bit in the stargazer frame, representing that the user with id=1 has starred the repository with id=10.</p>
+<p>SetBit also supports providing a timestamp. To write the date that a user starred a repository:</p>
+<pre><code class="language-request" data-lang="request">SetBit(frame=&quot;stargazer&quot;, col=10, row=1, timestamp=&quot;2016-01-01T00:00&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>Set multiple bits in a single request:</p>
+<pre><code class="language-request" data-lang="request">SetBit(frame=&quot;stargazer&quot;, col=10, row=1) SetBit(frame=&quot;stargazer&quot;, col=10, row=2) SetBit(frame=&quot;stargazer&quot;, col=20, row=1) SetBit(frame=&quot;stargazer&quot;, col=30, row=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[false,true,true,true]}
+</code></pre><h4 id="setrowattrs">SetRowAttrs</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetRowAttrs(&lt;frame=STRING&gt;, &lt;row=UINT&gt;, 
+            &lt;ATTR_NAME=ATTR_VALUE&gt;, 
+            [ATTR_NAME=ATTR_VALUE ...])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetRowAttrs</code> associates arbitrary key/value pairs with a row in a frame. Setting a value of <code>null</code>, without quotes, deletes an attribute.</p>
+<p><strong>Result Type:</strong> null</p>
+<p>SetRowAttrs queries always return <code>null</code> upon success.</p>
+<p><strong>Examples:</strong></p>
+<p>Set attributes <code>username</code> and <code>active</code> on row 10:</p>
+<pre><code class="language-request" data-lang="request">SetRowAttrs(frame=&quot;stargazer&quot;, row=10, username=&quot;mrpi&quot;, active=true)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>Set username value and active status for user 10. These are arbitrary key/value pairs which have no meaning to Pilosa. You can see the attributes you&rsquo;ve set on a row with a <a href="../query-language/#bitmap">Bitmap</a> query like so <code>Bitmap(frame=&quot;stargazer&quot;, row=10)</code>.</p>
+<p>Delete attribute <code>username</code> on row 10:</p>
+<pre><code class="language-request" data-lang="request">SetRowAttrs(frame=&quot;stargazer&quot;, row=10, username=null)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><h4 id="setcolumnattrs">SetColumnAttrs</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetColumnAttrs(&lt;frame=STRING&gt;, &lt;row=UINT&gt;, 
+               &lt;ATTR_NAME=ATTR_VALUE&gt;, 
+               [ATTR_NAME=ATTR_VALUE ...])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetColumnAttrs</code> associates arbitrary key/value pairs with a column in an index.</p>
+<p><strong>Result Type:</strong> null</p>
+<p>SetColumnAttrs queries always return <code>null</code> upon success. Setting a value of <code>null</code>, without quotes, deletes an attribute. To avoid confusion, <code>frame</code> cannot be used as an attribute name.</p>
+<p><strong>Examples:</strong></p>
+<p>Set attributes <code>stars</code>, <code>url</code>, and <code>active</code> on column 10:</p>
+<pre><code class="language-request" data-lang="request">SetColumnAttrs(col=10, stars=123, url=&quot;http://projects.pilosa.com/10&quot;, active=true)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>Set url value and active status for project 10. These are arbitrary key/value pairs which have no meaning to Pilosa.</p>
+<p>ColumnAttrs can be requested by adding the URL parameter <code>columnAttrs=true</code> to a query. For example:</p>
+<pre><code class="language-request" data-lang="request">curl localhost:10101/index/repository/query?columnAttrs=true -XPOST -d 'Bitmap(frame=&quot;stargazer&quot;, row=1)Bitmap(frame=&quot;stargazer&quot;, row=2)'
+</code></pre><pre><code class="language-response" data-lang="response">{
+  &quot;results&quot;:[
+    {&quot;attrs&quot;:{},&quot;bits&quot;:[10,20]},
+    {&quot;attrs&quot;:{},&quot;bits&quot;:[10,30]}
+  ],
+  &quot;columnAttrs&quot;:[
+    {&quot;id&quot;:10,&quot;attrs&quot;:{&quot;active&quot;:true,&quot;stars&quot;:123,&quot;url&quot;:&quot;http://projects.pilosa.com/10&quot;}},
+    {&quot;id&quot;:20,&quot;attrs&quot;:{&quot;active&quot;:false,&quot;stars&quot;:456,&quot;url&quot;:&quot;http://projects.pilosa.com/30&quot;}}
+  ]
+}
+</code></pre><p>In this example, ColumnAttrs have been set on columns 10 and 20, but not column 30. The relevant attributes are all returned in a single columnAttrs list. See the <a href="../api-reference/#query-index">query index</a> section for more information.</p>
+<p>Delete the <code>url</code> attribute on column 10:</p>
+<pre><code class="language-request" data-lang="request">SetColumnAttrs(col=10, url=null)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><h4 id="clearbit">ClearBit</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>ClearBit(&lt;frame=STRING&gt;, &lt;row=UINT&gt;, &lt;col=UINT&gt;, 
+         [timestamp=TIMESTAMP])
+</code></pre><p><strong>Description:</strong></p>
+<p><code>ClearBit</code> assigns a value of 0 to a bit in the binary matrix, thus disassociating the given row in the given frame from the given column.</p>
+<p><strong>Result Type:</strong> boolean</p>
+<p>A return value of <code>true</code> indicates that the bit was toggled from 1 to 0.</p>
+<p>A return value of <code>false</code> indicates that the bit was already set to 0 and nothing changed.</p>
+<p><strong>Examples:</strong></p>
+<p>Clear the bit at row 1 and column 10 in the stargazer frame:</p>
+<pre><code class="language-request" data-lang="request">ClearBit(frame=&quot;stargazer&quot;, col=10, row=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
+</code></pre><p>This represents removing the relationship between the user with id=1 and the repository with id=10.</p>
+<h4 id="setfieldvalue">SetFieldValue</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>SetFieldValue(&lt;col=UINT&gt;, &lt;frame=STRING&gt;, &lt;FIELD_NAME=INT&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p><code>SetFieldValue</code> assigns an integer value with the specified field name to the <code>col</code> in the given <code>frame</code>.</p>
+<p><strong>Result Type:</strong> null</p>
+<p>SetFieldValue returns <code>null</code> upon success.</p>
+<p><strong>Examples:</strong></p>
+<p>Set the field value <code>pullrequest</code> to the value 2, on column 10 in frame <code>stats</code>:</p>
+<pre><code class="language-request" data-lang="request">SetFieldValue(col=10, frame=&quot;stats&quot;, pullrequests=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[null]}
+</code></pre><p>This represents setting the number of pull requests of repository 10 to 2.</p>
+<p>This example assumes the existence of the frame <code>stats</code> and the field <code>pullrequests</code>. See <a href="../api-reference/#create-frame">frame creation</a> and <a href="../api-reference/#create-field">field creation</a> for more information.</p>
+<h3 id="read-operations">Read Operations</h3>
+<h4 id="bitmap">Bitmap</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Bitmap(&lt;frame=STRING&gt;, (&lt;rowL=UINT&gt; | &lt;col&gt;=UINT))
+</code></pre><p><strong>Description:</strong></p>
+<p><code>Bitmap</code> retrieves the indices of all the set bits in a row or column based on whether the row or column argument is provided in the query. It also retrieves any attributes set on that row or column.</p>
+<p><strong>Result Type:</strong> object with attrs and bits.</p>
+<p>e.g. <code>{&quot;attrs&quot;:{&quot;username&quot;:&quot;mrpi&quot;,&quot;active&quot;:true},&quot;bits&quot;:[10, 20]}</code></p>
+<p><strong>Examples:</strong></p>
+<p>Query all columns with a bit set in row 1 of the frame <code>stargazer</code> (repositories that are starred by user 1):</p>
+<pre><code class="language-request" data-lang="request">Bitmap(frame=&quot;stargazer&quot;, row=1)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{&quot;username&quot;:&quot;mrpi&quot;,&quot;active&quot;:true},&quot;bits&quot;:[10, 20]}
+</code></pre><ul>
+<li>attrs are the attributes for user 1</li>
+<li>bits are the repositories which user 1 has starred.</li>
+</ul>
+<h4 id="union">Union</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Union([BITMAP_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Union performs a logical OR on the results of all <code>BITMAP_CALL</code> queries passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in either of two rows (repositories that are starred by either of two users):</p>
+<pre><code class="language-request" data-lang="request">Union(Bitmap(frame=&quot;stargazer&quot;, stargazer_id=1), Bitmap(frame=&quot;stargazer&quot;, stargazer_id=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;bits&quot;:[10, 20, 30]}
+</code></pre><ul>
+<li>bits are repositories that were starred by user 1 OR user 2</li>
+</ul>
+<h4 id="intersect">Intersect</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Intersect(&lt;BITMAP_CALL&gt;, [BITMAP_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Intersect performs a logical AND on the results of all <code>BITMAP_CALL</code> queries passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in both of two rows (repositories that are starred by both of two users):</p>
+<pre><code class="language-request" data-lang="request">Intersect(Bitmap(frame=&quot;stargazer&quot;, row=1), Bitmap(frame=&quot;stargazer&quot;, row=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;bits&quot;:[10]}
+</code></pre><ul>
+<li>bits are repositories that were starred by user 1 AND user 2</li>
+</ul>
+<h4 id="difference">Difference</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Difference(&lt;BITMAP_CALL&gt;, [BITMAP_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Difference returns all of the bits from the first <code>BITMAP_CALL</code> argument passed to it, without the bits from each subsequent <code>BITMAP_CALL</code>.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in one row and not another (repositories that are starred by one user and not another):</p>
+<pre><code class="language-request" data-lang="request">Difference(Bitmap(frame=&quot;stargazer&quot;, row=1), Bitmap( frame=&quot;stargazer&quot;, row=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[20]}]}
+</code></pre><ul>
+<li>bits are repositories that were starred by user 1 BUT NOT user 2</li>
+</ul>
+<p>Query for the opposite difference:</p>
+<pre><code class="language-request" data-lang="request">Difference(Bitmap(frame=&quot;stargazer&quot;, row=2), Bitmap( frame=&quot;stargazer&quot;, row=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;attrs&quot;:{},&quot;bits&quot;:[30]}
+</code></pre><ul>
+<li>Bits are repositories that were starred by user 2 BUT NOT user 1</li>
+</ul>
+<h4 id="xor">Xor</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Xor(&lt;BITMAP_CALL&gt;, [BITMAP_CALL ...])
+</code></pre><p><strong>Description:</strong></p>
+<p>Xor performs a logical XOR on the results of each <code>BITMAP_CALL</code> query passed to it.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p>attrs will always be empty</p>
+<p><strong>Examples:</strong></p>
+<p>Query columns with a bit set in exactly one of two rows (repositories that are starred by only one of two users):</p>
+<pre><code class="language-request" data-lang="request">Xor(Bitmap(frame=&quot;stargazer&quot;, row=1), Bitmap(frame=&quot;stargazer&quot;, row=2))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;bits&quot;:[10,20,30]}]}
+</code></pre><ul>
+<li>bits are repositories that were starred by user 1 XOR user 2 (user 1 or user 2, but not both)</li>
+</ul>
+<h4 id="count">Count</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Count(&lt;BITMAP_CALL&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the number of set bits in the <code>BITMAP_CALL</code> passed in.</p>
+<p><strong>Result Type:</strong> int</p>
+<p><strong>Examples:</strong></p>
+<p>Query the number of bits set in a row (the number of repositories a user has starred):</p>
+<pre><code class="language-request" data-lang="request">Count(Bitmap(frame=&quot;stargazer&quot;, row=1))
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[1]}
+</code></pre><ul>
+<li>Result is the number of repositories that user 1 has starred.</li>
+</ul>
+<h4 id="topn">TopN</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>TopN([BITMAP_CALL], &lt;frame=STRING&gt;, [n=UINT],
+     [&lt;field=ATTR_NAME&gt;, &lt;filters=[]ATTR_VALUE&gt;])
+</code></pre><p><strong>Description:</strong></p>
+<p>Return the id and count of the top <code>n</code> bitmaps (by count of bits) in the frame.
+The <code>field</code> and <code>filters</code> arguments work together to only return Bitmaps which
+have the attribute specified by <code>field</code> with one of the values specified in
+<code>filters</code>.</p>
+<p><strong>Result Type:</strong> array of key/count objects</p>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Performing a TopN() query on a frame with cache type ranked will return the top bitmaps sorted by count in descending order.</li>
+<li>Frames with cache type lru will maintain an LRU (Least Recently Used replacement policy) cache, thus a TopN query on this type of frame will return bitmaps sorted in order of most recently set bit.</li>
+<li>The frame&rsquo;s cache size determines the number of sorted bitmaps to maintain in the cache for purposes of TopN queries. There is a tradeoff between performance and accuracy; increasing the cache size will improve accuracy of results at the cost of performance.</li>
+<li>Once full, the cache will truncate the set of bitmaps according to the frame option CacheSize. Bitmaps that straddle the limit and have the same count will be truncated in no particular order.</li>
+<li>The TopN query&rsquo;s attribute filter is applied to the existing sorted cache of bitmaps. Bitmaps that fall outside of the sorted cache range, even if they would normally pass the filter, are ignored.</li>
+</ul>
+<p>See <a href="../api-reference/#create-frame">frame creation</a> for more information about the cache.</p>
+<p><strong>Examples:</strong></p>
+<p>Basic TopN query:</p>
+<pre><code class="language-request" data-lang="request">TopN(frame=&quot;stargazer&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:102},{&quot;id&quot;:4734,&quot;count&quot;:100},{&quot;id&quot;:12709,&quot;count&quot;:93},...]]}
+</code></pre><ul>
+<li><code>id</code> is a row ID (user ID)</li>
+<li><code>count</code> is a count of columns (repositories)</li>
+<li>Results are the number of bits set in the corresponding row (repositories that each user starred) in descending order for all rows (users) in the stargazer frame. For example user 1240 starred 102 repositories, user 4734 starred 100 repositories, user 12709 starred 93 repository.</li>
+</ul>
+<p>Limit the number of results:</p>
+<pre><code class="language-request" data-lang="request">TopN(frame=&quot;stargazer&quot;, n=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:102},{&quot;id&quot;:4734,&quot;count&quot;:100}]]}
+</code></pre><ul>
+<li>Results are the top two rows (users) sorted by number of bits set (repositories they&rsquo;ve starred) in descending order.</li>
+</ul>
+<p>Filter based on an existing Bitmap:</p>
+<pre><code class="language-request" data-lang="request">TopN(Bitmap(frame=&quot;language&quot;, row=1), frame=&quot;stargazer&quot;, n=2)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:1240,&quot;count&quot;:35},{&quot;id&quot;:7508,&quot;count&quot;:32}]]}
+</code></pre><ul>
+<li>Results are the top two users (rows) sorted by the number of bits set in the intersection with row 1 of the language frame (repositories that they&rsquo;ve starred which are written in language 1).</li>
+</ul>
+<p>Filter based on attributes:</p>
+<pre><code class="language-request" data-lang="request">TopN(frame=&quot;stargazer&quot;, n=2, field=active, filters=[true])
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[[{&quot;id&quot;:10,&quot;count&quot;:1},{&quot;id&quot;:13,&quot;count&quot;:1}]]}
+</code></pre><ul>
+<li>Results are the top two users (rows) which have the &ldquo;active&rdquo; attribute set to &ldquo;true&rdquo;, sorted by the number of bits set (repositories that they&rsquo;ve starred).</li>
+</ul>
+<h4 id="range-queries">Range Queries</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Range(&lt;frame=STRING&gt;, &lt;row=UINT&gt;, 
+      &lt;start=TIMESTAMP&gt;, &lt;end=TIMESTAMP&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Similar to <code>Bitmap</code>, but only returns bits which were set with timestamps
+between the given <code>start</code> and <code>end</code> timestamps.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p><strong>Examples:</strong></p>
+<p>Query all columns with a bit set in row 1 of a frame (repositories that a user has starred), within a date range:</p>
+<pre><code class="language-request" data-lang="request">Range(frame=&quot;stargazer&quot;, row=1, start=&quot;2010-01-01T00:00&quot;, end=&quot;2017-03-02T03:00&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{{&quot;attrs&quot;:{},&quot;bits&quot;:[10]}
+</code></pre><p>This example assumes timestamps have been set on some bits.</p>
+<ul>
+<li>bits are repositories which were starred by user 1 in the time range 2010-01-01 to 2017-03-02.</li>
+</ul>
+<h4 id="range-bsi">Range (BSI)</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Range(&lt;frame=STRING&gt;, &lt;FIELD_NAME, COMPARISON_OPERATOR, COMPARISON_VALUE&gt; )
+</code></pre><p><strong>Description:</strong></p>
+<p>The <code>Range</code> query is overloaded to work on <code>field</code> values as well as <code>timestamp</code> values.
+Returns bits that are true for the comparison operator.</p>
+<p><strong>Result Type:</strong> object with attrs and bits</p>
+<p><strong>Examples:</strong></p>
+<p>In our source data, commitactivity was counted over the last year.
+The following greater-than <code>Range</code> query returns all columns with a field value greater than 100 (repositories having more than 100 commits):</p>
+<pre><code class="language-request" data-lang="request">Range(frame=&quot;stats&quot;, commitactivity &gt; 100)
+</code></pre><pre><code class="language-response" data-lang="response">{{&quot;attrs&quot;:{},&quot;bits&quot;:[10]}
+</code></pre><ul>
+<li>bits are repositories which had at least 100 commits in the last year.</li>
+</ul>
+<p>BSI range queries support the following operators:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&gt;</code></td>
+<td>greater-than, GT</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>less-than, LT</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>less-than-or-equal-to, LTE</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>greater-than-or-equal-to, GTE</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>==</code></td>
+<td>equal-to, EQ</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>not-equal-to, NEQ</td>
+<td>integer or <code>null</code></td>
+</tr>
+<tr>
+<td><code>&gt;&lt;</code></td>
+<td>between, BETWEEN</td>
+<td>[integer, integer]</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>BETWEEN</code> form specifies an interval with both bounds, using the <code>&gt;&lt;</code> operator, and a two-element list containing the lower and upper bounds of the interval:</p>
+<pre><code class="language-pql" data-lang="pql">Range(frame=&quot;stats&quot;, commitactivity &gt;&lt; [100, 200])
+</code></pre><p>This is conceptually equivalent to the interval 100 &lt;= commitactivity &lt;= 200, but this chained comparison syntax is not currently supported. <code>BETWEEN</code> query syntax is restricted to greater-than-or-equal-to and less-than-or-equal-to, but any valid interval on the integers can be represented this way.</p>
+<h4 id="min">Min</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Min([BITMAP_CALL], &lt;frame=STRING&gt;, &lt;field=STRING&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the minimum value of all BSI integer values in the <code>field</code> in this <code>frame</code>. If the optional <code>Bitmap</code> call is supplied, only columns with set bits are considered, otherwise all columns are considered.</p>
+<p><strong>Result Type:</strong> object with the min and count of columns containing the min value.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the minimum value of all fields in a frame (minimum size of all repositories):</p>
+<pre><code class="language-request" data-lang="request">Min(frame=&quot;stats&quot;, field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:4,&quot;count&quot;:2}
+</code></pre><ul>
+<li>Result is the smallest value (repository size in kilobytes, here), plus the count of columns with that value.</li>
+</ul>
+<h4 id="max">Max</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Max([BITMAP_CALL], &lt;frame=STRING&gt;, &lt;field=STRING&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the maximum value of all BSI integer values in the <code>field</code> in this <code>frame</code>. If the optional <code>Bitmap</code> call is supplied, only columns with set bits are considered, otherwise all columns are considered.</p>
+<p><strong>Result Type:</strong> object with the max and count of columns containing the max value.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the maximum value of all fields in a frame (maximum size of all repositories):</p>
+<pre><code class="language-request" data-lang="request">Max(frame=&quot;stats&quot;, field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:88,&quot;count&quot;:13}
+</code></pre><ul>
+<li>Result is the largest value (repository size in kilobytes, here), plus the count of columns with that value.</li>
+</ul>
+<h4 id="sum">Sum</h4>
+<p><strong>Spec:</strong></p>
+<pre><code>Sum([BITMAP_CALL], &lt;frame=STRING&gt;, &lt;field=STRING&gt;)
+</code></pre><p><strong>Description:</strong></p>
+<p>Returns the count and computed sum of all BSI integer values in the <code>field</code> and <code>frame</code>. If the optional <code>Bitmap</code> call is supplied, columns with set bits are summed, otherwise the sum is across all columns.</p>
+<p><strong>Result Type:</strong> object with the computed sum and count of the bitmap field.</p>
+<p><strong>Examples:</strong></p>
+<p>Query the size of all repositories.</p>
+<pre><code class="language-request" data-lang="request">Sum(frame=&quot;stats&quot;, field=&quot;diskusage&quot;)
+</code></pre><pre><code class="language-response" data-lang="response">{&quot;value&quot;:10,&quot;count&quot;:3}
+</code></pre><ul>
+<li>Result is the sum of all values (total size of all repositories in kilobytes, here), plus the count of columns.</li>
+</ul>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v0.10/docs/query-language.md">View markdown source</a> on Github. Last updated 1 year ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v0.10"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v0.10"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

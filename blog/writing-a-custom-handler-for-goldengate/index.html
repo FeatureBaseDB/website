@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Writing a Custom Handler for Oracle GoldenGate &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="In this post, we will cover creating a custom handler for Oracle GoldenGate which updates the data in a Pilosa server.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Writing a Custom Handler for Oracle GoldenGate"/>
+    <meta property="og:description" content="In this post, we will cover creating a custom handler for Oracle GoldenGate which updates the data in a Pilosa server." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/writing-a-custom-handler-for-goldengate/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/ogg-handler.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2019-02-18T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/ogg-handler.jpg" alt="Writing a Custom Handler for Oracle GoldenGate"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Writing a Custom Handler for Oracle GoldenGate</h1>
+      <h6 class="h-6-caps-white">2/18/2019 • 11 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Writing&#43;a&#43;Custom&#43;Handler&#43;for&#43;Oracle&#43;GoldenGate%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-custom-handler-for-goldengate%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-custom-handler-for-goldengate%2F&title=Writing&#43;a&#43;Custom&#43;Handler&#43;for&#43;Oracle&#43;GoldenGate&summary=In&#43;this&#43;post%2C&#43;we&#43;will&#43;cover&#43;creating&#43;a&#43;custom&#43;handler&#43;for&#43;Oracle&#43;GoldenGate&#43;which&#43;updates&#43;the&#43;data&#43;in&#43;a&#43;Pilosa&#43;server.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fwriting-a-custom-handler-for-goldengate%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>In this post, we will cover creating a custom handler for Oracle GoldenGate which updates the data in a Pilosa server.</p>
+<h3 id="introduction">Introduction</h3>
+<p><a href="https://www.oracle.com/middleware/technologies/goldengate.html">Oracle GoldenGate</a> captures and delivers real-time change data from a compatible database to other databases, data warehouses and applications. The change data is directly read from database logs, having minimal impact on the database itself.</p>
+<p>GoldenGate has three primary components:</p>
+<ol>
+<li>
+<p>Capture: <em>Extract groups</em> retrieve change information from database logs and write it to <em>trail files</em>. Since GoldenGate uses the transaction logs from databases, capturing changes has a low impact on the source system.</p>
+</li>
+<li>
+<p>Trail files: A trail file contains changes in a database, such as inserts, updates and deletes in a platfrom independent data format. The changes are ordered by commit time.</p>
+</li>
+<li>
+<p>Delivery: The trail is sent over the network from the source system to the target and written in a remote trail. A replication group applies the changes to the target system. The extract group which reads the local trail and sends the changes is called a <em>pump</em>.</p>
+</li>
+</ol>
+<p>In the simplest case, GoldenGate can be used for unidirectional replication from a source to a target. GoldenGate also supports bidirectional and multi-master replication where there may be more than one writer to a database table.</p>
+<p>It is possible to extend Oracle GoldenGate&rsquo;s functionality with custom handlers. We are going to use that feature to deliver and map real-time updates from an Oracle database to a Pilosa server using Pilosa Java client library.</p>
+<p><a href="https://www.pilosa.com">Pilosa</a> is an open source distributed index which enables updating and querying massive data sets in real-time. See the <a href="https://www.pilosa.com/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">Pilosa whitepaper (PDF)</a> for more information.</p>
+<p>Using GoldenGate with Pilosa has the following benefits:</p>
+<ul>
+<li>Pilosa is distributed and fast. It may be used for a lot of the tasks a database is used for, offloading the tasks to Pilosa and freeing up database resources.</li>
+<li>Using GoldenGate, updates from a database to the Pilosa server can be delivered in a low impact way. GoldenGate extracts changes in the database from logs instead of running queries.</li>
+<li>The data in the database is replicated to a Pilosa server in real-time, making the data in the Pilosa side always up-to-date.</li>
+</ul>
+<h3 id="getting-ready">Getting Ready</h3>
+<p>Requirements:</p>
+<ul>
+<li>Linux or MacOS, Bash or compatible shell</li>
+<li>Docker 17.05 or better</li>
+<li>Docker Compose</li>
+<li>git</li>
+</ul>
+<h4 id="creating-docker-images">Creating Docker Images</h4>
+<p>Oracle doesn&rsquo;t provide Docker images for their products, but they allow downloading them for evaluation purposes. They supply scripts for creating Docker images from downloaded products.</p>
+<p>Clone Oracle Docker Images repository, which contains the necessary scripts to create Docker images for Oracle products:</p>
+<pre><code>$ git clone https://github.com/oracle/docker-images.git
+</code></pre><p>Switch to the <code>docker-images</code> directory:</p>
+<pre><code>$ cd docker-images
+</code></pre><h5 id="creating-the-oracle-database-image">Creating the Oracle Database Image</h5>
+<p>Create the Oracle Database 12c image (<code>oracle/database:12.2.0.1-ee</code>) using the following steps:</p>
+<ol>
+<li>
+<p>Switch to <code>OracleDatabase/SingleInstance/dockerfiles</code> directory:</p>
+<pre><code>$ cd OracleDatabase/SingleInstance/dockerfiles
+</code></pre></li>
+<li>
+<p>Download Oracle Database 12c Release 2 archive (linuxx64_12201_database.zip) from <a href="https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html">https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html</a> and copy it to <code>12.2.0.1</code> directory/</p>
+</li>
+<li>
+<p>Run the image creation script:</p>
+<pre><code>$ ./buildDockerImage.sh -v 12.2.0.1 -e -i
+</code></pre></li>
+</ol>
+<h5 id="creating-oracle-goldengate-images">Creating Oracle GoldenGate Images</h5>
+<p>We need to create two Oracle GoldenGate images:</p>
+<ul>
+<li>Oracle GoldenGate 18 for the <code>extract</code> container.</li>
+<li>Oracle GoldenGate for BigData image for the <code>replicat</code> container.</li>
+</ul>
+<p>First, switch to <code>OracleGoldenGate</code> directory:</p>
+<pre><code>$ cd ../../../OracleGoldenGate
+</code></pre><p>Make sure that <code>strings</code>, <code>unzip</code> and GNU <code>tar</code> utilities are installed in your system. These are required by Oracle&rsquo;s GoldenGate Docker image creation script. On Linux, GNU <code>tar</code> should be already installed, but on MacOS follow the steps below:</p>
+<ol>
+<li>
+<p>Download the patch:</p>
+<pre><code>$ curl -O https://raw.githubusercontent.com/pilosa/sample-ogg-handler/master/macos/dockerBuild.sh.patch
+</code></pre></li>
+<li>
+<p>Apply the patch:</p>
+<pre><code>$ patch &lt; dockerBuild.sh.patch
+</code></pre></li>
+</ol>
+<p>Create the Oracle GoldenGate 18 image using the following steps:</p>
+<ol>
+<li>
+<p>Download Oracle GoldenGate 18.1.0.0.0 for Oracle on Linux x86-64 (<code>181000_fbo_ggs_Linux_x64_shiphome.zip</code>) from <a href="https://www.oracle.com/technetwork/middleware/goldengate/downloads/index.html">https://www.oracle.com/technetwork/middleware/goldengate/downloads/index.html</a></p>
+</li>
+<li>
+<p>Run the image creation script:</p>
+<pre><code>$ BASE_IMAGE=oracle/database:12.2.0.1-ee ./dockerBuild.sh 181000_fbo_ggs_Linux_x64_shiphome.zip --build-arg BASE_COMMAND=&quot;su -c '/opt/oracle/runOracle.sh' oracle&quot; --tag oracle/db-12.2-goldengate-standard:18.1.0.0.0
+</code></pre></li>
+</ol>
+<p>Create the GoldenGate for BigData image using the following steps:</p>
+<ol>
+<li>
+<p>Download Oracle GoldenGate for Big Data 12.3.2.1.1 on Linux x86-64 (<code>OGG_BigData_Linux_x64_12.3.2.1.1.zip</code>) from <a href="https://www.oracle.com/technetwork/middleware/goldengate/downloads/index.html">https://www.oracle.com/technetwork/middleware/goldengate/downloads/index.html</a></p>
+</li>
+<li>
+<p>Run the image creation script:</p>
+<pre><code>BASE_IMAGE=&quot;oraclelinux:7-slim&quot; ./dockerBuild.sh OGG_BigData_Linux_x64_12.3.2.1.1.zip --tag oracle/goldengate-standard-bigdata:12.3.0.1.2
+</code></pre></li>
+</ol>
+<h5 id="patching-the-oracle-database-image">Patching the Oracle Database Image</h5>
+<p>After completing the <em>Creating the Oracle GoldenGate Image</em> section above, we should end up with the <code>oracle/db-12.2-goldengate-standard:18.1.0.0.0</code> image. The <code>root</code> user in the created image doesn&rsquo;t have the correct <a href="http://www.linux-pam.org">PAM</a> so we need to add them. The simplest way of doing it is creating another Docker image based on the image we have created.</p>
+<ol>
+<li>Clone <a href="https://github.com/pilosa/sample-ogg-handler">https://github.com/pilosa/sample-ogg-handler</a> to somewhere in your system.</li>
+<li>Switch to the <code>sample-ogg-handler/docker</code> directory.</li>
+<li>Run the following to create the patched image:
+<pre><code>$ docker build -t oracle/db-12.2-goldengate-standard:18.1.0.0.0-patched .
+</code></pre></li>
+</ol>
+<h3 id="running-the-setup">Running the Setup</h3>
+<p>The sample setup is composed of an Oracle database container, the replication container which also contains the custom adapter, and a Pilosa container.</p>
+<p>We have already cloned the sample project in the <em>Patching the Oracle Database Image</em> section. The sample project includes a Docker compose file. Let&rsquo;s run it:</p>
+<pre><code>$ docker-compose up
+</code></pre><p>This takes a while.</p>
+<p>Before carrying on with enabling GoldenGate support, we have to modify the <code>tnsnames.ora</code> file which contains database service names mapped to listener protocol addresses. The default installed one doesn&rsquo;t seem to be in the correct format:</p>
+<pre><code>$ docker exec -it sampleogghandler_extract_1 cp /prv/tnsnames.ora /opt/oracle/oradata/dbconfig/ORCLCDB/tnsnames.ora
+</code></pre><p>Make sure running the following commands end with <code>OK</code>:</p>
+<ul>
+<li><code>docker exec -it sampleogghandler_extract_1 tnsping ORCLCDB</code></li>
+<li><code>docker exec -it sampleogghandler_extract_1 tnsping ORCLPDB1</code></li>
+</ul>
+<h4 id="enabling-goldengate-support-on-an-oracle-database">Enabling GoldenGate Support on an Oracle Database</h4>
+<p>The support for GoldenGate is not enabled on Oracle databases by default. Follow the steps below to enable it:</p>
+<ol>
+<li>
+<p>Start a shell on the extract container with the <code>oracle</code> user:</p>
+<pre><code>$ docker exec -it sampleogghandler_extract_1 su oracle
+</code></pre></li>
+<li>
+<p>Prepare the root database.</p>
+<p>Login to the root database:</p>
+<pre><code>$ sqlplus / as SYSDBA
+</code></pre><p>Turn on the archive log:</p>
+<pre><code>SHUTDOWN IMMEDIATE;
+STARTUP MOUNT EXCLUSIVE;
+ALTER DATABASE ARCHIVELOG;
+ALTER DATABASE OPEN;
+</code></pre><p>This may take a while.</p>
+<p>Create the extract user. The user must be added to the root database when the integrated mode is used:</p>
+<pre><code>CREATE USER c##ggadmin IDENTIFIED BY w
+DEFAULT TABLESPACE users
+TEMPORARY TABLESPACE temp;
+GRANT DBA TO c##ggadmin container=all;
+EXEC dbms_goldengate_auth.grant_admin_privilege('c##ggadmin',container=&gt;'all');
+</code></pre><p>Check whether GoldenGate replication was enabled on this database:</p>
+<pre><code>SHOW PARAMETER ENABLE_GOLDENGATE_REPLICATION;
+</code></pre><p>If it is not already enabled, enable it:</p>
+<pre><code>ALTER SYSTEM SET ENABLE_GOLDENGATE_REPLICATION=true SCOPE=both;
+</code></pre><p>Chech whether supplemental logging is enabled:</p>
+<pre><code>SELECT SUPPLEMENTAL_LOG_DATA_MIN, FORCE_LOGGING FROM v$database;
+</code></pre><p>If it is not already enabled, enable it:</p>
+<pre><code>ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;
+ALTER DATABASE FORCE LOGGING;
+ALTER SYSTEM SWITCH LOGFILE;
+</code></pre><p>Exit <code>sqlplus</code> using <code>Ctrl+D</code>.</p>
+</li>
+<li>
+<p>Next, let&rsquo;s prepare the pluggable database:</p>
+<p>Login to the pluggable database:</p>
+<pre><code>$ sqlplus SYS/w@ORCLPDB1 as SYSDBA
+</code></pre><p>Create the schema:</p>
+<pre><code>CREATE USER ogguser IDENTIFIED BY w;
+GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE, CREATE VIEW TO ogguser;
+</code></pre><p>Exit <code>sqlplus</code> using <code>Ctrl+D</code>.</p>
+</li>
+<li>
+<p>Create demo tables:</p>
+<pre><code>$ echo EXIT | sqlplus ogguser@ORCLPDB1/w @$ORACLE_HOME/demo/schema/human_resources/hr_cre.sql
+</code></pre></li>
+<li>
+<p>Create the GoldenGate credentials store and add the user for extract:</p>
+<p>Start GoldenGate console:</p>
+<pre><code>$ ggsci
+</code></pre><p>Add a credential store and store the root database user credentials:</p>
+<pre><code>ADD CREDENTIALSTORE
+ALTER CREDENTIALSTORE ADD USER c##ggadmin@ORCLCDB PASSWORD w ALIAS c##ggadmin
+</code></pre></li>
+<li>
+<p>Enable schema-level supplemental logging for the database tables:</p>
+<pre><code>DBLOGIN USERIDALIAS c##ggadmin
+ADD SCHEMATRANDATA ORCLPDB1.ogguser
+</code></pre></li>
+</ol>
+<h4 id="setting-up-extract-and-pump-groups">Setting Up Extract and Pump Groups</h4>
+<p>While still in the GoldenGate console, follow these steps to create and start extract and pump groups.</p>
+<ol>
+<li>
+<p>The extract group is used to obtain the changes from the database log and save it to the trail file. Let&rsquo;s add it.</p>
+<p>Check the contents of the extract group:</p>
+<pre><code>VIEW PARAM ext
+</code></pre><p>Outputs:</p>
+<pre><code>EXTRACT ext
+SETENV (ORACLE_SID = ORCLCDB)
+USERIDALIAS c##ggadmin
+EXTTRAIL ./dirdat/et
+GETUPDATEBEFORES
+UPDATERECORDFORMAT COMPACT
+
+SOURCECATALOG ORCLPDB1
+TABLE ogguser.*;
+SEQUENCE ogguser.*;
+</code></pre><p>Add the extract group. We limit each trail file to be at most 5 megabytes; that&rsquo;s adequate for the sample project.</p>
+<pre><code>ADD EXTRACT ext, INTEGRATED TRANLOG, BEGIN NOW
+ADD EXTTRAIL ./dirdat/et, EXTRACT ext, MEGABYTES 5
+</code></pre><p>Register the extract group with the pluggable database:</p>
+<pre><code>REGISTER EXTRACT ext DATABASE CONTAINER (ORCLPDB1)
+</code></pre><p>This may take a while to complete.</p>
+<p>Check that extract group is present:</p>
+<pre><code>INFO EXTRACT ext
+</code></pre><p>Should output something like:</p>
+<pre><code>EXTRACT    EXT       Initialized   2019-02-07 14:29   Status STOPPED
+Checkpoint Lag       00:00:00 (updated 00:01:20 ago)
+Log Read Checkpoint  Oracle Integrated Redo Logs
+                    2019-02-07 14:29:08
+                    SCN 0.0 (0)
+</code></pre></li>
+<li>
+<p>The pump group is used to send the local trail to a remote location over the network, in our case the <code>replicat</code> container.</p>
+<p>Check the contents of the pump group:</p>
+<pre><code>VIEW PARAM pump
+</code></pre><p>Outputs:</p>
+<pre><code>EXTRACT pump
+RMTHOST replicat, MGRPORT 7809, COMPRESS
+RMTTRAIL ./dirdat/pm
+PASSTHRU
+
+SOURCECATALOG ORCLPDB1
+TABLE ogguser.*;
+SEQUENCE ogguser.*;
+</code></pre><p>Using our Docker compose setup, the replicat container is accessible with the host name <code>replicat</code>. We set the trail format to <code>12.1</code> for the pump too.</p>
+<p>Add the pump group.</p>
+<pre><code>ADD EXTRACT pump, EXTTRAILSOURCE ./dirdat/et
+ADD RMTTRAIL ./dirdat/pm, EXTRACT pump, MEGABYTES 5
+</code></pre></li>
+<li>
+<p>Start the extract and pump groups:</p>
+<pre><code>START EXTRACT EXT
+START EXTRACT PUMP
+</code></pre><p>Check that the extract groups are running:</p>
+<pre><code>INFO ALL
+</code></pre><p>Should output something like:</p>
+<pre><code>Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     RUNNING
+EXTRACT     RUNNING     EXT         00:32:27      00:00:04
+EXTRACT     RUNNING     PUMP        00:00:00      00:00:08
+</code></pre><p>If any of the items in that list has <code>STOPPED</code> or <code>ABENDED</code> status, check the logs for errors using <code>VIEW REPORT GROUP_NAME</code>, e.g., for <code>ext</code>:</p>
+<pre><code>VIEW REPORT ext
+</code></pre></li>
+</ol>
+<h4 id="setting-up-the-pilosa-handler-project">Setting Up the Pilosa Handler Project</h4>
+<p>We are going to take a detour to set up the custom handler project here.</p>
+<p>Requirements:</p>
+<ul>
+<li>JDK 1.8</li>
+<li>Maven 3.6 or better</li>
+</ul>
+<p>A sample Pilosa handler for GoldenGate is included in the <code>handler</code> directory in <code>sample-ogg-handler</code> that we cloned earlier.</p>
+<ol>
+<li>
+<p>You have already downloaded <code>OGG_BigData_Linux_x64_12.3.2.1.1.zip</code> before. Extract <code>OGG_BigData_Linux_x64_12.3.2.1.1.tar</code> from <code>OGG_BigData_Linux_x64_12.3.2.1.1.zip</code>.</p>
+</li>
+<li>
+<p>Extract <code>ggjava</code> directory from <code>OGG_BigData_Linux_x64_12.3.2.1.1.tar</code> and copy it to the <code>sample-ogg-handler/handler/local</code> directory, so <code>sample-ogg-handler/handler/local/ggjava</code> directory contains the GoldenGate libraries.</p>
+</li>
+<li>
+<p>In a shell, register the libraries for the GoldenGate Java Adapter. This has to be done only once:</p>
+<pre><code>$ make install-libs
+</code></pre></li>
+<li>
+<p>In order to build the project, run <code>make</code>. If there are no errors, you should end up with <code>target/sample-ogg-handler-0.1.0-all.jar</code>. This file contains everything needed to run the handler.</p>
+</li>
+<li>
+<p>Copy <code>sample-ogg-handler/handler/target/sample-ogg-handler-0.1.0-all.jar</code> to the <code>sample-ogg-handler/v_dirprm/handler</code> directory. We  will need to do that any time we modify the handler.</p>
+</li>
+<li>
+<p>You can open the GoldenGate handler project in the <code>sample-ogg-handler/handler</code> directory with your favorite IDE/editor and check the contents of <code>src/main/java/sample/PilosaHandler.java</code>. This is the source file that contains all the logic for the handler.</p>
+</li>
+</ol>
+<h4 id="setting-up-replication">Setting Up Replication</h4>
+<p>Our custom handler will run in the replicat container and react to the changes to the trail file. The trail file is updated using the data sent by the pump in the extract container.</p>
+<ol>
+<li>
+<p>Run a shell in the replicat container using the <code>oracle</code> user:</p>
+<pre><code>$ docker exec -it sampleogghandler_replicat_1 su oracle
+</code></pre></li>
+<li>
+<p>Check that properties for the custom handler are correct:</p>
+<pre><code>$ cat dirprm/pilosa.properties
+</code></pre><p>Should output:</p>
+<pre><code>gg.log = log4j
+gg.log.level = info
+gg.classpath = dirprm/handler/sample-ogg-handler-0.1.0-all.jar
+gg.handlerlist = pilosa
+
+gg.handler.pilosa.type = sample.PilosaHandler
+gg.handler.pilosa.address = pilosa:10101
+</code></pre><p>The properties file contains settings for the custom handler. Most of the entries in the properties file should be self-explanatory. The most import entries are:</p>
+<ul>
+<li><code>gg.classpath</code> should contain the class path for the handler. You can specify a comma delimited list of directories and jar files.</li>
+<li><code>gg.handlerlist</code> should contain a comma delimited list of handler names. You can choose any name you would like, but it should match the entries for other settings for the handler.</li>
+<li><code>gg.handler.HANDLER_NAME.type</code> should contain the complete name of the handler, including the package name.</li>
+<li><code>gg.handler.HANDLER_NAME.address</code> is a setting directly passed to <code>setAddress</code> method of <code>sample.PilosaHandler</code>.</li>
+</ul>
+<p>The name of the properties file is the same as the extract group we will be adding next, so it is found automatically.</p>
+</li>
+<li>
+<p>Replicat groups process a trail file and apply the changes to a database, or execute a handler in our case.</p>
+<p>Run the GoldenGate console:</p>
+<pre><code>$ ggsci
+</code></pre><p>The replicat params are in <code>dirprm/pilosa.prm</code>. Verify that it&rsquo;s there:</p>
+<pre><code>VIEW PARAM pilosa
+</code></pre><p>Should output:</p>
+<pre><code>REPLICAT pilosa
+TARGETDB LIBFILE libggjava.so
+REPORTCOUNT EVERY 1 MINUTES, RATE
+GROUPTRANSOPS 1000
+MAP ORCLPDB1.ogguser.*, TARGET ogguser.*;
+</code></pre><p>Add the replicat group:</p>
+<pre><code>ADD REPLICAT pilosa, EXTTRAIL ./dirdat/pm, NODBCHECKPOINT
+</code></pre><p>Check that the extract group was created:</p>
+<pre><code>INFO ALL
+</code></pre><p>Should output something like:</p>
+<pre><code>Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     RUNNING
+REPLICAT    STOPPED     PILOSA      00:00:00      00:00:01
+</code></pre><p>Start the replicat group:</p>
+<pre><code>START REPLICAT pilosa
+</code></pre><p>Check that the extract group is running:</p>
+<pre><code>INFO ALL
+</code></pre><p>Should output something like:</p>
+<pre><code>Program     Status      Group       Lag at Chkpt  Time Since Chkpt
+
+MANAGER     RUNNING
+REPLICAT    RUNNING     PILOSA      00:00:00      00:00:05
+</code></pre><p>If the group has <code>STOPPED</code> or <code>ABENDED</code> status, check the logs for errors using:</p>
+<pre><code>VIEW REPORT pilosa
+</code></pre></li>
+<li>
+<p>View the custom handler logs:</p>
+<pre><code>VIEW REPORT pilosa
+</code></pre><p>The replicat container log is located at: <code>dirrpt/PILOSA_info_log4j.log</code></p>
+</li>
+</ol>
+<h4 id="insert-data-to-the-source-database">Insert Data to the Source Database</h4>
+<p>Start a shell on the Pilosa container with <code>oracle</code> user:</p>
+<pre><code>$ docker exec -it sampleogghandler_extract_1 su oracle
+</code></pre><p>Insert sample records into the source database:</p>
+<pre><code>$ echo EXIT | sqlplus ogguser@ORCLPDB1/w @$ORACLE_HOME/demo/schema/human_resources/hr_popul.sql
+</code></pre><h4 id="check-the-data-on-the-pilosa-side">Check the Data on the Pilosa Side</h4>
+<p>Let&rsquo;s confirm the data on the Pilosa side was updated when we inserted some records to the source database.</p>
+<p>Start a shell on the Pilosa container:</p>
+<pre><code>$ docker exec -it sampleogghandler_pilosa_1 sh
+</code></pre><p>Let&rsquo;s find out what are the top 5 jobs and the number of employees having those jobs:</p>
+<pre><code># curl pilosa:10101/index/employees/query -d 'TopN(job, Row(ok=true), n=5)'
+</code></pre><p>Turns out there are 30 sales representatives, 20 shipping clerks, etc.:</p>
+<pre><code>{&quot;results&quot;:[[{&quot;id&quot;:0,&quot;key&quot;:&quot;SA_REP&quot;,&quot;count&quot;:30},{&quot;id&quot;:0,&quot;key&quot;:&quot;SH_CLERK&quot;,&quot;count&quot;:20},{&quot;id&quot;:0,&quot;key&quot;:&quot;ST_CLERK&quot;,&quot;count&quot;:20},{&quot;id&quot;:0,&quot;key&quot;:&quot;FI_ACCOUNT&quot;,&quot;count&quot;:5},{&quot;id&quot;:0,&quot;key&quot;:&quot;SA_MAN&quot;,&quot;count&quot;:5}]]}
+</code></pre><p>Which sales representatives earn $10000 or more and what do we know about them?</p>
+<pre><code># curl pilosa:10101/index/employees/query -d 'Options(Intersect(Row(ok=true), Row(salary &gt;= 10000), Row(job=&quot;SA_REP&quot;)), columnAttrs=true)'
+</code></pre><p>Outputs:</p>
+<pre><code>{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[150,156,162,168,169,174]}],&quot;columnAttrs&quot;:[{&quot;id&quot;:150,&quot;attrs&quot;:{&quot;email&quot;:&quot;PTUCKER&quot;}},{&quot;id&quot;:156,&quot;attrs&quot;:{&quot;email&quot;:&quot;JKING&quot;}},{&quot;id&quot;:162,&quot;attrs&quot;:{&quot;email&quot;:&quot;CVISHNEY&quot;}},{&quot;id&quot;:168,&quot;attrs&quot;:{&quot;email&quot;:&quot;LOZER&quot;}},{&quot;id&quot;:169,&quot;attrs&quot;:{&quot;email&quot;:&quot;HBLOOM&quot;}},{&quot;id&quot;:174,&quot;attrs&quot;:{&quot;email&quot;:&quot;EABEL&quot;}}]}
+</code></pre><p>Let&rsquo;s delete one of the employees from the source table to confirm that the corresponding column is marked non-existent.</p>
+<p>Open <code>sqlplus</code>:</p>
+<pre><code>$ docker exec -it sampleogghandler_extract_1 su oracle -c 'sqlplus ogguser@ORCLPDB1/w'
+</code></pre><p>Delete the employee with ID 150, who is a sales representative:</p>
+<pre><code>DELETE FROM ogguser.employees WHERE employee_id=150;
+COMMIT;
+</code></pre><p>How many sales representatives left?</p>
+<pre><code> # curl pilosa:10101/index/employees/query -d 'Count(Intersect(Row(ok=true), Row(job=&quot;SA_REP&quot;)))'
+</code></pre><p>Outputs:</p>
+<pre><code>{&quot;results&quot;:[29]}
+</code></pre><p>Check out our <a href="https://www.pilosa.com/docs/latest/query-language/">documentation</a> for PQL, the query language of Pilosa, for more.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>In this article we explored how to write a custom handler for Oracle GoldenGate, specifically a Pilosa handler. GoldenGate custom handlers enable acting on trail files in an efficient and fast way.</p>
+<p>We are developing a Pilosa adapter for Oracle GoldenGate, which provides a Javascript based API for programming the translation logic. It is still in early phase of development, but <a href="https://www.pilosa.com/about/#contact">let us know</a> if you are interested in integrating Pilosa in your workflow or providing feedback.</p>
+<p><em>Yüce is an Independent Software Engineer at Pilosa. When he&rsquo;s not writing Pilosa client libraries, you can find him watching good bad movies. He is <a href="https://github.com/yuce">@yuce</a> on GitHub and <a href="https://twitter.com/tklx">@tklx</a> on Twitter.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_04.svg" alt="Avatar for Yüce Tekol">
+        <div class="body-bold"><a href="https://twitter.com/tklx">Yüce Tekol</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

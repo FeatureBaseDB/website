@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Real Time Queries Without Compromises &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="The desire to eliminate barriers between raw data and useful insights has driven decades of engineering innovation. Countless databases, datastores, indexes, and query-level solutions promising to make this dream a reality have surfaced at regular intervals, only to fall into obscurity again as the promise remains unrealized.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Real Time Queries Without Compromises"/>
+    <meta property="og:description" content="The desire to eliminate barriers between raw data and useful insights has driven decades of engineering innovation. Countless databases, datastores, indexes, and query-level solutions promising to make this dream a reality have surfaced at regular intervals, only to fall into obscurity again as the promise remains unrealized." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/complex-queries-without-sacrificing-latency/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/complex-queries-without-sacrificing-latency.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-10-24T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/complex-queries-without-sacrificing-latency.jpg" alt="Real Time Queries Without Compromises"/>
+    </div>
+    
+
+    <div class="single-hero-overlay green-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Real Time Queries Without Compromises</h1>
+      <h6 class="h-6-caps-white">10/24/2017 • 5 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Real&#43;Time&#43;Queries&#43;Without&#43;Compromises%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcomplex-queries-without-sacrificing-latency%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcomplex-queries-without-sacrificing-latency%2F&title=Real&#43;Time&#43;Queries&#43;Without&#43;Compromises&summary=The&#43;desire&#43;to&#43;eliminate&#43;barriers&#43;between&#43;raw&#43;data&#43;and&#43;useful&#43;insights&#43;has&#43;driven&#43;decades&#43;of&#43;engineering&#43;innovation.&#43;Countless&#43;databases%2C&#43;datastores%2C&#43;indexes%2C&#43;and&#43;query-level&#43;solutions&#43;promising&#43;to&#43;make&#43;this&#43;dream&#43;a&#43;reality&#43;have&#43;surfaced&#43;at&#43;regular&#43;intervals%2C&#43;only&#43;to&#43;fall&#43;into&#43;obscurity&#43;again&#43;as&#43;the&#43;promise&#43;remains&#43;unrealized.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fcomplex-queries-without-sacrificing-latency%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>The desire to eliminate barriers between raw data and useful insights has driven decades of engineering innovation. Countless databases, datastores, indexes, and query-level solutions promising to make this dream a reality have surfaced at regular intervals, only to fall into obscurity again as the promise remains unrealized.</p>
+<p>In the meantime, an entire class of data-centric professions has stepped in to fill the gaps left by current technologies. Those professions are doing the work of cleaning, manipulating, and analyzing data that continues to stymie our machines. So great is the demand for these skills that the <a href="https://www.idc.com/getdoc.jsp?containerId=prUS41826116">IDC predicts</a> global revenues for big data and business analytics – the services these data solutions and professionals provide – will grow from $130.1 billion in 2016 to more than $203 billion in 2020.</p>
+<p>The rise of artificial intelligence (AI) and machine learning (ML) carries even greater promise: the <a href="https://www.idc.com/getdoc.jsp?containerId=IDC_P33198">IDC estimates</a> that spending on AI/ML capabilities will grow 55%, ultimately reaching $47 billion in three short years.</p>
+<p>In short, industries need these technologies and services, and they’re paying massive amounts of money to get them.</p>
+<p>Take Uber, for example. The <a href="https://www.nytimes.com/2017/10/21/style/susan-fowler-uber.html">embattled</a> <a href="https://www.nytimes.com/2017/06/21/technology/uber-ceo-travis-kalanick.html">tech giant’s</a> mission is to make “transportation as reliable as running water, everywhere, for everyone.” In order to accomplish this, the rideshare platform connects people who need rides to strangers with cars in mere seconds, and sweetens the deal by automating payments, thereby eliminate the awkward exchange of cash or the necessity of cards. All on a smartphone. Simple. Brilliant.</p>
+<p>But it takes a ton of real-time, data-based decisions to make that happen.</p>
+<p><a href="https://www.linkedin.com/in/vinothchandar/">Vinoth Chandar</a>, a staff software engineer at Uber, recently <a href="https://www.oreilly.com/ideas/ubers-case-for-incremental-processing-on-hadoop">made the case for incremental processing on Hadoop</a> for <em>near</em>-real time use cases at Uber. He posits that there is a gap in capability between traditional batch oriented Hadoop, and streaming solutions like Storm, Spark Streaming and Flink; these streaming solutions work well for sub-5 minute latency requirements, and Hadoop works well when an hour or more is sufficient. So there is a gap in the 5-60 minute range; of course, the streaming solutions will work just fine here, but if you could get Hadoop to work well in that range, you can (a) save lots of cost, (b) greatly simplify your infrastructure, and (c) take advantage of more mature SQL tooling. Vinoth proposes adding some new capabilities to the Hadoop ecosystem to support incremental processing for this near real time use case.</p>
+<p>Vinoth&rsquo;s post is great by the way, and you should totally go read it. We here at Pilosa agree with everything right up to the point where he suggests continuing to use Hadoop with just a few modifications.</p>
+<p>To us, this seems like putting a bandaid over ravenous flesh-eating bacteria. As we mentioned above, data volumes are only increasing, and latency requirements are plummeting. So why go through Herculean efforts to retrofit a batch-oriented, high-latency technology into working for near real-time use cases, when the need for REAL real-time use cases increases every day? If you&rsquo;re going to collapse the lambda architecture to one side, let&rsquo;s make it the low latency/streaming side, not the &ldquo;my results are between 5 minutes and a few hours old&rdquo; side!</p>
+<p>Most of Vinoth&rsquo;s arguments work pretty well whether you&rsquo;re talking about streaming or batch anyway. For example, if your latency requirements are not stringent, then stream processing workers can batch data store updates. Doing this will generally give you an overall increase in throughput per worker allowing you to reduce the number of workers, and therefore save on infrastructure costs. Pilosa has support for configurable batching which shows the latency/throughput trade off clearly:</p>
+<table>
+<thead>
+<tr>
+<th>Batch Size</th>
+<th>Time</th>
+<th>Latency to 1st result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>14m47.830748948s</td>
+<td>0.0087s</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>2m34.943978702s</td>
+<td>0.0154s</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>1m14.523008057s</td>
+<td>0.074s</td>
+</tr>
+<tr>
+<td>100000</td>
+<td>11.044166203s</td>
+<td>0.11s</td>
+</tr>
+<tr>
+<td>1000000</td>
+<td>6.535759196s</td>
+<td>0.65s</td>
+</tr>
+</tbody>
+</table>
+<p>Another of Vinoth&rsquo;s arguments is that sticking with Hadoop allows you to take advantage of the mature tooling for SQL on Hadoop, and this is certainly valid; it&rsquo;s always tempting to use the latest technology available, but more often than not it will cause as many problems as it solves.</p>
+<p>The problem with these SQL on Hadoop packages is that they are fundamentally based on Hadoop&rsquo;s concepts – they operate on immutable data, and require massive amounts of precomputation to be performant. Indeed, the author&rsquo;s proposed extensions to Hadoop revolve primarily around the ability to change and update existing data in an efficient way rather than rewriting entire partitions. Precomputation can be very useful for query acceleration, but it ultimately complicates things, particularly if you have delayed events, or &ldquo;late data&rdquo; as Vinoth calls it. If only there were some way to have <a href="https://www.pilosa.com/use-cases/retail-analytics/">fast queries without precomputation&hellip;</a></p>
+<p>Vinoth&rsquo;s final, major argument is &ldquo;fewer moving parts;&rdquo; any time you can reduce the number of subsystems in a tech stack, you&rsquo;re probably going to make things less expensive, easier to change, simpler to manage, etc. Simplicity is one of our main foundations at Pilosa, so we&rsquo;re nodding enthusiastically at this bit. As we mentioned earlier on though (but it bears repeating): if you&rsquo;re only going to implement one arm of a lambda architecture (batch or streaming), MAKE IT STREAMING! Then take a look at <a href="https://www.pilosa.com/docs/latest/introduction/">Pilosa</a> to see how you can still get complete, up to date results for complex queries without sacrificing latency.</p>
+<p><em>Ali is Pilosa&rsquo;s jack of all trades and resident research nerd. Jaffee is a lead software engineer at Pilosa and is obsessed with optimization. Say hello to them on Twitter at <a href="https://twitter.com/ay_em_see?lang=en">@ay_em_see</a> and <a href="https://twitter.com/mattjaffee?lang=en">@mattjaffee</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley and Matt Jaffee">
+        <div class="body-bold"><a href="https://twitter.com/slothware">Ali Cooley and Matt Jaffee</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

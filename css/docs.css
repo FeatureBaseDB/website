@@ -1,0 +1,139 @@
+.docs-wrapper {
+  max-width: 1366px;
+  margin: 0 auto;
+}
+
+.docs-nav-container{
+  background: #f8fafb;
+}
+
+.docs-nav{
+  display: flex;
+  align-items:  flex-end;
+  flex-direction: column;
+  margin-top: 10px;
+  padding: 10px;
+  /*this makes the nav stick*/
+  /*position: sticky;*/
+  /*top: 10px;*/
+}
+.docs-nav ul{
+  list-style-type: none;
+  padding: 0;
+  padding-left: 10px;
+  min-width: 240px;
+}
+.docs-nav li>a{
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+/*first level*/
+.docs-nav > ul > li > a{
+  font-size: 20px;
+	font-weight: 500;
+	line-height: 3.25;
+	letter-spacing: 0.2px;
+	color: #0e1a35;
+
+}
+
+
+
+
+/*second level*/
+.docs-nav > ul > li > a + ul > li>a{
+    font-size: 18px;
+
+    line-height: 3.25;
+    letter-spacing: 0.2px;
+}
+
+.docs-nav > ul > li ul {
+    display: none;
+}
+
+.docs-nav > ul > li > .docs-active + ul {
+    display: block;
+}
+
+.docs-active{
+  border-left: 5px solid #1db598;
+  font-weight: 500;
+  margin-left: -5px;
+}
+.docs-nav-btn-container{
+  width: 100%;
+  padding-left: 25%;
+}
+.docs-nav-mobile{display: none;}
+
+@media (max-width: 1000px) {
+  .docs-nav-container {
+    display: none;
+  }
+  .docs-nav-mobile{
+    display: block;
+    background: #f8fafb;
+  }
+}
+
+.dropdown-nav{
+  padding-bottom: 5px;
+  padding-top: 20px;
+  background: #f8fafb;
+  outline: none;
+  letter-spacing: 1.25px;
+  font-weight: 600;
+
+}
+.dropdown-toggle::after {
+    display:none
+}
+
+.inner-dropdown-nav{
+
+  width: 85vw;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+
+}
+
+.dropdown-menu-nav{
+  width: 90%;
+  margin-left: 30px;
+}
+
+.docsearch-container {
+    margin: 30px auto 0px;
+    padding: 0;
+    width: 250px;
+    text-align:center;
+}
+
+.docsearch-input {
+    margin: 0 auto;
+    padding: 0;
+    width: 244px;
+}
+
+.docsearch-icon {
+    position: relative;
+    z-index: 1;
+    left: -25px;
+    top: 2px;
+    color: #7B7B7B;
+    width: 0;
+}
+
+pre.request {
+    margin-bottom: 0px;
+}
+pre.response {
+    background-color: #eee;
+    margin-top: 0px;
+    border-top: 0px;
+    font-size: 12px;
+}
+

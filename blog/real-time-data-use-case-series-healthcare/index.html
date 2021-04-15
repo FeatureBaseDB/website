@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Real-time Data Use Case Series: Healthcare &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="The big data landscape is advancing rapidly, and changing healthcare as we know it.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Real-time Data Use Case Series: Healthcare"/>
+    <meta property="og:description" content="The big data landscape is advancing rapidly, and changing healthcare as we know it." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/real-time-data-use-case-series-healthcare/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/real-time-use-case-health-header.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-11-17T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/real-time-use-case-health-header.jpg" alt="Real-time Data Use Case Series: Healthcare"/>
+    </div>
+    
+
+    <div class="single-hero-overlay green-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Real-time Data Use Case Series: Healthcare</h1>
+      <h6 class="h-6-caps-white">11/17/2017 • 5 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Real-time&#43;Data&#43;Use&#43;Case&#43;Series%3A&#43;Healthcare%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Freal-time-data-use-case-series-healthcare%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Freal-time-data-use-case-series-healthcare%2F&title=Real-time&#43;Data&#43;Use&#43;Case&#43;Series%3A&#43;Healthcare&summary=The&#43;big&#43;data&#43;landscape&#43;is&#43;advancing&#43;rapidly%2C&#43;and&#43;changing&#43;healthcare&#43;as&#43;we&#43;know&#43;it.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Freal-time-data-use-case-series-healthcare%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>The big data landscape is advancing rapidly, and changing healthcare as we know it.</p>
+<p>As Artificial Intelligence (AI) and Machine Learning (ML) slide out of the shadows and into the limelight, industries must begin to contend with their <a href="https://www.wsj.com/articles/how-artificial-intelligence-will-change-everything-1488856320">many possibilities</a> and <a href="https://www.vanityfair.com/news/2017/03/elon-musk-billion-dollar-crusade-to-stop-ai-space-x">potential perils</a>. Before these new technologies can be employed and perfected, however, companies must learn to manage the deluge of human and machine-generated data now clogging enterprise-level datastores.</p>
+<p>So far, the it seems the data is winning: <a href="https://hbr.org/2017/05/whats-your-data-strategy">cross-industry studies have shown</a> that less than 50% of an organization’s structured data are actively used in making decisions, and less than 1% of its unstructured data are analyzed – or even used – at all. This can be <a href="http://www.healthaffairs.org/do/10.1377/hblog20150821.050034/full/">particularly problematic in healthcare</a>, where <a href="https://insights.datamark.net/white-papers/unstructured-data-in-electronic-health-record-systems-challenges-and-solutions">approximately 60%</a> of valuable patient-care data is “trapped” in unstructured formats.</p>
+<p>In this first installment of our industry-level real-time data series, we will review two existing real-time data use cases that are accelerating the pace of care and delivery breakthroughs in the US Healthcare sector.</p>
+<p><img src="/img/blog/health-use-case-1.jpg" alt="Use case one header"></p>
+<h3 id="use-case-1-stopping-the-spread-of-deadly-iatrogenic-infections">Use Case 1: Stopping the Spread of Deadly Iatrogenic Infections</h3>
+<p><em><a href="https://www.webmd.com/digestive-disorders/clostridium-difficile-colitis#1">Clostridium Difficile (C. diff)</a></em> is a typically harmless bacteria found throughout the environment, often colonizing the human digestive system with no ill effects. When allowed to grow unchecked, however, it can lead to serious inflammation of the colon, known as colitis, and even death. These growth events are generally rare, as competition with other, beneficial bacteria in our microbiome typically keeps C. diff’s numbers in check. One of the only times an individual is at risk for a C. diff infection is immediately after taking a course of antibiotics, which disrupts the balance of beneficial bacteria in our digestive systems.</p>
+<p>C. diff is most often spread iatrogenically within healthcare facilities, as caregivers unknowingly carry it from room to room after touching clothing, sheets, keyboards, and other surfaces. While many hospitals are able to limit the spread of C. diff through standardized sanitation measures, two units at Salem Health hospitals in Portland, Oregon, were experiencing particularly high rates of infection in 2014.</p>
+<p>Rather than go through the standard prevention measures – repeated staff sanitation trainings – Salem <a href="https://hbr.org/2017/05/whats-your-data-strategy">went on the offensive</a>. They deployed their clinical business intelligence (CBI) team to create a real-time reporting system that allowed caregivers across two hospitals, a rehabilitation center, and nine clinics to track and compare C. diff infections across units. They <a href="http://salemhealth.org/for-healthcare-professionals/common-ground/dec-26-2016/preventing-the-spread-of-c-difficile-part-2">further revised</a> diagnostic algorithms to ensure more efficient diagnosis, closing the gap between symptom onset and appropriate treatment. Within two years, they had dropped off of <a href="https://www.consumerreports.org/doctors-hospitals/consumer-reports-names-hospitals-with-high-c-diff-infection-rates/">Consumer Reports’ list</a> of hospitals with abnormally high C. diff rates.</p>
+<p><img src="/img/blog/health-use-case-2.jpg" alt="Use case one header"></p>
+<h3 id="use-case-2-using-missile-defense-algorithms-to-spot-sepsis">Use Case 2: Using Missile Defense Algorithms to Spot Sepsis</h3>
+<p><a href="https://www.webmd.com/a-to-z-guides/sepsis-septicemia-blood-infection#1">Sepsis</a> <a href="https://www.medicinenet.com/sepsis/article.htm">kills nearly 40%</a> of the 750,000 people who contract it each year, costing hospitals more than $12.5 billion in care costs. Even when it is not fatal, its effects can lead to permanent mental and physical disabilities. The high mortality is due largely to the fast pace of the disease and the difficulties healthcare workers experience in spotting it early on. On the one hand, a patient’s chances of survival drop significantly for every hour they suffer from sepsis. On the other, the disease’s early stages are so similar to the flu that many caregivers do not know to administer the required antibiotic treatments in time. Further complicating the problem, current technologies used to track sepsis are largely ignored by hospital staff due to their exceptionally high error rates.</p>
+<p>Working separately, two teams of researchers have identified improved methods to identify sepsis sooner using real-time analytics. The first, out of UC Davis, analyzed patients’ EHRs to determine whether they provided better risk indicators for patients than current methods. They found that three previously unknown indicators – lactate level, blood pressure and respiratory rate – can predict the likelihood of a patient succumbing to the disease with high levels of accuracy. They are currently in the process of creating a customized algorithm for EHR systems that will automatically track these indicators and alert medical staff of a patient’s risk in real time.</p>
+<p>The second team, out of Lockheed Martin, has <a href="https://www.lockheedmartin.com/us/news/features/2014/sepsis-detection.html">adapted</a> the company’s signature ML algorithmic platforms – currently used in missile defense – to accelerate sepsis identification. Rather than focusing on identifying additional indicators, Lockheed Martin focused on improving both the speed and accuracy of sepsis identification. They accomplished this by monitoring continuous changes in patient vital signs and blood work, rather than momentary indicators, and then deploying data analytics to flag sepsis cases. A trial that included more than 4,500 patients concluded that this method correctly identified sepsis cases more than 90% of the time and, on average, about 14 to 16 hours before the conventional approach. Further, it reduced false positives to less than 1%, making diagnosis more reliable in critical care settings.</p>
+<p>While both of these interventions are highly disease-specific, their consequences are far reaching for the future of patient health outcomes. In the short term, effectively addressing these persistent health problems will allow caregivers more time and resources to provide better care to more patients. In the long term, these methods can be improved and adapted to additional cases, benefiting countless others in the years to come.</p>
+<p>If you have any questions about how Pilosa can help your business unlock your data store for real-time queries, please feel free to <a href="https://www.pilosa.com/about/#contact">contact us</a>.</p>
+<p>Ali is the resident Jack of all trades at Pilosa. She likes health and tech probably more than she should. Find her on Twitter at <a href="https://twitter.com/ay_em_see?lang=en">@ay_em_see</a>.</p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_01.svg" alt="Avatar for Ali Cooley">
+        <div class="body-bold"><a href="https://twitter.com/slothware">Ali Cooley</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

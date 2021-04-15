@@ -1,0 +1,3764 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Client Libraries &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Client Libraries This section contains example code for client libraries in several languages. Please remember that when modeling your data in Pilosa, it is best to keep row and column ids sequential. It is best to avoid using the output of a hash or randomly distributed ids with Pilosa.
+Go You can find the Go client library for Pilosa at our Go Pilosa Repository. Check out its README for more information and installation instructions.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Client Libraries"/>
+    <meta property="og:description" content="Client Libraries This section contains example code for client libraries in several languages. Please remember that when modeling your data in Pilosa, it is best to keep row and column ids sequential. It is best to avoid using the output of a hash or randomly distributed ids with Pilosa.
+Go You can find the Go client library for Pilosa at our Go Pilosa Repository. Check out its README for more information and installation instructions." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v1.2/client-libraries/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Client Libraries
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/client-libraries/"  class="docs-active" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/client-libraries/"  class="docs-active" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.2/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.2/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v1.2. View the <a href="/docs/latest/client-libraries/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="client-libraries">Client Libraries</h2>
+<p>This section contains example code for client libraries in several languages. Please remember that when modeling your data in Pilosa, it is best to keep row and column ids sequential. It is best to avoid using the output of a hash or randomly distributed ids with Pilosa.</p>
+<h3 id="go">Go</h3>
+<p>You can find the Go client library for Pilosa at our <a href="https://github.com/pilosa/go-pilosa">Go Pilosa Repository</a>. Check out its <a href="https://github.com/pilosa/go-pilosa/blob/master/README.md">README</a> for more information and installation instructions.</p>
+<p>We are going to use the index you have created in the <a href="../getting-started/">Getting Started</a> section. Before carrying on, make sure that example index is created, sample stargazer data is imported and Pilosa server is running on the default address: <code>http://localhost:10101</code>.</p>
+<p>Error handling has been omitted in the example below for brevity.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+
+	<span style="color:#e6db74">&#34;github.com/pilosa/go-pilosa&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#75715e">// We will just use the default client which assumes the server is at http://localhost:10101
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">client</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">pilosa</span>.<span style="color:#a6e22e">DefaultClient</span>()
+
+	<span style="color:#75715e">// Let&#39;s load the schema from the server.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Note that, for this example the schema should be created beforehand
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// and the stargazer data should be imported.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// See the Getting Started repository: https://github.com/pilosa/getting-started/
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">schema</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Schema</span>()
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#75715e">// Most calls will return an error value.
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// You should handle them appropriately.
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// We will just terminate the program in this case.
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// Error handling was left out for brevity in the rest of the code.
+</span><span style="color:#75715e"></span>		panic(<span style="color:#a6e22e">err</span>)
+	}
+
+	<span style="color:#75715e">// We need to refer to indexes and fields before we can use them in a query.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">repository</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">Index</span>(<span style="color:#e6db74">&#34;repository&#34;</span>)
+	<span style="color:#a6e22e">stargazer</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Field</span>(<span style="color:#e6db74">&#34;stargazer&#34;</span>)
+	<span style="color:#a6e22e">language</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Field</span>(<span style="color:#e6db74">&#34;language&#34;</span>)
+
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">pilosa</span>.<span style="color:#a6e22e">QueryResponse</span>
+
+	<span style="color:#75715e">// Which repositories did user 14 star:
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">14</span>))
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;User 14 starred: &#34;</span>, <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">Result</span>().<span style="color:#a6e22e">Row</span>().<span style="color:#a6e22e">Columns</span>)
+
+	<span style="color:#75715e">// What are the top 5 languages in the sample data?
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#a6e22e">language</span>.<span style="color:#a6e22e">TopN</span>(<span style="color:#ae81ff">5</span>))
+	<span style="color:#a6e22e">languageIDs</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">uint64</span>{}
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">item</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">Result</span>().<span style="color:#a6e22e">CountItems</span>() {
+		<span style="color:#a6e22e">languageIDs</span> = append(<span style="color:#a6e22e">languageIDs</span>, <span style="color:#a6e22e">item</span>.<span style="color:#a6e22e">ID</span>)
+	}
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Top 5 languages: &#34;</span>, <span style="color:#a6e22e">languageIDs</span>)
+
+	<span style="color:#75715e">// Which repositories were starred by both user 14 and 19:
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(
+		<span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Intersect</span>(
+			<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">14</span>),
+			<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">19</span>)))
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Both user 14 and 19 starred:&#34;</span>, <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">Result</span>().<span style="color:#a6e22e">Row</span>().<span style="color:#a6e22e">Columns</span>)
+
+	<span style="color:#75715e">// Which repositories were starred by user 14 or 19:
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(
+		<span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Union</span>(
+			<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">14</span>),
+			<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">19</span>)))
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;User 14 or 19 starred:&#34;</span>, <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">Result</span>().<span style="color:#a6e22e">Row</span>().<span style="color:#a6e22e">Columns</span>)
+
+	<span style="color:#75715e">// Which repositories were starred by user 14 or 19 and were written in language 1:
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(
+		<span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Intersect</span>(
+			<span style="color:#a6e22e">repository</span>.<span style="color:#a6e22e">Union</span>(
+				<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">14</span>),
+				<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">19</span>),
+			),
+			<span style="color:#a6e22e">language</span>.<span style="color:#a6e22e">Row</span>(<span style="color:#ae81ff">1</span>)))
+	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;User 14 or 19 starred, written in language 1:&#34;</span>, <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">Result</span>().<span style="color:#a6e22e">Row</span>().<span style="color:#a6e22e">Columns</span>)
+
+	<span style="color:#75715e">// Set user 99999 as a stargazer for repository 77777?
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#a6e22e">stargazer</span>.<span style="color:#a6e22e">Set</span>(<span style="color:#ae81ff">99999</span>, <span style="color:#ae81ff">77777</span>))
+}
+</code></pre></div><p>Running the above program should produce output like this:</p>
+<pre><code>User 14 starred:  [1 2 3 362 368 391 396 409 416 430 436 450 454 460 461 464 466 469 470 483 484 486 490 491 503 504 514]
+Top 5 languages:  [5 1 4 9 13]
+Both user 14 and 19 starred: [2 3 362 396 416 461 464 466 470 486]
+User 14 or 19 starred: [1 2 3 361 362 368 376 377 378 382 386 388 391 396 398 400 409 411 412 416 426 428 430 435 436 450 452 453 454 456 460 461 464 465 466 469 470 483 484 486 487 489 490 491 500 503 504 505 512 514]
+User 14 or 19 starred, written in language 1: [1 2 362 368 382 386 416 426 435 456 461 483 500 503 504 514]
+</code></pre><h3 id="python">Python</h3>
+<p>You can find the Python client library for Pilosa at our <a href="https://github.com/pilosa/python-pilosa">Python Pilosa Repository</a>. Check out its <a href="https://github.com/pilosa/python-pilosa/blob/master/README.md">README</a> or <a href="https://pilosa.readthedocs.io/en/latest/">readthedocs</a> for more information and installation instructions.</p>
+<p>We are going to use the index you have created in the <a href="../getting-started/">Getting Started</a> section. Before carrying on, make sure that example index is created, sample stargazer data is imported and Pilosa server is running on the default address: <code>http://localhost:10101</code>.</p>
+<p>Error handling has been omitted in the example below for brevity.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> print_function
+<span style="color:#f92672">from</span> pilosa <span style="color:#f92672">import</span> Index, Client, PilosaError, TimeQuantum
+
+<span style="color:#75715e"># We will just use the default client which assumes the server is at http://localhost:10101</span>
+client <span style="color:#f92672">=</span> Client()
+
+<span style="color:#75715e"># Let&#39;s load the schema from the server.</span>
+<span style="color:#75715e"># Note that, for this example the schema should be created beforehand</span>
+<span style="color:#75715e"># and the stargazer data should be imported.</span>
+<span style="color:#75715e"># See the Getting Started repository: https://github.com/pilosa/getting-started/</span>
+
+<span style="color:#75715e"># Let&#39;s create Index and Field objects, which will contain the settings</span>
+<span style="color:#75715e"># for the corresponding indexes and fields.</span>
+<span style="color:#66d9ef">try</span>:
+    schema <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>schema()
+<span style="color:#66d9ef">except</span> PilosaError <span style="color:#66d9ef">as</span> e:
+    <span style="color:#75715e"># Most calls will raise an exception on errors.</span>
+    <span style="color:#75715e"># You should handle them appropriately.</span>
+    <span style="color:#75715e"># We will just terminate the program in this case.</span>
+    <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">SystemExit</span>(e)
+
+<span style="color:#75715e"># We need to refer to indexes and fields before we can use them in a query.</span>
+repository <span style="color:#f92672">=</span> schema<span style="color:#f92672">.</span>index(<span style="color:#e6db74">&#34;repository&#34;</span>)
+stargazer <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span>field(<span style="color:#e6db74">&#34;stargazer&#34;</span>)
+language <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span>field(<span style="color:#e6db74">&#34;language&#34;</span>)
+
+<span style="color:#75715e"># Which repositories did user 8 star:</span>
+repository_ids <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>query(stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">14</span>))<span style="color:#f92672">.</span>result<span style="color:#f92672">.</span>row<span style="color:#f92672">.</span>columns
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;User 8 starred: &#34;</span>, repository_ids)
+
+<span style="color:#75715e"># What are the top 5 languages in the sample data:</span>
+top_languages <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>query(language<span style="color:#f92672">.</span>topn(<span style="color:#ae81ff">5</span>))<span style="color:#f92672">.</span>result<span style="color:#f92672">.</span>count_items
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Top 5 languages: &#34;</span>, [item<span style="color:#f92672">.</span>id <span style="color:#66d9ef">for</span> item <span style="color:#f92672">in</span> top_languages])
+
+<span style="color:#75715e"># Which repositories were starred by both user 14 and 19:</span>
+query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span>intersect(
+    stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">14</span>),
+    stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">19</span>)
+)
+mutually_starred <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>query(query)<span style="color:#f92672">.</span>result<span style="color:#f92672">.</span>row<span style="color:#f92672">.</span>columns
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Both user 14 and 19 starred:&#34;</span>, mutually_starred)
+
+<span style="color:#75715e"># Which repositories were starred by user 14 or 19:</span>
+query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span>union(
+    stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">14</span>),
+    stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">19</span>)
+)
+either_starred <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>query(query)<span style="color:#f92672">.</span>result<span style="color:#f92672">.</span>row<span style="color:#f92672">.</span>columns
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;User 14 or 19 starred:&#34;</span>, either_starred)
+
+<span style="color:#75715e"># Which repositories were starred by user 14 or 19 and were written in language 1:</span>
+query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span>intersect(
+    repository<span style="color:#f92672">.</span>union(
+        stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">14</span>),
+        stargazer<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">19</span>)
+    ),
+    language<span style="color:#f92672">.</span>row(<span style="color:#ae81ff">1</span>)
+)
+mutually_starred <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>query(query)<span style="color:#f92672">.</span>result<span style="color:#f92672">.</span>row<span style="color:#f92672">.</span>columns
+<span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;User 14 or 19 starred, written in language 1:&#34;</span>, mutually_starred)
+
+<span style="color:#75715e"># Set user 99999 as a stargazer for repository 77777</span>
+client<span style="color:#f92672">.</span>query(stargazer<span style="color:#f92672">.</span>set(<span style="color:#ae81ff">99999</span>, <span style="color:#ae81ff">77777</span>))
+</code></pre></div><p>Running the above program should produce output like this:</p>
+<pre><code>('User 8 starred: ', [1L, 2L, 3L, 362L, 368L, 391L, 396L, 409L, 416L, 430L, 436L, 450L, 454L, 460L, 461L, 464L, 466L, 469L, 470L, 483L, 484L, 486L, 490L, 491L, 503L, 504L, 514L])
+('Top 5 languages: ', [5L, 1L, 4L, 9L, 13L])
+('Both user 14 and 19 starred:', [2L, 3L, 362L, 396L, 416L, 461L, 464L, 466L, 470L, 486L])
+('User 14 or 19 starred:', [1L, 2L, 3L, 361L, 362L, 368L, 376L, 377L, 378L, 382L, 386L, 388L, 391L, 396L, 398L, 400L, 409L, 411L, 412L, 416L, 426L, 428L, 430L, 435L, 436L, 450L, 452L, 453L, 454L, 456L, 460L, 461L, 464L, 465L, 466L, 469L, 470L, 483L, 484L, 486L, 487L, 489L, 490L, 491L, 500L, 503L, 504L, 505L, 512L, 514L])
+('User 14 or 19 starred, written in language 1:', [1L, 2L, 362L, 368L, 382L, 386L, 416L, 426L, 435L, 456L, 461L, 483L, 500L, 503L, 504L, 514L])
+</code></pre><h3 id="java">Java</h3>
+<p>You can find the Java client library for Pilosa at our <a href="https://github.com/pilosa/java-pilosa">Java Pilosa Repository</a>. Check out its <a href="https://github.com/pilosa/java-pilosa/blob/master/README.md">README</a> for more information and installation instructions.</p>
+<p>We are going to use the index you have created in the <a href="../getting-started/">Getting Started</a> section. Before carrying on, make sure that example index is created, sample stargazer data is imported and Pilosa server is running on the default address: <code>http://localhost:10101</code>.</p>
+<p>Error handling has been omitted in the example below for brevity.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> com.pilosa.client.*<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.pilosa.client.orm.*<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.pilosa.client.exceptions.PilosaException<span style="color:#f92672">;</span>
+
+<span style="color:#f92672">import</span> java.util.ArrayList<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StarTrace</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span><span style="color:#f92672">(</span>String<span style="color:#f92672">[]</span> args<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// We will just use the default client which assumes the server is at http://localhost:10101
+</span><span style="color:#75715e"></span>        PilosaClient client <span style="color:#f92672">=</span> PilosaClient<span style="color:#f92672">.</span><span style="color:#a6e22e">defaultClient</span><span style="color:#f92672">();</span>
+
+        <span style="color:#75715e">// Let&#39;s load the schema from the server.
+</span><span style="color:#75715e"></span>        Schema schema<span style="color:#f92672">;</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            schema <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">readSchema</span><span style="color:#f92672">();</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>PilosaException ex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// Most calls will return an error value.
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// You should handle them appropriately.
+</span><span style="color:#75715e"></span>            <span style="color:#75715e">// We will just terminate the program in this case.
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException<span style="color:#f92672">(</span>ex<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+
+        <span style="color:#75715e">// We need to refer to indexes and fields before we can use them in a query.
+</span><span style="color:#75715e"></span>        Index repository <span style="color:#f92672">=</span> schema<span style="color:#f92672">.</span><span style="color:#a6e22e">index</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;repository&#34;</span><span style="color:#f92672">);</span>
+        Field stargazer <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span><span style="color:#a6e22e">field</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;stargazer&#34;</span><span style="color:#f92672">);</span>
+        Field language <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span><span style="color:#a6e22e">field</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;language&#34;</span><span style="color:#f92672">);</span>
+
+        QueryResponse response<span style="color:#f92672">;</span>
+        QueryResult result<span style="color:#f92672">;</span>
+        PqlQuery query<span style="color:#f92672">;</span>
+        List<span style="color:#f92672">&lt;</span>Long<span style="color:#f92672">&gt;</span> repositoryIDs<span style="color:#f92672">;</span>
+
+        <span style="color:#75715e">// Which repositories did user 14 star:
+</span><span style="color:#75715e"></span>        response <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>14<span style="color:#f92672">));</span>
+        repositoryIDs <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getResult</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getRow</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getColumns</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;User 14 starred: &#34;</span> <span style="color:#f92672">+</span> repositoryIDs<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">// What are the top 5 languages in the sample data:
+</span><span style="color:#75715e"></span>        response <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>language<span style="color:#f92672">.</span><span style="color:#a6e22e">topN</span><span style="color:#f92672">(</span>5<span style="color:#f92672">));</span>
+        List<span style="color:#f92672">&lt;</span>CountResultItem<span style="color:#f92672">&gt;</span> top_languages <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getResult</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getCountItems</span><span style="color:#f92672">();</span>
+        List<span style="color:#f92672">&lt;</span>Long<span style="color:#f92672">&gt;</span> languageIDs <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;</span>Long<span style="color:#f92672">&gt;();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>CountResultItem item <span style="color:#f92672">:</span> top_languages<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            languageIDs<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>item<span style="color:#f92672">.</span><span style="color:#a6e22e">getID</span><span style="color:#f92672">());</span>
+        <span style="color:#f92672">}</span>
+
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Top Languages: &#34;</span> <span style="color:#f92672">+</span>languageIDs<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">// Which repositories were starred by both user 14 and 19:
+</span><span style="color:#75715e"></span>        query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span><span style="color:#a6e22e">intersect</span><span style="color:#f92672">(</span>
+                stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>14<span style="color:#f92672">),</span>
+                stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>19<span style="color:#f92672">)</span>
+        <span style="color:#f92672">);</span>
+        response <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>query<span style="color:#f92672">);</span>
+        repositoryIDs <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getResult</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getRow</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getColumns</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Both user 14 and 19 starred: &#34;</span> <span style="color:#f92672">+</span> repositoryIDs<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">// Which repositories were starred by user 14 or 19:
+</span><span style="color:#75715e"></span>        query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span><span style="color:#a6e22e">union</span><span style="color:#f92672">(</span>
+                stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>14<span style="color:#f92672">),</span>
+                stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>19<span style="color:#f92672">)</span>
+        <span style="color:#f92672">);</span>
+        response <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>query<span style="color:#f92672">);</span>
+        repositoryIDs <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getResult</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getRow</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getColumns</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;User 14 or 19 starred: &#34;</span> <span style="color:#f92672">+</span> repositoryIDs<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">// Which repositories were starred by user 14 or 19 and were written in language 1:
+</span><span style="color:#75715e"></span>        query <span style="color:#f92672">=</span> repository<span style="color:#f92672">.</span><span style="color:#a6e22e">intersect</span><span style="color:#f92672">(</span>
+                repository<span style="color:#f92672">.</span><span style="color:#a6e22e">union</span><span style="color:#f92672">(</span>
+                        stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>14<span style="color:#f92672">),</span>
+                        stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>19<span style="color:#f92672">)</span>
+                <span style="color:#f92672">),</span>
+                language<span style="color:#f92672">.</span><span style="color:#a6e22e">row</span><span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>
+        <span style="color:#f92672">);</span>
+        response <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>query<span style="color:#f92672">);</span>
+        repositoryIDs <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getResult</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getRow</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getColumns</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;User 14 or 19 starred, written in language 1: &#34;</span> <span style="color:#f92672">+</span> repositoryIDs<span style="color:#f92672">);</span>
+
+        <span style="color:#75715e">// Set user 99999 as a stargazer for repository 77777:
+</span><span style="color:#75715e"></span>        client<span style="color:#f92672">.</span><span style="color:#a6e22e">query</span><span style="color:#f92672">(</span>stargazer<span style="color:#f92672">.</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>99999<span style="color:#f92672">,</span> 77777<span style="color:#f92672">));</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Running the above program should produce output like this:</p>
+<pre><code>User 14 starred: [1, 2, 3, 362, 368, 391, 396, 409, 416, 430, 436, 450, 454, 460, 461, 464, 466, 469, 470, 483, 484, 486, 490, 491, 503, 504, 514]
+Top Languages: [5, 1, 4, 9, 13]
+Both user 14 and 19 starred: [2, 3, 362, 396, 416, 461, 464, 466, 470, 486]
+User 14 or 19 starred: [1, 2, 3, 361, 362, 368, 376, 377, 378, 382, 386, 388, 391, 396, 398, 400, 409, 411, 412, 416, 426, 428, 430, 435, 436, 450, 452, 453, 454, 456, 460, 461, 464, 465, 466, 469, 470, 483, 484, 486, 487, 489, 490, 491, 500, 503, 504, 505, 512, 514]
+User 14 or 19 starred, written in language 1: [1, 2, 362, 368, 382, 386, 416, 426, 435, 456, 461, 483, 500, 503, 504, 514]
+</code></pre>
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v1.2/docs/client-libraries.md">View markdown source</a> on Github. Last updated 9 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v1.2"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v1.2"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

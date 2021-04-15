@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Apophenia: Seeking Patterns in Randomness &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Apophenia provides a seekable (but not cryptographically secure) PRNG
+implementation. Because what&rsquo;s the point in random numbers if you can&rsquo;t
+predict them?">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Apophenia: Seeking Patterns in Randomness"/>
+    <meta property="og:description" content="Apophenia provides a seekable (but not cryptographically secure) PRNG
+implementation. Because what&rsquo;s the point in random numbers if you can&rsquo;t
+predict them?" />
+    <meta property="og:url" content="https://www.pilosa.com/blog/apophenia/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/apophenia/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2019-08-29T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/apophenia/banner.jpg" alt="Apophenia: Seeking Patterns in Randomness"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Apophenia: Seeking Patterns in Randomness</h1>
+      <h6 class="h-6-caps-white">8/29/2019 • 7 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Apophenia%3A&#43;Seeking&#43;Patterns&#43;in&#43;Randomness%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fapophenia%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fapophenia%2F&title=Apophenia%3A&#43;Seeking&#43;Patterns&#43;in&#43;Randomness&summary=Apophenia&#43;provides&#43;a&#43;seekable&#43;%28but&#43;not&#43;cryptographically&#43;secure%29&#43;PRNG&#43;implementation.&#43;Because&#43;what%26rsquo%3Bs&#43;the&#43;point&#43;in&#43;random&#43;numbers&#43;if&#43;you&#43;can%26rsquo%3Bt&#43;predict&#43;them%3F%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fapophenia%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>Apophenia provides a seekable (but not cryptographically secure) PRNG
+implementation. Because what&rsquo;s the point in random numbers if you can&rsquo;t
+predict them?</p>
+<h3 id="introduction">Introduction</h3>
+<p>One of the difficulties of working with large data sets is that large data
+sets take up a large amount of space. For testing and benchmarking, it
+turns out that you don&rsquo;t care that much whether the data&rsquo;s accurate, but you
+want to be able to generate it quickly.</p>
+<p>To this end, I started working on a tool called <code>imagine</code> (still being
+developed) which allows creating pretty large amounts of data matching
+fairly arbitrary specifications of its characteristics. For instance, we
+might want data in which about 1% of bits are set, or data where which bits
+are set follows a Zipf distribution.</p>
+<p>And then I had this great idea: It&rsquo;d be nice, for performance testing, to be
+able to compare results between data sets even when the data sets were generated
+in different ways. For instance, generating all the column values for one row,
+then moving on to the next row, or generating all the row values for one column,
+then moving on to the next column. But what if differences between the data sets
+made them perform differently? Obviously, the solution is to make sure the data
+will be the same regardless of the order in which it&rsquo;s generated. And that
+suggests that what we really want is not just a PRNG, but a PRNG where
+we can seek to a given point in its output stream arbitrarily.</p>
+<p>I spent some time looking into existing work in this field, and there&rsquo;s a lot
+of it, but most of it is relatively computationally expensive, and really,
+we don&rsquo;t <em>care</em> about the quality of the bits all that much &ndash; we just need
+a lot of them, really fast.</p>
+<p>Enter the realization that AES-128 is very similar to a PRNG. If you initialize
+an AES block cipher with a given key (think of that as a seed), and then treat
+its 128-bit inputs as a 128-bit integers, start at 0, and count up, you get a
+series of 128-bit values. This isn&rsquo;t a novel idea; there&rsquo;s a lot of existing
+implementations out there that do things basically like it, but the ones I&rsquo;ve
+found typically use the counter (CTR) mode, or one of the chained modes.
+Apophenia runs in the default block cipher mode, maintaining an offset/counter
+internally, so we can jump to specific locations in the stream.</p>
+<p>And I could have stopped there, and just built anything else that wanted
+random values of more specific types in terms of it in our other code, but
+there&rsquo;s some conceptual overlap, so I built some of that additional
+functionality into the same package, to make the implementation more
+consistent.</p>
+<p>As a side note: Throughout, I&rsquo;m referring to powers of two as <code>1&lt;&lt;N</code> rather than
+<code>2^N</code>. This is because we&rsquo;re writing in Go, and in Go, <code>2^16</code> is just a fancy
+way of spelling <code>18</code>, and I am trying to get out of that habit before it bites
+me.</p>
+<h4 id="that-sure-is-a-lot-of-bits">That sure is a lot of bits</h4>
+<p>First off, while AES-128 is usually conceived of as 16 byte inputs and outputs,
+for our purposes, I wanted to treat it as a single <code>uint128</code>, only that&rsquo;s not
+a type in Go. Enter <code>apophenia.Uint128</code>, a structure that holds a pair of
+<code>uint64</code> values named <code>Hi</code> and <code>Lo</code>. (I am not the most creative person when
+it comes to naming things.) So we&rsquo;re looking at AES-128, not so much as a
+sequence of <code>1&lt;&lt;135</code> bits, as a sequence of <code>1&lt;&lt;128</code> 128-bit values. You
+might wonder why it&rsquo;s a structure, and not <code>[2]uint64</code>; the answer is the
+compiler appears to be slightly smarter about the structure, and it&rsquo;s a bit
+less ambiguous. (Should <code>u[0]</code> be the high-order-bits? Always, or just on
+big-endian hardware? Let&rsquo;s just call them Hi and Lo and be done.)</p>
+<p>I was raised by mathematicians and still think it&rsquo;s weird when people call
+a number large even though it&rsquo;s obviously finite, but I will admit, there&rsquo;s a
+fair amount of space in a 128-bit input. We take advantage of this to ensure
+that if you&rsquo;re grabbing sequences of values from the 128-bit space, you don&rsquo;t
+get the same sequence for two different things.</p>
+<p>For our purposes, we&rsquo;re mostly concerned with things where we might be iterating
+over a 64-bit range of &ldquo;columns&rdquo;, so let&rsquo;s use the column values as the low
+order word of our <code>Uint128</code> offsets. We also often care about iterating over
+rows, which tend to be significantly smaller &ndash; a few dozen is common, but we
+could reasonably expect to see values in the low billions. So we&rsquo;ll want
+a 32-bit value that can correspond to those in some way. That leaves us only
+32 more bits. Well, let&rsquo;s block out an 8-bit byte for the <em>kind</em> of thing being
+generated &ndash; for instance, Zipf distributions will use an entirely different
+set of 128-bit values than we use when generating permutations. This doesn&rsquo;t
+really matter very much, but hey, bits are cheap. So we have 24 bits left. What
+are those for? Well, it turns out, a lot of algorithms, like Zipf generators,
+want multiple consecutive values which they iterate on. Let&rsquo;s call those
+&ldquo;iterations&rdquo; and give them the remaining 24 bits.</p>
+<p>So this gives us our layout:</p>
+<p><img src="/img/blog/apophenia/seed-structure.png" alt="Apophenia seed structure"></p>
+<p>This allows some neat tricks. One is that you can compute the next iteration
+from a given value just by incrementing the high-order word. Most of these
+algorithms use only a handful of words, but just in case, the order is
+selected such that overflowing iteration hops to a different sequence, not
+to another seed of the same sequence. Similarly, you can just set the low-order
+word to the index you want without worrying about the high-order word at all.</p>
+<p>There&rsquo;s also a convenience function to create these offsets:</p>
+<p><code>OffsetFor(sequence SequenceType, seed uint32, iteration uint32, id uint64) Uint128</code></p>
+<h4 id="useful-generators">Useful Generators</h4>
+<p>It&rsquo;s great to have a seekable PRNG, but usually you want values which follow
+specific patterns. Apophenia provides a handful of prebuilt generators which
+produce values following specific rules, built on top of an underlying <code>Sequence</code>.</p>
+<p>The three currently-defined types are permutations (yielding the values from
+0 to N-1 in an arbitrary order), zipf distributions (yielding values from 0
+to N with a weighted distribution), and weighted bits. The zipf and permutation
+forms are straightforward, and correspond to similar functionality in Go&rsquo;s
+<code>math/rand</code>, although making them seekable changes them a bit. The weighted
+bits, however, are a relatively unusual application.</p>
+<p>Frequently, people look at creating weighted distributions of values; for
+instance, if you generate numbers by summing evenly-distributed values, you
+get a nice pretty bell curve. But in Molecula&rsquo;s use case, we frequently want
+billions of bits with some density of bits set; we don&rsquo;t care so much about
+weighting values within a larger range, as weighting 0 and 1.</p>
+<p>Usually, when people want to generate bits with a given probability that
+they&rsquo;re set, they generate a random number, then test it for a property with
+the given probability of being true. For instance, if you want a 1-in-6 chance,
+you might express this as <code>(x % 6) == 0</code>, which is pretty close. (It&rsquo;s not
+exactly correct, because the range of x isn&rsquo;t a multiple of 6, so some numbers
+are more likely than others, but with a 64-bit range, it&rsquo;s a very small
+difference.) And this works reasonably well, but it does suggest one possible
+problem, which is that you need to generate a random value for every bit you
+want. What if you want to generate a <em>lot</em> of bits?</p>
+<p>The <code>Weighted</code> generator supports this use case. You give it a density,
+expressed as a ratio where the denominator is a power of 2. For instance,
+you could request bits of which 3/16 are set, or 7/1024. Apophenia then
+creates bundles of 128 bits, with approximately that proportion of bits set,
+using bitwise operations on <code>Uint128</code>, using log2(denominator) steps. It
+doesn&rsquo;t try to solve the case where the denominator isn&rsquo;t a power of two,
+but it can generally be as close as you need, and it&rsquo;s a significant speedup.</p>
+<h4 id="future-directions">Future Directions</h4>
+<p>The apophenia package is pretty new, but it&rsquo;s been fairly stable from an API
+standpoint for a while now. It will probably get more sequence types and
+functionality added, but this seems like a good point for a release. So,
+here you go: <a href="https://github.com/molecula/apophenia">https://github.com/molecula/apophenia</a></p>
+<p>Note that this implementation, despite being based on a crypto function, is
+not itself reasonable for cryptographic purposes; it is entirely too possible
+to derive information about the &ldquo;state&rdquo; of the PRNG and predict its behavior.
+The tradeoff from security to controlled reproducibility is intentional, and
+is not a bug, but it&rsquo;s a real tradeoff.</p>
+<h4 id="useful-links">Useful Links</h4>
+<p>Some background reading if you want to read more about this:</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function">https://en.wikipedia.org/wiki/Cryptographic_hash_function</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">https://en.wikipedia.org/wiki/Advanced_Encryption_Standard</a></li>
+<li><a href="https://crypto.stackexchange.com/questions/32495/how-to-convert-aes-to-a-prng-in-order-to-run-nist-statistical-test-suite">https://crypto.stackexchange.com/questions/32495/how-to-convert-aes-to-a-prng-in-order-to-run-nist-statistical-test-suite</a></li>
+<li><a href="https://github.com/paragonie/seedspring">https://github.com/paragonie/seedspring</a></li>
+</ul>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_07.svg" alt="Avatar for Seebs">
+        <div class="body-bold"><a href="https://twitter.com/the_real_seebs">Seebs</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

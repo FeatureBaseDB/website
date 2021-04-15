@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>The Value in Failed Prototypes &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="To solve hard problems successfully, you usually have to be willing to
+solve them unsuccessfully in order to learn more about them. The process of
+learning why a given solution doesn&rsquo;t work can allow you to learn more about
+what would work. Here&rsquo;s a case study.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="The Value in Failed Prototypes"/>
+    <meta property="og:description" content="To solve hard problems successfully, you usually have to be willing to
+solve them unsuccessfully in order to learn more about them. The process of
+learning why a given solution doesn&rsquo;t work can allow you to learn more about
+what would work. Here&rsquo;s a case study." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/engineering-through-failure/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/engineering-through-failure/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2019-12-20T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/engineering-through-failure/banner.jpg" alt="The Value in Failed Prototypes"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">The Value in Failed Prototypes</h1>
+      <h6 class="h-6-caps-white">12/20/2019 • 12 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=The&#43;Value&#43;in&#43;Failed&#43;Prototypes%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fengineering-through-failure%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fengineering-through-failure%2F&title=The&#43;Value&#43;in&#43;Failed&#43;Prototypes&summary=To&#43;solve&#43;hard&#43;problems&#43;successfully%2C&#43;you&#43;usually&#43;have&#43;to&#43;be&#43;willing&#43;to&#43;solve&#43;them&#43;unsuccessfully&#43;in&#43;order&#43;to&#43;learn&#43;more&#43;about&#43;them.&#43;The&#43;process&#43;of&#43;learning&#43;why&#43;a&#43;given&#43;solution&#43;doesn%26rsquo%3Bt&#43;work&#43;can&#43;allow&#43;you&#43;to&#43;learn&#43;more&#43;about&#43;what&#43;would&#43;work.&#43;Here%26rsquo%3Bs&#43;a&#43;case&#43;study.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fengineering-through-failure%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>To solve hard problems successfully, you usually have to be willing to
+solve them unsuccessfully in order to learn more about them. The process of
+learning <em>why</em> a given solution doesn&rsquo;t work can allow you to learn more about
+what <em>would</em> work. Here&rsquo;s a case study.</p>
+<h3 id="some-background">Some background</h3>
+<p>This one is a bit complicated, so bear with me. There are two central
+requirements that turn out to be in tension here.</p>
+<h4 id="memory-mapping-and-memory-remapping">Memory-mapping and memory-remapping</h4>
+<p>Pilosa works with fairly large data sets, and reading data in can be slow,
+but memory-mapping files and reading them later can be fast. So we like to
+memory-map files. This offers a neat bonus feature: The kernel is able to
+drop pages of mapped data that are mapped to on-disk files, and recover
+them later by reading the disk, which means that we can have more &ldquo;memory&rdquo;
+available than there is physical memory in a machine. (That comes up more
+than you might expect.)</p>
+<p>The unit by which these are done is called, internally, a &ldquo;fragment&rdquo;. A
+fragment represents one shard&rsquo;s worth of data for a single view of a
+single field, but possibly many rows. Each fragment is about a million columns
+by default, and each fragment gets its own distinct data file. Each fragment
+(and bitmap) is logically divided into sections of 65,536 (1&laquo;16) bits,
+called &ldquo;containers&rdquo;; the individual container data structures are what
+contain pointers to the mmapped data. So here&rsquo;s how it looks right after
+you&rsquo;ve just opened a fragment from the disk:</p>
+<p><img src="/img/blog/mmap1.png" alt="Freshly-mapped fragment"></p>
+<p>Unfortunately, it only works for data that&rsquo;s identical to the on-disk
+file. We don&rsquo;t want to corrupt the data, so we don&rsquo;t write back to the
+memory-mapped parts of the file; rather, when an object which was memory-mapped
+changes, we allocate new storage in memory and use that. So after a couple of
+changes, it looks like this:</p>
+<p><img src="/img/blog/mmap2.png" alt="Partially-mapped fragment"></p>
+<p>Unlike the file-backed memory, this memory can&rsquo;t just be discarded by the kernel
+whenever it wants more space. So, eventually, we want to update the on-disk
+representation to match the in-memory representation, and go back to using
+memory-mapped access. We call this operation a &ldquo;snapshot&rdquo;. After that, we would
+end up in the same state we were in before, with a freshly-mapped fragment.</p>
+<p>So, that&rsquo;s part one of the backstory: We have a lot of things which are
+memory-mapped, and occasionally we want to clear the old memory maps and
+make new ones.</p>
+<h4 id="caching-and-copy-on-write-semantics">Caching and copy-on-write semantics</h4>
+<p>Now let&rsquo;s talk about mixed loads, where there&rsquo;s both read and write operations
+happening. It&rsquo;s undesireable to have bits mutating while you read them, and
+Go makes no guarantees about what happens if you try. So, when a read operation
+comes in, it temporarily locks the object it&rsquo;s reading from, and extracts the
+bits it cares about. Then it <em>releases</em> that lock, and goes on to process the
+data it retrieved, without the lock held. So, we create a new in-memory
+structure, which refers to the same memory that the fragment is using for
+a single row&rsquo;s data:</p>
+<p><img src="/img/blog/mmap3.png" alt="A row, with containers pointing at both mapped and heap storage"></p>
+<p>But now that we&rsquo;ve released the lock, other parts of the system can come along
+and modify the data in the fragment. You might ask why we don&rsquo;t just keep the
+lock; the answer is that we have a lot of parallel processing going on, and
+furthermore, in some cases we might need several separate reads from the same
+data source, which will be used as inputs to computations which need to happen
+before we can be done using this data. For instance, consider a query like:</p>
+<pre><code>Intersect(Row(x=1),Row(x=2))
+</code></pre>
+<p>The <code>Intersect</code> query needs to operate on the contents of two separate rows from
+the same field, which means they&rsquo;re using the same storage. We have to be able
+to retrieve both, and each of them wants to grab the lock, so they have to
+release the lock, too.</p>
+<p>In the times of long-ago, we had a simple solution: Make a copy of the data,
+store that copy in a cache, and then use that to answer read requests. And that
+works, but it costs a <em>lot</em> of memory, and takes a significant amount of time.</p>
+<p>To resolve this, we developed a software-emulated &ldquo;copy on write&rdquo; functionality;
+when a given piece of data gets read, we don&rsquo;t copy it, but we mark it as
+&ldquo;frozen&rdquo;; this means that specific data is never allowed to be modified, and
+anything that wants to modify it needs to create a copy and start using that
+copy. So, when you read part of a bitmap, that part is frozen; when writes to
+that part of the bitmap happen, the bitmap allocates new copies that it can
+write to.</p>
+<p>So, in this scheme, if additional writes come in, they may change what
+the fragment refers to, but they won&rsquo;t change the contents of an existing
+row object. It looks a bit like this:</p>
+<p><img src="/img/blog/mmap4.png" alt="Row with references to storage the fragment doesn&rsquo;t use"></p>
+<p>At this point, if a new write came in for Row 0, Container 1, we&rsquo;d end up
+with a <em>new</em> container in memory; the row object would still point to the old
+one, but the fragment would get the new one. Then, when the row argument goes
+away, the in-memory object it was using gets garbage collected.</p>
+<p>That&rsquo;s part two of the backstory: We&rsquo;re using copy-on-write semantics, and
+unmodifiable copies of chunks of data, to reduce copying and memory overhead.</p>
+<h4 id="oops">Oops</h4>
+<p>And then I realized the problem, which didn&rsquo;t show up in production often
+enough for us to catch it, but which I could reproduce with a custom test
+case: If you have stale containers using memory-mapped bits, and you unmap
+the addresses they were at, and then access those containers, you have a crash.</p>
+<p>Have a look at the state immediately after a snapshot, when a row object
+exists:</p>
+<p><img src="/img/blog/mmap5.png" alt="Row with references to an old mapping"></p>
+<p>As long as the objects the row has references to aren&rsquo;t memory-mapped, we
+don&rsquo;t have a problem. If they are, we have a problem &ndash; when can we unmap
+this memory?</p>
+<p>This initially escaped my notice because I had evaluated everything in terms of
+changes to the actual representation of the container objects &ndash; every operation
+which could do that was being invoked on a specific container, and could check
+that the container wasn&rsquo;t frozen, or create a new container to operate on. But
+unmapping memory <em>doesn&rsquo;t</em> have to write to the in-memory data structure to be
+effectively a change to it, invalidating the address it stored for the data it
+wants to refer to.</p>
+<p>The temporary solution for this is obvious: When marking a thing as frozen, we
+always first make that initial copy, making it be a memory object rather than a
+mapped object. Which is to say, revert a significant part of the copy-on-write
+semantics change, and lose a lot of its benefits. The nicer solution would be to
+make sure that we have a way to track whether anything&rsquo;s still using a given
+mapping, so we can map a new file, then unmap the old one only after all of its
+users are gone. But that requires a way to <em>track</em> all those users. And we
+didn&rsquo;t really have a good way to express that, and there&rsquo;s a lot of code that
+might be referencing these hunks of bitmaps, and all of it would need to be
+changed. So this got shelved for a while; we took the performance hit but
+kept things safe and stable.</p>
+<h3 id="round-two-i-have-this-great-idea">Round Two: I have this great idea&hellip;</h3>
+<p>I wanted to work on some code to improve reliability during opens with
+possibly-corrupt files, and in the process of this,  I ran into the problem that
+the file open/close logic, which also handles memory mapping, was really a bit
+more complicated than I wanted it to be. It wasn&rsquo;t wrong, just hard to follow or
+modify cleanly, and I wanted to fix this up. So I started working on cleaning it
+up, and dividing it up into logical components that are easier to reason about.</p>
+<p>For instance, when we memory-map a new file, we need to point all the fragment&rsquo;s
+storage to that file&rsquo;s mapping, so we can unmap the old file. This logic is
+tied in closely with the logic for reading and validating the file and ensuring
+that it&rsquo;s not corrupt, and the logic for handling missing files, and it just
+ends up being a lot. A good starting point would be to separate this logic out,
+and handle the memory-mapping logic separately from the rest of the open/close
+logic. Some of the complexity comes from the fragment needing to know what
+its current memory-map is. So I wanted to make a separate object that represents
+the memory-mapping and handles that bookkeeping.</p>
+<p>And that gave me an idea: Part of the problem is that we need to know the
+address to unmap it, so if we overwrite the fragment&rsquo;s memory-map
+attribute, we&rsquo;ve got to have unmapped the old one before that. But this separate
+object could track the old mapping separately, and unmap it at some other
+time.</p>
+<p>I named the new data structure a &ldquo;generation&rdquo;; each fragment would have
+sequentially-numbered generations representing times we&rsquo;ve opened a copy of that
+fragment and mapped it in. The periodic &ldquo;snapshot&rdquo; tasks would then create a new
+generation for that fragment. Then these generations could be assigned to
+bitmaps as &ldquo;sources&rdquo;, which the bitmaps could then track, and mark as in-use or
+not-in-use. So, basically: Reference counting. Unmap things when the reference
+count reaches zero, and the problem is solved. (Narrator: It wasn&rsquo;t solved.)</p>
+<h4 id="building-a-new-interface">Building a new interface</h4>
+<p>My initial design was to have a compatibility API for these which would still
+do the copying, and a new API that would let you basically &ldquo;check out&rdquo; a given
+mapping, then return it when you&rsquo;re done, and that wouldn&rsquo;t need to do the
+copying. Existing code would start out using the compatibility API, and then
+I&rsquo;d migrate things to the new API and they&rsquo;d work better.</p>
+<p>This does imply a fair amount of work, though, to track ownership, and make
+sure it gets tracked correctly across operations. For instance, if you perform
+a union operation on two bitmaps, it&rsquo;s <em>possible</em> that the resulting bitmap
+actually still contains some of the individual containers from either or both
+sources. So there&rsquo;s support for making a combined/merged source. But if you
+combine two references, should you end up with a single reference, or with
+two? If you&rsquo;re just performing an intersect operation on two items, and never
+touch those items again, you probably want to think of this as one reference.
+If you&rsquo;re intersecting a row with each of 20 other rows, it&rsquo;s more complicated.</p>
+<p>So I spent a few days prototyping this and making sure things ran and passed
+the existing tests cleanly.</p>
+<h4 id="testing-it-more-carefully">Testing it more carefully</h4>
+<p>Eventually I had something that sort of worked, but I wasn&rsquo;t confident that I&rsquo;d
+proven that it was correct. And then I had a great insight: Go supports
+finalizers for garbage-collected objects, so I could write finalizers which
+checked the reference counts on items, and their history, and reported items
+which had the wrong reference count on close.</p>
+<p>That worked out pretty well. It definitely identified problems, and it
+made it pretty easy to correct them. Well, easy to identify them and figure
+out where they were happening; correcting them was hard, and messy, and
+required a lot of fiddly little details to try to track reference counts
+and ownership. Roughly two weeks after I first started on this, I had it
+basically working: It passed all the tests, and thanks to the fancy
+finalizer-based code, I had reasonable confidence that it was correct, and that
+if we got anything wrong in the complicated reference-counting code, we would
+be able to detect it.</p>
+<p>And that got me to thinking, and I had a couple of insights that are closely
+related:</p>
+<ol>
+<li>My confidence in the finalizers is much higher than my confidence in
+the code they&rsquo;re checking.</li>
+<li>The entire purpose of this is to determine whether or not I have anything
+left that contains a reference to a thing. I don&rsquo;t actually care about the
+number of references, just &ldquo;are there any&rdquo;.</li>
+<li>So basically, this is just a slower, more error-prone, reimplementation
+of what the garbage collector <em>already does</em> to decide whether to call those
+finalizers.</li>
+</ol>
+<p>Which is to say, I realized I&rsquo;d just spent two weeks building a convincing
+argument against my current design.</p>
+<h3 id="round-three-lessons-learned">Round Three: Lessons Learned</h3>
+<p>So I started over, mostly. I kept a lot of the base code for the generations,
+and the source tracking, but I didn&rsquo;t implement any reference counting at all.
+Instead, I implemented a tracker (controlled by a build tag) which records
+when a generation is created, when we declare it &ldquo;ended&rdquo; (not planning to
+hand out new references to it), and when it gets finalized, and functionality
+for reporting on any generations which ended up in undesired states. For
+instance, if a generation got finalized without having been marked as ended,
+or hadn&rsquo;t been finalized yet at the end of the run, even after explicitly
+running the garbage collector, that should be reported as suspicious. That&rsquo;s
+no longer a functional part of the generation code; it&rsquo;s an additional bit
+of code used only for debugging and testing.</p>
+<p>Implementing this, and cleaning it up, took about a week. It did turn up a
+handful of bugs, but while the previous implementation turned up mostly bugs it
+had <em>introduced</em> by requiring careful reference counting which could be wrong,
+this one caught <em>existing</em> problems like tests which weren&rsquo;t cleaning up after
+themselves properly, which are arguably actual bugs.</p>
+<p>This code isn&rsquo;t in-tree yet, because we still want to do more testing, but
+it appears that it finally gets us the performance boosts we wanted for
+read-only access to files, without the crash risks we were working so hard
+to avoid. Memory usage and CPU time are down, and the code that manages
+opening and closing the files is clearer and easier to read.</p>
+<p>But the point of this long rambling story is: I wouldn&rsquo;t have gotten there
+without the detour.</p>
+<p>If you want to do something that looks hard, and you&rsquo;re not sure whether you
+can do it, the best strategy I&rsquo;ve found is to go <em>try</em> it, even if you&rsquo;re
+not sure at all whether your approach is going to be viable. The most likely
+outcome is that you will fail, but that you&rsquo;ll learn enough about the problem
+in the process to have a much better chance next time. That said, test your
+experimental designs extra carefully and thoroughly; if the reason you&rsquo;re in
+this situation is that you don&rsquo;t fully understand what problems you need to
+solve, you shouldn&rsquo;t assume that you&rsquo;ll have thought of all the problems that
+might crop up.</p>
+<p><a href="https://www.pexels.com/photo/close-up-of-pictures-185933/">Hero image credit</a></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_07.svg" alt="Avatar for Seebs">
+        <div class="body-bold"><a href="https://twitter.com/the_real_seebs">Seebs</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

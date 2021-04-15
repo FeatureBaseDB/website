@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>How to Generate an Arbitrarily Large Amount of Test Data &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Have you ever looked at some publicly available data, and thought, &ldquo;I wish this data set was 100 times larger&rdquo;? It seems like there should be an easy way to do that, and it turns out, there is!">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="How to Generate an Arbitrarily Large Amount of Test Data"/>
+    <meta property="og:description" content="Have you ever looked at some publicly available data, and thought, &ldquo;I wish this data set was 100 times larger&rdquo;? It seems like there should be an easy way to do that, and it turns out, there is!" />
+    <meta property="og:url" content="https://www.pilosa.com/blog/smote/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/smote/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2019-08-21T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/smote/banner.jpg" alt="How to Generate an Arbitrarily Large Amount of Test Data"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">How to Generate an Arbitrarily Large Amount of Test Data</h1>
+      <h6 class="h-6-caps-white">8/21/2019 • 6 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=How&#43;to&#43;Generate&#43;an&#43;Arbitrarily&#43;Large&#43;Amount&#43;of&#43;Test&#43;Data%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fsmote%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fsmote%2F&title=How&#43;to&#43;Generate&#43;an&#43;Arbitrarily&#43;Large&#43;Amount&#43;of&#43;Test&#43;Data&summary=Have&#43;you&#43;ever&#43;looked&#43;at&#43;some&#43;publicly&#43;available&#43;data%2C&#43;and&#43;thought%2C&#43;%26ldquo%3BI&#43;wish&#43;this&#43;data&#43;set&#43;was&#43;100&#43;times&#43;larger%26rdquo%3B%3F&#43;It&#43;seems&#43;like&#43;there&#43;should&#43;be&#43;an&#43;easy&#43;way&#43;to&#43;do&#43;that%2C&#43;and&#43;it&#43;turns&#43;out%2C&#43;there&#43;is%21%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fsmote%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>Have you ever looked at some publicly available data, and thought, &ldquo;I wish this data set was 100 times larger&rdquo;? It seems like there should be an easy way to do that, and it turns out, there is!</p>
+<p>Much of the work we do with <a href="https://www.pilosa.com">Pilosa</a> involves benchmarking and optimization of data ingestion. With extreme scalability as one of our selling points, using large data sets is crucial. Sample data sets of all kinds are available all over the web, but it isn&rsquo;t always easy to find data sets that are 1) huge, 2) meaningful, 3) well-fit to our target use cases and data models. Often we&rsquo;ll find a great, clean public data set that looks perfect for an experiment, then download it and realize it consists of 100,000 records - not even close to big enough for our purposes.</p>
+<h3 id="oversampling">Oversampling</h3>
+<p>Oversampling can save us here. Wikipedia <a href="https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis#Oversampling_techniques_for_classification_problems">lists</a> only three oversampling methods, starting with random duplication. While duplication would probably do fine for most of our work, it just feels icky to me. Ideally, we could generate realistic samples from the multidimensional distribution underlying the true dataset. A naive way to approach this is to use the marginal distributions - randomly choosing each column value (e.g. from a CSV file) based on the distribution of true values in that column - but this has problems too. Each value would look reasonable by itself, but the relationships between those values wouldn&rsquo;t be realistic (usually).</p>
+<p>As a silly example, a medical data set might have two fields, <code>heartRate</code> (numeric) and <code>alive</code> (boolean):</p>
+<table>
+<thead>
+<tr>
+<th>heartRate</th>
+<th>alive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>180</td>
+<td>true</td>
+</tr>
+<tr>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr>
+<td>60</td>
+<td>true</td>
+</tr>
+<tr>
+<td>90</td>
+<td>true</td>
+</tr>
+<tr>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr>
+<td>30</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<p>Analyzing each column, we can approximate its distribution independently of the others. Maybe we&rsquo;d assume <code>heartRate</code> is uniformly distributed between the minimum and maximum values, while <code>alive</code> is either true or false, with a probability matching the proportion of true values in the data. Generating values for these independently, you might produce a record with <code>heartRate=90</code> and <code>alive=false</code>. With some approximation of that full, true distribution, we can avoid this situation. However, estimating such a thing for a CSV file with arbitrary data types, and correlations, seems tricky.</p>
+<h3 id="smote">SMOTE</h3>
+<p>The other two oversampling methods listed on Wikipedia are variants of <a href="https://arxiv.org/pdf/1106.1813.pdf">SMOTE</a> (Synthetic Minority Over-sampling TEchnique), an old-fashioned AI algorithm that is deceptively simple, even elegant. SMOTE provides a solution to the correlation problem, without needing to explicitly understand the full distribution. We have taken the core idea of this algorithm, twisted it and abused it, to synthesize silly amounts of test data.</p>
+<p><img src="/img/blog/smote/smote-diagram.png" alt="SMOTE concept">
+<em>Illustration of synthesizing data points in SMOTE. Graphic from a <a href="https://www.jair.org/index.php/jair/article/view/11192">survey</a> of SMOTE extensions.</em></p>
+<p>The basic algorithm is described <a href="https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume16/chawla02a-html/node6.html">here</a>. Briefly, an original data point (x<!-- raw HTML omitted -->i<!-- raw HTML omitted -->, in N-dimensional space <strong>R</strong><!-- raw HTML omitted -->N<!-- raw HTML omitted -->) is chosen, one of K <a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm">nearest neighbors</a> (x<!-- raw HTML omitted -->i3<!-- raw HTML omitted -->, for example) is selected, and a random linear interpolation of those two is produced (r<!-- raw HTML omitted -->3<!-- raw HTML omitted -->). That&rsquo;s it! Do that, say, 100 times for each data point, and you get a huge oversampling factor, with reasonable computational efficiency. SMOTE takes advantage of the local structure of the dataset to synthesize statistically reasonable data, without explicitly understanding the full correlations.</p>
+<p>This works great for real-valued (floating point) data. What if the dataset contains other types, like integers, categorical string values, or even arbitrary text? Although <a href="https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume16/chawla02a-html/node15.html">some variants</a> handle some of these cases, we had a few other minor modifications in mind.</p>
+<h3 id="pilosa-smote">Pilosa-SMOTE</h3>
+<p>The practical goal is to run this algorithm on a wide range of CSV files, which means supporting more data types is important. Supporting integers and categorical values should go a long way, so we started with those. Let&rsquo;s look at the last step of the basic SMOTE algorithm, the random combination (r<!-- raw HTML omitted -->3<!-- raw HTML omitted -->) of the original point (x<!-- raw HTML omitted -->i<!-- raw HTML omitted -->) and the neighbor (x<!-- raw HTML omitted -->i3<!-- raw HTML omitted -->). We can write this as r<!-- raw HTML omitted -->3<!-- raw HTML omitted --> = αx<!-- raw HTML omitted -->i<!-- raw HTML omitted --> + (1-α)x<!-- raw HTML omitted -->i3<!-- raw HTML omitted -->, where α is a random floating point value in [0, 1]. In pseudocode, with a single floating-point value for the data point <code>x</code>:</p>
+<pre><code>neighborIdx = rand.Intn(5)
+weight = rand.Float64()
+synthetic = weight * x + (1-weight) * neighbors[neighborIdx]
+</code></pre><p>Now, if <code>x</code> is an integer, this will still produce a floating-point synthetic value. To address this, we simply round the result to the nearest integer. If <code>x</code> is categorical (say, one of ten different string values), this doesn&rsquo;t quite work. We could select one of the values based on the random weight, that is:</p>
+<pre><code>synthetic = x
+if weight &lt; 0.5 {
+    synthetic = neighbors[neighborIdx]
+}
+</code></pre><p>The problem with this is that in the case of a data set with all categorical values, this reduces to duplication of the entire record (because the same weight value is applied to each field). Instead, you might choose the value that occurs in the majority of the K nearest neighbors. Another option, the one we went with, is to use the weight to control <em>another</em> random choice between the two points (with potentially different results for each field):</p>
+<pre><code>synthetic = x
+if weight &lt; rand.Float64() {
+    synthetic = neighbors[neighborIdx]
+}
+</code></pre><p>These handle a much wider range of data sets; the most significant remaining type is arbitrary text data. We have only started exploring Pilosa&rsquo;s capabilities in that area, so we aren&rsquo;t handling that here. With these modifications, and some finer control over the classes of data points produced, this just about covers our needs. Of course there are a few outstanding TODO items. In particular, computing nearest neighbors is a crucial step, and that can&rsquo;t be done directly on non-numeric data. As a quick workaround, we mapped categorical data to integers (with a loosely meaningful ordering when possible), and then used a standard KNN algorithm to compute neighbors. I can imagine a sort of k-d tree variant that understands categorical axes, with a custom distance metric (say, an inequality test). This would simplify the process, but it may require an unreasonable effort. Another idea is to generate synthetic data points based on a combination of more than just one neighbor, but it&rsquo;s not clear how beneficial this would be.</p>
+<p>Despite being a quick prototype, this is all pretty fast. For a base dataset of about about 41,000 records, with 15 fields of various types, we can generate just over one million synthetic data points (25x oversampling) in about 23 seconds. Generating ten million points takes about 430 seconds. Finding nearest neighbors takes eight seconds, and the synthesis time <em>should</em> scale linearly with the output size. This is in python/numpy, so there is lots of room for improvement. We will likely rewrite this in Go, the next time we need a billion synthetic data points.</p>
+<p>One last note: despite a perhaps-unreasonable focus on the quality of test data, there are no guarantees regarding the statistical validity of this variant of SMOTE. I would not suggest using it for any sort of predictive modeling work without further study.</p>
+<p><a href="https://github.com/alanbernstein/smote">Try it out</a>!</p>
+<p><em>Banner image by Felix Mittermeier on Unsplash</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+        <div class="body-bold"><a href="https://twitter.com/gsnark">Alan Bernstein</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

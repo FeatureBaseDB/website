@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>A Map of the Entire Universe &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="&hellip; the universe of 65536-bit sets in Roaring, that is. This is one part debugging
+postmortem, one part documentation, and three parts academic deep dive on the
+structure that underlies Roaring Bitmaps.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="A Map of the Entire Universe"/>
+    <meta property="og:description" content="&hellip; the universe of 65536-bit sets in Roaring, that is. This is one part debugging
+postmortem, one part documentation, and three parts academic deep dive on the
+structure that underlies Roaring Bitmaps." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/universe-map/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/universe-map/banner.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-08-25T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/universe-map/banner.png" alt="A Map of the Entire Universe"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">A Map of the Entire Universe</h1>
+      <h6 class="h-6-caps-white">8/25/2017 • 17 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=A&#43;Map&#43;of&#43;the&#43;Entire&#43;Universe%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Funiverse-map%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Funiverse-map%2F&title=A&#43;Map&#43;of&#43;the&#43;Entire&#43;Universe&summary=%26hellip%3B&#43;the&#43;universe&#43;of&#43;65536-bit&#43;sets&#43;in&#43;Roaring%2C&#43;that&#43;is.&#43;This&#43;is&#43;one&#43;part&#43;debugging&#43;postmortem%2C&#43;one&#43;part&#43;documentation%2C&#43;and&#43;three&#43;parts&#43;academic&#43;deep&#43;dive&#43;on&#43;the&#43;structure&#43;that&#43;underlies&#43;Roaring&#43;Bitmaps.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Funiverse-map%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>&hellip; the universe of 65536-bit sets in Roaring, that is. This is one part debugging
+postmortem, one part documentation, and three parts academic deep dive on the
+structure that underlies Roaring Bitmaps.</p>
+<h3 id="introduction">Introduction</h3>
+<p>Pilosa uses <a href="http://roaringbitmap.org/">Roaring Bitmaps</a> for storage of and computation
+with bitmaps (integer sets) in its distributed bitmap index. Roaring is a core component
+of Pilosa, which makes it an easy place to look for optimization opportunities. One of
+those opportunities, adding a <a href="/blog/adding-rle-support/">new compression technique</a>,
+was a big undertaking, and it has raised interesting questions.</p>
+<p>In this post, I&rsquo;ll start with a brief explanation of Roaring and how it works.
+This is important background for understanding &ldquo;container space&rdquo;, a two-dimensional
+plane which can be used to map all integer sets under a given size. Container space is a
+helpful framework for understanding some of the details of Roaring&rsquo;s implementation
+and performance.</p>
+<p>This came in handy in debugging and testing. At one point, we started asking more
+theoretical questions, and that&rsquo;s when I went down a rabbit hole, with the help of the
+container space framework. In the process of answering those questions, I produced some
+pretty pictures that I wanted to share. Feel free to skip to the last section to see those,
+but I suggest at least skimming the next section for context.</p>
+<h3 id="container-space">Container Space</h3>
+<p>Roaring stores large sets of integers by breaking them up into
+<strong>containers</strong> that are 2<!-- raw HTML omitted -->16<!-- raw HTML omitted --> = 65536 bits long, and it uses a different
+<strong>container type</strong> for each container, depending on what&rsquo;s in it. For example, the
+set {0, 1, 2, 3, 6, 7, 9, 10, 14} has three equivalent representations in
+Roaring:</p>
+<p><img src="/img/blog/universe-map/rle-container-example.png" alt="RLE container example">
+<em>Small container type example</em></p>
+<p>The set contains nine elements, and in this toy example, we&rsquo;ll use 16-bit
+numbers to store them. That means the <strong>array</strong> representation, a list of integers in
+the set, uses 9×2 bytes. The uncompressed <strong>bitmap</strong>, in which one bit is set for each
+number in the set, uses a constant number of bytes (2 here), regardless of what set it
+represents. Run-length encoding (<strong>RLE</strong>) stores the set as a list of runs, where each
+run contains two 16-bit numbers (the start and end of the run). For this set with four
+runs, we use (4 runs) × (2 numbers per run) × (2 bytes per number).</p>
+<p>Before I get into it, here is a summary of some notation. You can skip this, just refer back to it if you lose track of what the symbols mean.</p>
+<p><img src="/img/blog/universe-map/container-terminology-table.png" alt="Container terminology table">
+<em>Container terminology</em></p>
+<p>Roaring switches between these intelligently to minimize storage size. Which
+container type is smallest? In this example, the uncompressed bitmap is, but
+the answer depends on the set, and all three types are important in their own way. Originally, with only two container types
+(uncompressed bitmaps and arrays), deciding when to switch between the two for a
+given container was trivial: compare the <strong>cardinality</strong> of
+the set (N) to a threshold, (M<!-- raw HTML omitted -->A<!-- raw HTML omitted -->), and only use an array if
+N ≤ M<!-- raw HTML omitted -->A<!-- raw HTML omitted -->. With the addition of RLE containers, this got more complicated,
+because now we have to check a new attribute of the set: the <strong>run count</strong>, the
+number of runs of ones (N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->).</p>
+<p>Previously, we only had to decide between two one-dimensional intervals with a
+single comparison. Now, with both N and N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> defining a two-dimensional
+planar region that I have dubbed <strong>container space</strong>, each container type
+corresponds to a subregion with linear boundaries. These regions are illustrated
+below.</p>
+<p><img src="/img/blog/universe-map/container-type-decision.png" alt="Container type decision">
+<em>Container type decision</em></p>
+<p>M is the maximum number of bits in a container.
+Note that the figure is not to scale; M is actually much larger than
+M<!-- raw HTML omitted -->A<!-- raw HTML omitted --> and M<!-- raw HTML omitted -->R<!-- raw HTML omitted -->. The 2:1 ratio of M<!-- raw HTML omitted -->A<!-- raw HTML omitted --> and M<!-- raw HTML omitted -->R<!-- raw HTML omitted --> is
+accurate, however.</p>
+<p>There is an impossible region in there. Why is that?</p>
+<ul>
+<li>
+<p>The solid black line sloping up-right, the N = N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> diagonal,
+represents sets where every set bit is isolated - all runs are length one.
+No set can be above this line, as that would mean more runs than set bits
+(but each run must have at least one bit).</p>
+</li>
+<li>
+<p>The other solid black diagonal line, N = M-N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->+1, represents sets where
+every clear bit is isolated - all runs are as close as possible while still
+being separate. No set can be above this line, as that would mean more runs
+than clear bits (which must separate adjacent runs). If you think about the
+complementary set, it makes sense that both of these constraints must exist.</p>
+</li>
+<li>
+<p>Near the intersection of these two lines are two points, (M/2, M/2) and (M/2+1,
+M/2), which represent sets with the maximum number of single-bit runs. These
+are the only cases for which N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> = M/2; N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> is smaller for
+all other sets.</p>
+</li>
+</ul>
+<p>The remaining region represents all possible sets, with container type regions
+indicated by color. What about those boundaries, where do they come from?</p>
+<ul>
+<li>
+<p>The line N = M<!-- raw HTML omitted -->A<!-- raw HTML omitted --> is the <code>ArrayMaxSize</code> threshold constraint: when
+cardinality is low enough, an array will always be smaller than a bitmap.
+Array size is AN, so an array is smaller than a bitmap when AN &lt; M, or N &lt; M/A.</p>
+</li>
+<li>
+<p>The line N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> = M<!-- raw HTML omitted -->R<!-- raw HTML omitted --> is a similar <code>RunMaxSize</code> threshold constraint.
+When the number of runs is low enough, an RLE container will always be smaller than a
+bitmap. RLE size is 2RN<!-- raw HTML omitted -->R<!-- raw HTML omitted -->, so an RLE is smaller than a bitmap when
+2RN<!-- raw HTML omitted -->R<!-- raw HTML omitted --> &lt; M, or N<!-- raw HTML omitted -->R<!-- raw HTML omitted --> &lt; M/(2R).</p>
+</li>
+<li>
+<p>Finally, that dotted diagonal line is the boundary between array and RLE:
+arrays are smaller than runs when AN &lt; 2RN<!-- raw HTML omitted -->R<!-- raw HTML omitted -->, or N &lt; 2(R/A)N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->.
+Generally, A = R, so this simplifies to N &lt; 2N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->.</p>
+</li>
+</ul>
+<p>I think it&rsquo;s a pretty diagram. It&rsquo;s satisfying to see a complex situation
+condensed into a simple 2-D cartesian representation, even if it ignores
+important complexity. There is one problem: it&rsquo;s not symmetric enough!</p>
+<p>The above figure represents exactly what Pilosa does to decide a container type,
+but there is another container type that Pilosa doesn&rsquo;t use at all:
+<strong>inverse arrays</strong>. What if, for dense data, we store an array of the
+<em>clear bits</em> instead of the set bits? In other words, we store an array of the
+integers that are NOT in the set, so all <em>other</em> integers in {0, 1, &hellip;, 65535}
+are part of the set. Then the diagram looks like this:</p>
+<p><img src="/img/blog/universe-map/container-type-decision-with-inverse.png" alt="Container type decision with inverse arrays">
+<em>Container type decision with inverse arrays</em></p>
+<p>Beautiful! The utility of the iarray container type is questionable, however, because it&rsquo;s
+fundamentally the same as the array type. In other words, you can achieve the same
+behavior by simply storing the inverse of a set, with a little overhead. Also, the iarray
+container type is really only useful for very dense data sets, which we don&rsquo;t see a lot of.
+If we do, we&rsquo;ll consider adding support for this new type to Pilosa. Anyway, I&rsquo;m just glad
+to know that there is a sort of fundamental mirror symmetry to the diagram.</p>
+<h3 id="bugs">Bugs</h3>
+<p>We made fast progress with the <a href="https://github.com/pilosa/pilosa/releases/tag/v0.6.0">RLE work</a>,
+but while stress testing it with large imports, we discovered some nasty bugs.
+For weeks we couldn&rsquo;t even reproduce them consistently, but eventually we were
+able to trim those big import jobs down to something more manageable. Only then
+did we have a chance to diagnose the problem, and before long we figured it
+out: some of the container type decision logic was flawed.</p>
+<p>Before RLE, every time an element was added to or removed from a container, we
+checked the cardinality threshold, and converted to bitmap or array accordingly.
+With RLE containers, we introduced a function to handle the new conversions in a
+single place:</p>
+<pre><code>func (c *container) Optimize() {
+  if c.isArray() {
+    runs := c.arrayCountRuns()
+    if runs &lt; c.n/2 {
+      c.arrayToRun()
+    }
+  } else if c.isBitmap() {
+    runs := c.bitmapCountRuns()
+    if runs &lt; 2048 {
+      c.bitmapToRun()
+    }
+  }
+}
+</code></pre><p>With some thought we can see that this function, in itself, is incomplete: it can only result in one
+of two conversion actions: <code>arrayToRun</code> or <code>bitmapToRun</code>. But there are <em>six</em> possible conversions.
+<code>arrayToBitmap</code> and <code>bitmapToArray</code> were previously being handled elsewhere, but that still leaves
+<code>runToArray</code> and <code>runToBitmap</code>. To handle all of these possibilities at once, we should have been
+doing something more like this:</p>
+<pre><code>func (c *container) Optimize() {
+  runs := c.countRuns()
+
+  // Decide new type.
+  var newType byte
+  if runs &lt;= RunMaxSize &amp;&amp; runs &lt;= c.n/2 {
+    newType = ContainerRun
+  } else if c.n &lt; ArrayMaxSize {
+    newType = ContainerArray
+  } else {
+    newType = ContainerBitmap
+  }
+
+  // Then handle all six conversions.
+  if c.isArray() &amp;&amp; newType == ContainerBitmap {
+    c.arrayToBitmap()
+  else if ... {
+    ...
+  }
+}
+</code></pre><p>Implementing RLE was a big job, and at least four of our engineers contributed
+to the branch. Two of us, working independently, updated the file-read/write functions to handle RLE
+containers, which is why we failed to notice that the logic for deciding
+container type on file read did not exactly match the logic on write (partly
+because the latter was hidden inside the innocuous-sounding <code>container.Optimize()</code>).
+If you&rsquo;ve implemented a binary file format before, you might be thinking: why
+is there even any logic at all for deciding a container  type while reading a
+file? That&rsquo;s a great question, and it&rsquo;s answered in full by the
+<a href="https://github.com/RoaringBitmap/RoaringFormatSpec">Roaring storage spec</a>.</p>
+<p>TL;DR: back before RLE containers, it was trivial to infer container type from
+the cardinality, which had to be stored for arrays anyway, so there was no need to have explicit type
+information in the file. With the addition of RLE, it became necessary to add
+one extra bit per container to indicate an RLE container, since the cardinality
+doesn&rsquo;t tell you anything about that.</p>
+<p>Of course, if perfect backward compatibility isn&rsquo;t critical, there are other,
+more robust ways to store type information. We chose this route—including the
+container type explicitly in the &ldquo;descriptive header&rdquo; section—to guard against
+similar bugs in the future. We also fixed the bug, which is the reason these
+diagrams exist. Once we pinpointed the faulty decision logic, I drew these diagrams
+to convince myself of the correct behavior. Getting some thorough documentation
+out of it was a nice bonus.</p>
+<h3 id="testing">Testing</h3>
+<p>We wrote a lot of debugging code to track down these bugs. One tool I wanted
+early was a function <code>randomContainers()</code> to randomly generate a slice of
+containers with a variety of types. I accomplished this by choosing a random
+cardinality, and then generating a container with that cardinality. With some
+parameter tweaking, it was easy to get an acceptable variety.</p>
+<p>This lacked elegance. What I wanted was a function
+<code>randomContainerOfType(type)</code> to generate one container, guaranteed to be
+a specified type. Stretch goal: the container should be selected uniformly at random
+from all containers of that type. How might I do that?</p>
+<p>One approach: write a function <code>randomContainer(N, Nruns)</code> that generates
+a random container with a specified cardinality and runCount. Then I can call
+that within <code>randomContainerOfType(type)</code>, using randomly chosen pairs
+(N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->) that fall into the correct regions of container space. That whole
+thing might be wrapped up in <code>randomContainers()</code>, which could generate
+the three types with equal probability.</p>
+<p>How does <code>randomContainer(N, Nruns)</code> work? Since <code>Nruns</code> is known,
+we should probably generate an RLE container. Remember, Roaring knows how to
+convert container types, so we can generate it as whatever type is most
+convenient. We need an RLE container with <code>Nruns</code>, and the total number
+of set bits among those runs is <code>N</code>. It&rsquo;s fairly easy to produce a list
+of runs that satisfies these constraints. We do this by generating the
+constrained run-lengths for both 1-runs and 0-runs, and converting those to the (start,
+last) format used internally by Pilosa.</p>
+<p><img src="/img/blog/universe-map/container-generation-diagram.png" alt="Container generation">
+<em>Random container generation</em></p>
+<p>The <a href="https://github.com/alanbernstein/pilosa/blob/rle-fuzz/roaring/fuzz_test.go#L95">process</a>
+is illustrated here, and later I&rsquo;ll revisit one last detail about how the
+x and y values are generated&hellip;</p>
+<h3 id="analysis">Analysis</h3>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted -->
+<em>Nerd sniping (xkcd)</em></p>
+<p><a href="https://twitter.com/mattjaffee">Jaffee</a> saw the container space diagram, and
+made a remark similar to one that I made to myself
+previously: &ldquo;That array region is so small, it seems like it&rsquo;s not even worth
+the effort.&rdquo; Of course, areas are deceptive in container space. There is no
+direct correlation between the size of a region, and the number of sets in the
+region, or the likelihood of a random set belonging to it. For example, a random
+bitmap with a bit density of 5% is overwhelmingly likely to be an array, rather
+than an RLE, <em>if the set bits are distributed uniformly randomly</em>.</p>
+<p>Or that&rsquo;s what I assumed, at least. When someone else posed the question, I was
+sniped. I had no choice but to validate that assumption. This served to satisfy
+my curiosity more than anything else, but still, it&rsquo;s good to know I understand
+what I&rsquo;m working on. So, I set out to answer the question &ldquo;for a randomly chosen
+bitmap with M = 65536 total bits, what is the probability of falling into each of
+the three regions of container space?&rdquo;</p>
+<p>I started out small: for M = 8, it&rsquo;s easy to enumerate all 2<!-- raw HTML omitted -->8<!-- raw HTML omitted --> possible sets
+and just count the number that belong to each point in the space. This produces
+a low-resolution heatmap, where position corresponds to (N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->), and color
+indicates the count for that (N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->) pair. For such a small M, there is
+hardly any sense in switching container types, so I left the region boundaries
+out of the plot.</p>
+<p><img src="/img/blog/universe-map/heatmap-8.png" alt="Heatmap for M=8">
+<em>Brute force Heatmap for M=8</em></p>
+<p>For M = 256, that doesn&rsquo;t work, 2<!-- raw HTML omitted -->256<!-- raw HTML omitted --> is way too big. Instead, I
+sampled random sets and counted their (N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->) in a 256x128 grid. A million
+iterations captures a decent portion of the space, and with some tweaking I
+figured I could fill that out. Note that this one is in logarithmic scale. Greenish
+pixels, labeled 74 in the color scale on the right, represent counts of 10<!-- raw HTML omitted -->74<!-- raw HTML omitted -->.</p>
+<p><img src="/img/blog/universe-map/heatmap-256.png" alt="Heatmap for M=256">
+<em>Stochastic heatmap for M=256</em></p>
+<p>But I wanted something that would even work for M = 65536. The same sampling
+approach can be used, but the space is too big. No reasonable number of samples
+could get a decent picture of the distribution.</p>
+<p><img src="/img/blog/universe-map/heatmap-65536-stochastic.png" alt="Stochastic Heatmap for M=65536">
+<em>Stochastic Heatmap for M=65536</em></p>
+<p>That thing that looks like a speck of dust on your screen, that&rsquo;s the result. Zooming
+in, you can see all the samples are clustered around the center of the space
+(M/2, M/4) = (32768, 16384).</p>
+<p><img src="/img/blog/universe-map/heatmap-65536-stochastic-zoom.png" alt="Zoomed Stochastic Heatmap for M=65536">
+<em>Stochastic Heatmap for M=65536, zoom view</em></p>
+<p>See, that just seems futile. I realized there was another approach: an analytical solution.
+I thought about that for a bit, then remembered the work I did on generating
+random containers, which solves almost the same problem. That is, if I know how
+to generate a random container given (N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->), I should be able to count the
+number of possible outcomes of that event. If I can reduce that to an analytical
+expression, then I can simply examine that as a function, rather than use Monte
+Carlo simulation on the impossibly large space.</p>
+<p>After a detour through a <a href="http://www.sciencedirect.com/science/article/pii/S0898122109005744">paper</a>
+addressing a similar but much more general question, and verification from some helpful
+stackexchange <a href="https://math.stackexchange.com/questions/2391769/what-is-the-number-of-binary-strings-of-length-n-with-exactly-r-runs-of-ones-wi">answerers</a>,
+I found the expression I needed:</p>
+<p><img src="/img/blog/universe-map/container-space-expression.png" alt="Container Space Expression">
+<em>Analytical form of container space distribution</em></p>
+<p>If you look at the actual <a href="https://github.com/alanbernstein/pilosa/blob/rle-fuzz/roaring/fuzz_test.go#L95"><code>randomContainer</code></a>
+code, you can see exactly where this comes from: the two <code>randomPartition</code> calls
+correspond to the two terms in the expression. The truncated permutation
+<a href="https://en.wikipedia.org/wiki/Hand-waving">obviously</a> chooses one of a
+binomial-coefficient number of possible events.</p>
+<p>So I just needed a way to compute this, accurately and efficiently, for large values
+of M, N, N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->. After another few iterations, I decided that simply summing
+the values of F<!-- raw HTML omitted -->M<!-- raw HTML omitted --> over the appropriate regions was the way to go. The numbers
+involved are so big that it only makes sense to do this in the logarithmic domain. That
+means numbers are stored as base-10 exponents, products are sums, and sums are
+calculated as <code>y + math.log10(1 + 10 ** (x-y))</code>. Since that sidesteps costly bignum
+binomial-coefficient calculations, it helps with the speed quite a bit. It can even
+help avoid those log-domain sums in some cases, because
+10<!-- raw HTML omitted -->50<!-- raw HTML omitted --> + 10<!-- raw HTML omitted -->60<!-- raw HTML omitted --> ≈ 10<!-- raw HTML omitted -->60<!-- raw HTML omitted -->. I&rsquo;m not looking for exact integer
+answers here, so I&rsquo;m not too worried about an approximation that&rsquo;s only accurate to nine
+decimal places.</p>
+<p><img src="/img/blog/universe-map/heatmap-65536-analytical.png" alt="Analytical Heatmap for M=65536">
+<em>Analytical Heatmap for M=65536</em></p>
+<p>Finally, we come to the motivating question: when choosing one bitmap among all
+possible bitmaps of length 65536, what is the probability of falling into each
+of the container type regions? With that expression for F<!-- raw HTML omitted -->M<!-- raw HTML omitted --> in hand,
+it&rsquo;s a relatively simple matter to count the sets in each region, then divide
+by the total to get a probability. The answer is even simpler: all sets are bitmaps.</p>
+<p>Wait, that doesn&rsquo;t sound right&hellip; Actually, the question was wrong. We made the
+mistake of trying to look at all possible sets. In that context, the vast
+majority of them are right in the middle of container space, in that bright yellow
+spot in the bitmap region. Let&rsquo;s pick just one point somewhere in the RLE region:
+sets with cardinality 2000, and 50 runs. There are</p>
+<!-- raw HTML omitted -->
+<p>(2.28×10<!-- raw HTML omitted -->274<!-- raw HTML omitted -->) sets matching this criterion. But that number is
+inconceivably tiny compared to the number of bitmaps with cardinality 30000 and
+10000 runs: 3.69×10<!-- raw HTML omitted -->17459<!-- raw HTML omitted -->, a number with about as many digits as there
+are letters in this blog post.</p>
+<p>The numbers for the full regions are equally absurd; The bitmap region contains
+the vast majority, 2.00×10<!-- raw HTML omitted -->19728<!-- raw HTML omitted -->, which is almost exactly the same as
+the total count. There are approximately 9.96×10<!-- raw HTML omitted -->6651<!-- raw HTML omitted --> array sets, and
+9.96×10<!-- raw HTML omitted -->6651<!-- raw HTML omitted --> RLE sets. Those look the same, which is an interesting clue.
+Actually, they agree out to the eighth digit, and arrays outnumber RLEs by a small
+relative margin.</p>
+<p>This is what combinatorial explosion looks like in a universe containing
+2<!-- raw HTML omitted -->65536<!-- raw HTML omitted --> elements. But we don&rsquo;t have to stop here, we just have to ask
+different questions.</p>
+<p>For example, what happens if we ask the same question about region probabilities,
+but for a range of different bit depths? That is, Pilosa uses M = 65536, and
+M<!-- raw HTML omitted -->A<!-- raw HTML omitted --> and M<!-- raw HTML omitted -->R<!-- raw HTML omitted --> are dictated by the 16-bit array elements. Since
+we&rsquo;re off in la-la-land anyway, why not consider what things look like for different
+values of these parameters?</p>
+<p><img src="/img/blog/universe-map/container-count-vs-M.png" alt="Container count vs universe size">
+<em>Container count vs universe size</em></p>
+<p>The scale here is a little wonky: the x axis is logarithmic and the y axis doubly
+logarithmic. That means the gap between the two pairs of lines is huge - a factor
+of 10<!-- raw HTML omitted -->165<!-- raw HTML omitted --> for M=1024, for example. In short, that means bitmaps dominate
+in probability for all M. This is why the <em>bitmap</em> and <em>total</em> curves coincide. Why
+do the <em>array</em> and <em>RLE</em> curves coincide for large M? I&rsquo;m not sure, but I wonder if
+there is a simple counting argument to explain this. There is some discrepancy for
+small M, so the near-equality appears asymptotic.</p>
+<p>Getting back to the Pilosa world, what happens if we stick with M = 65536, but
+restrict bit density? That is, instead of looking at all possible bitmaps, let&rsquo;s
+look at a smaller portion of the space: bitmaps with a specific cardinality N. If
+we do this computation for a range of values of N, we can examine the container
+type distribution as a function of the bit density.</p>
+<p><img src="/img/blog/universe-map/container-count-vs-N.png" alt="Container count vs cardinality">
+<em>Container count vs cardinality</em></p>
+<p><img src="/img/blog/universe-map/container-count-vs-N-zoom.png" alt="Zoomed container count vs cardinality">
+<em>Container count vs cardinality, zoom view</em></p>
+<p>What exactly are we looking at here? The x-axis is cardinality, and the y-axis
+is the count of all sets, in log scale again. Curves are shown for each of the
+four types, but we can focus on the first three. This really shows
+the difference in magnitude between the container types, and reiterates the
+&ldquo;everything is a bitmap&rdquo; result. You can see the behavior on both sides
+of the <code>ArrayMaxSize</code> threshold: for N &lt; M<!-- raw HTML omitted -->A<!-- raw HTML omitted -->, containers can be
+either arrays or runs, and arrays outnumber runs dramatically. Even at very low
+cardinality, arrays are more than a googol times more likely than runs. When
+N &gt; M<!-- raw HTML omitted -->A<!-- raw HTML omitted -->, bitmaps replace arrays, and runs are still possible,
+but again bitmaps outnumber them dramatically.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>At this point, my intuitive answer to Jaffee&rsquo;s question seems to be confirmed:
+The area of a region in container space does not necessarily correspond to the
+count of sets belonging to the region. The specific result suggests a new
+question: if the number of sets in the RLE region is so small, why is THAT worth
+using as a separate container type?</p>
+<p>One problem with the above analysis is that we&rsquo;re considering a uniform distribution
+across all sets in the 2<!-- raw HTML omitted -->65536<!-- raw HTML omitted -->-bit universe. Even when I restricted N, I
+still used a uniform distribution for N<!-- raw HTML omitted -->R<!-- raw HTML omitted -->. I didn&rsquo;t have any fundamental
+reason for picking that distribution, it&rsquo;s just the simplest thing to look at. What
+if we used some distribution based on real-world data?</p>
+<p>Another great question, for another post. There are quite a few variables to consider
+here: the dataset, the mapping used to index it, and the order data is imported into
+Pilosa, among others. Perhaps most importantly, I&rsquo;ve left out any discussion of query
+speed, which is another area RLE shines. I started looking at the <a href="/use-cases/taming-transportation-data/">Taxi dataset</a>,
+where I noticed a number of effects, with a strong dependence on the frame (and the
+structure of the data contained within). I do have a brief summary of some benchmarks,
+which demonstrate the value of adding RLE:</p>
+<p><img src="/img/blog/universe-map/rle-query-benchmarks-2017-08-10.png" alt="RLE Benchmarks">
+<em>Preliminary RLE benchmarks</em></p>
+<p>But there is more work to do, to understand these effects and dependencies fully.
+That is a different sort of undertaking, which we&rsquo;ll be exploring as part of
+several upcoming posts on benchmarks.</p>
+<p>Figures were created with LaTeX or <a href="https://plot.ly/">plotly</a>, source available
+<a href="https://github.com/pilosa/latex-figures/">here</a> and
+<a href="https://github.com/alanbernstein/roaring-container-theory">here</a>.</p>
+<p><em>Alan is a software engineer at Pilosa. When he’s not mapping the universe, you can find him playing with laser cutters, building fidget spinners for his dog, or practicing his sick photography skills. Find him on Twitter <a href="https://twitter.com/gsnark">@gsnark</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein">
+        <div class="body-bold"><a href="https://twitter.com/gsnark">Alan Bernstein</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

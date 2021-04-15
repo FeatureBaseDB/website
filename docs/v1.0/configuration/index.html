@@ -1,0 +1,4066 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Configuration &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Configuration Pilosa can be configured through command line flags, environment variables, and/or a configuration file; configured options take precedence in that order. So if an option is specified in a command line flag, it will take precedence over the same option specified in the environment, which will take precedence over that same option specified in the configuration file.
+All options are available in all three configuration types with the exception of the --config option which specifies the location of the config file, and therefore will not be used if it is present in the config file.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Configuration"/>
+    <meta property="og:description" content="Configuration Pilosa can be configured through command line flags, environment variables, and/or a configuration file; configured options take precedence in that order. So if an option is specified in a command line flag, it will take precedence over the same option specified in the environment, which will take precedence over that same option specified in the configuration file.
+All options are available in all three configuration types with the exception of the --config option which specifies the location of the config file, and therefore will not be used if it is present in the config file." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/v1.0/configuration/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Configuration
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#shard">Shard</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/configuration/"  class="docs-active" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#shard">Shard</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/data-model/#view">View</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/configuration/"  class="docs-active" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/v1.0/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/glossary/" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/v1.0/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+          <div class="warning">
+              You are viewing the documentation for Pilosa v1.0. View the <a href="/docs/latest/configuration/">latest documentation for Pilosa v1.4.0</a>.
+
+
+          </div>
+      
+      <h2 id="configuration">Configuration</h2>
+<p>Pilosa can be configured through command line flags, environment variables, and/or a configuration file; configured options take precedence in that order. So if an option is specified in a command line flag, it will take precedence over the same option specified in the environment, which will take precedence over that same option specified in the configuration file.</p>
+<p>All options are available in all three configuration types with the exception of the <code>--config</code> option which specifies the location of the config file, and therefore will not be used if it is present in the config file.</p>
+<p>The syntax for each option is slightly different between each of the configuration types, but follows a simple formula. See the following three sections for an explanation of each configuration type.</p>
+<h3 id="command-line-flags">Command line flags</h3>
+<p>Pilosa uses GNU/POSIX style flags. Most flags you specify as <code>--flagname=value</code> although some have a short form that is a single character and can be specified with a single dash like <code>-f value</code>. Running <code>pilosa server --help</code> will give an overview of the available flags as well as their short forms (if applicable).</p>
+<h3 id="environment-variables">Environment variables</h3>
+<p>Every command line flag has a corresponding environment variable. The environment variable is the flag name in all caps, prefixed by <code>PILOSA_</code>, and with dots and dashes replaced by underscores. For example: <code>--scope.flag-name</code> becomes <code>PILOSA_SCOPE_FLAG_NAME</code>.</p>
+<h3 id="config-file">Config file</h3>
+<p>The config file is in the <a href="https://github.com/toml-lang/toml">toml format</a> and has exactly the same options available as the flags and environment variables. Any flag which contains a dot (&quot;.&quot;) denotes nesting within the config file, so the two flags <code>--cluster.coordinator</code> and <code>--cluster.replicas=1</code> look like this in the config file:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">cluster</span>]
+  <span style="color:#a6e22e">coordinator</span> = <span style="color:#66d9ef">true</span>
+  <span style="color:#a6e22e">replicas</span> = <span style="color:#ae81ff">1</span>
+</code></pre></div><h3 id="all-options">All Options</h3>
+<h4 id="anti-entropy-interval">Anti Entropy Interval</h4>
+<ul>
+<li>
+<p>Description: Interval at which the cluster will run its anti-entropy routine which ensures that all replicas of each fragment are in sync.</p>
+</li>
+<li>
+<p>Flag: <code>--anti-entropy.interval=&quot;10m0s&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_ANTI_ENTROPY_INTERVAL=&quot;10m0s&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">anti</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">entropy</span>]
+<span style="color:#a6e22e">interval</span> = <span style="color:#e6db74">&#34;10m0s&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="bind">Bind</h4>
+<ul>
+<li>
+<p>Description: host:port on which the Pilosa server will listen for requests. Host defaults to localhost and port to 10101.</p>
+</li>
+<li>
+<p>Flag: <code>--bind=&quot;localhost:10101&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_BIND=&quot;localhost:10101&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">bind</span> = <span style="color:#a6e22e">localhost</span><span style="color:#960050;background-color:#1e0010">:</span><span style="color:#ae81ff">10101</span>
+</code></pre></div></li>
+</ul>
+<h4 id="cors-cross-origin-resource-sharing-allowed-origins">CORS (Cross-Origin Resource Sharing) Allowed Origins</h4>
+<ul>
+<li>
+<p>Description: List of allowed origin URIs for CORS</p>
+</li>
+<li>
+<p>Flag: <code>--handler.allowed-origins=&quot;https://myapp.com,https://myapp.org&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_HANDLER_ALLOWED_ORIGINS=&quot;https://myapp.com,https://myapp.org&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">handler</span>]
+<span style="color:#a6e22e">allowed</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">origins</span> = [<span style="color:#e6db74">&#34;https://myapp.com&#34;</span>, <span style="color:#e6db74">&#34;https://myapp.org&#34;</span>]
+</code></pre></div></li>
+</ul>
+<h4 id="data-dir">Data Dir</h4>
+<ul>
+<li>
+<p>Description: Directory to store Pilosa data files.</p>
+</li>
+<li>
+<p>Flag: <code>--data-dir=&quot;~/.pilosa&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_DATA_DIR=&quot;~/.pilosa&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">data</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">dir</span> = <span style="color:#e6db74">&#34;~/.pilosa&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="log-path">Log Path</h4>
+<ul>
+<li>
+<p>Description: Path of log file.</p>
+</li>
+<li>
+<p>Flag: <code>--log-path=&quot;/path/to/logfile&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_LOG_PATH=&quot;/path/to/logfile&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">log</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">path</span> = <span style="color:#e6db74">&#34;/path/to/logfile&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="verbose">Verbose</h4>
+<ul>
+<li>
+<p>Description: Enable verbose logging.</p>
+</li>
+<li>
+<p>Flag: <code>--verbose</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_VERBOSE</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">verbose</span> = <span style="color:#66d9ef">true</span>
+</code></pre></div></li>
+</ul>
+<h4 id="max-writes-per-request">Max Writes Per Request</h4>
+<ul>
+<li>
+<p>Description: Maximum number of mutating commands allowed per request. This includes Set, Clear, SetRowAttrs, and SetColumnAttrs.</p>
+</li>
+<li>
+<p>Flag: <code>--max-writes-per-request=5000</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_MAX_WRITES_PER_REQUEST=5000</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">max</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">writes</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">per</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">request</span> = <span style="color:#ae81ff">5000</span>
+</code></pre></div></li>
+</ul>
+<h4 id="gossip-port">Gossip Port</h4>
+<ul>
+<li>
+<p>Description: Port to which Pilosa should bind for internal communication. If more than one Pilosa server is running on the same host, the gossip port for each server must be unique.</p>
+</li>
+<li>
+<p>Flag: <code>--gossip.port=11101</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_GOSSIP_PORT=11101</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">gossip</span>]
+  <span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">11101</span>
+</code></pre></div></li>
+</ul>
+<h4 id="gossip-seeds">Gossip Seeds</h4>
+<ul>
+<li>
+<p>Description: This specifies which internal host(s) should be used to initialize membership in the cluster. Typically this can be the address of any available host in the cluster. For example, when starting a three-node cluster made up of <code>node0</code>, <code>node1</code>, and <code>node2</code>, the <code>gossip.seeds</code> for all three nodes can be configured to be the address of <code>node0</code>. Multiple seeds should be comma-separated in the flag and env forms.</p>
+</li>
+<li>
+<p>Flag: <code>--gossip.seeds=&quot;localhost:11101,localhost:11110&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_GOSSIP_SEEDS=&quot;localhost:11101,localhost:11110&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">gossip</span>]
+  <span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;localhost:11101&#34;</span>, <span style="color:#e6db74">&#34;localhost:11110&#34;</span>]
+</code></pre></div></li>
+</ul>
+<h4 id="gossip-key">Gossip Key</h4>
+<ul>
+<li>Description: Path to the file which contains the key to encrypt gossip communication. The contents of the file should be either 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256 encryption. You can read from <code>/dev/random</code> device on UNIX-like systems to create the key file; e.g., <code>head -c 32 /dev/random &gt; gossip.key32</code> creates a key file to use AES-256.</li>
+<li>Flag: <code>--gossip.key=&quot;/var/secret/gossip.key32&quot;</code></li>
+<li>Env: <code>PILOSA_GOSSIP_KEY=&quot;/var/secret/gossip.key32&quot;</code></li>
+<li>Config:
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">gossip</span>]
+  <span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;/var/secret/gossip.key32&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="cluster-coordinator">Cluster Coordinator</h4>
+<ul>
+<li>
+<p>Description: Indicates whether the node should act as the coordinator for the cluster. Only one node per cluster should be the coordinator.</p>
+</li>
+<li>
+<p>Flag: <code>cluster.coordinator</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_CLUSTER_COORDINATOR</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">cluster</span>]
+<span style="color:#a6e22e">coordinator</span> = <span style="color:#66d9ef">true</span>
+</code></pre></div></li>
+</ul>
+<h4 id="cluster-long-query-time">Cluster Long Query Time</h4>
+<ul>
+<li>
+<p>Description: Duration that will trigger log and stat messages for slow queries.</p>
+</li>
+<li>
+<p>Flag: <code>cluster.long-query-time=&quot;1m0s&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_CLUSTER_LONG_QUERY_TIME=&quot;1m0s&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">cluster</span>]
+<span style="color:#a6e22e">long</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">query</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">time</span> = <span style="color:#e6db74">&#34;1m0s&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="cluster-replicas">Cluster Replicas</h4>
+<ul>
+<li>
+<p>Description: Number of hosts each piece of data should be stored on.</p>
+</li>
+<li>
+<p>Flag: <code>cluster.replicas=1</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_CLUSTER_REPLICAS=1</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">cluster</span>]
+<span style="color:#a6e22e">replicas</span> = <span style="color:#ae81ff">1</span>
+</code></pre></div></li>
+</ul>
+<h4 id="cluster-type">Cluster Type</h4>
+<ul>
+<li>
+<p>Description: Determine how the cluster handles membership and state sharing. Choose from [static, gossip].</p>
+<ul>
+<li>static - Messaging between nodes is disabled. This is primarily used for testing.</li>
+<li>gossip - Messages are transmitted over TCP. Cluster status and node state are kept in sync via internode gossip.</li>
+</ul>
+</li>
+<li>
+<p>Flag: <code>cluster.type=&quot;gossip&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_CLUSTER_TYPE=&quot;gossip&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">cluster</span>]
+<span style="color:#a6e22e">type</span> = <span style="color:#e6db74">&#34;gossip&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="profile-cpu">Profile CPU</h4>
+<ul>
+<li>
+<p>Description: If this is set to a path, collect a cpu profile and store it there.</p>
+</li>
+<li>
+<p>Flag: <code>--profile.cpu=&quot;/path/to/somewhere&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_PROFILE_CPU=&quot;/path/to/somewhere&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">profile</span>]
+<span style="color:#a6e22e">cpu</span> = <span style="color:#e6db74">&#34;/path/to/somewhere&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="profile-cpu-time">Profile CPU Time</h4>
+<ul>
+<li>
+<p>Description: Amount of time to collect cpu profiling data at startup if <code>profile.cpu</code> is set.</p>
+</li>
+<li>
+<p>Flag: <code>--profile.cpu-time=&quot;30s&quot;</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_PROFILE_CPU_TIME=&quot;30s&quot;</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">profile</span>]
+<span style="color:#a6e22e">cpu</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">time</span> = <span style="color:#e6db74">&#34;30s&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="metric-service">Metric Service</h4>
+<ul>
+<li>
+<p>Description: Which stats service to use for collecting <a href="../administration/#metrics">metrics</a>. Choose from [statsd, expvar, none].</p>
+</li>
+<li>
+<p>Flag: <code>--metric.service=statsd</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_METRIC_SERVICE=statsd</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">metric</span>]
+<span style="color:#a6e22e">service</span> = <span style="color:#960050;background-color:#1e0010">“</span><span style="color:#a6e22e">statsd</span><span style="color:#960050;background-color:#1e0010">”</span>
+</code></pre></div></li>
+</ul>
+<h4 id="metric-host">Metric Host</h4>
+<ul>
+<li>
+<p>Description: Address of the StatsD service host.</p>
+</li>
+<li>
+<p>Flag: <code>--metric.host=localhost:8125</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_METRIC_HOST=localhost:8125</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">metric</span>]
+<span style="color:#a6e22e">host</span> = <span style="color:#e6db74">&#34;localhost:8125&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="metric-poll-interval">Metric Poll Interval</h4>
+<ul>
+<li>
+<p>Description: Rate at which runtime metrics (such as open file handles and memory usage) are collected.</p>
+</li>
+<li>
+<p>Flag: <code>metric.poll-interval=”0m15s”</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_METRIC_POLL_INTERVAL=0m15s</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">metric</span>]
+<span style="color:#a6e22e">poll</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">interval</span> = <span style="color:#e6db74">&#34;0m15s&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="metric-diagnostics">Metric Diagnostics</h4>
+<ul>
+<li>
+<p>Description: Enable <a href="../administration/#diagnostics">reporting</a> of limited usage statistics to Pilosa developers. To disable, set to false.</p>
+</li>
+<li>
+<p>Flag: <code>metric.diagnostics</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_METRIC_DIAGNOSTICS</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">metric</span>]
+<span style="color:#a6e22e">diagnostics</span> = <span style="color:#66d9ef">true</span>
+</code></pre></div></li>
+</ul>
+<h4 id="tls-certificate">TLS Certificate</h4>
+<ul>
+<li>
+<p>Description: Path to the TLS certificate to use for serving HTTPS. Usually has one of<code>.crt</code> or <code>.pem</code> extensions.</p>
+</li>
+<li>
+<p>Flag: <code>tls.certificate=/srv/pilosa/certs/server.crt</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_TLS_CERTIFICATE=/srv/pilosa/certs/server.crt</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;/srv/pilosa/certs/server.crt&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="tls-certificate-key">TLS Certificate Key</h4>
+<ul>
+<li>
+<p>Description: Path to the TLS certificate key to use for serving HTTPS. Usually has the <code>.key</code> extension.</p>
+</li>
+<li>
+<p>Flag: <code>tls.key=/srv/pilosa/certs/server.key</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_TLS_KEY=/srv/pilosa/certs/server.key</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;/srv/pilosa/certs/server.key&#34;</span>
+</code></pre></div></li>
+</ul>
+<h4 id="tls-skip-verify">TLS Skip Verify</h4>
+<ul>
+<li>
+<p>Description: Disables verification for checking TLS certificates. This configuration item is mainly useful for using self-signed certificates for a Pilosa cluster. Do not use in production since it makes man-in-the-middle attacks trivial.</p>
+</li>
+<li>
+<p>Flag: <code>tls.skip-verify</code></p>
+</li>
+<li>
+<p>Env: <code>PILOSA_TLS_SKIP_VERIFY</code></p>
+</li>
+<li>
+<p>Config:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">tls</span>]
+<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+</code></pre></div></li>
+</ul>
+<h3 id="example-cluster-configuration">Example Cluster Configuration</h3>
+<p>A three node cluster running on different hosts could be minimally configured as follows:</p>
+<h4 id="node-0">Node 0</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;node0.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = true
+</code></pre>
+<h4 id="node-1">Node 1</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;node1.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+</code></pre>
+<h4 id="node-2">Node 2</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;node2.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+</code></pre>
+<h3 id="example-cluster-configuration-https">Example Cluster Configuration (HTTPS)</h3>
+<p>The same cluster which uses HTTPS instead of HTTP can be configured as follows. Note that we explicitly specify <code>https</code> as the protocol in <code>bind</code> and <code>cluster.hosts</code> configuration. It is not required to use a gossip key but it is highly recommended:</p>
+<h4 id="node-0-1">Node 0</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;https://node0.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = true
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+<h4 id="node-1-1">Node 1</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;https://node1.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+<h4 id="node-2-1">Node 2</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data&quot;
+bind = &quot;https://node2.pilosa.com:10101&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;node0.pilosa.com:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+<h3 id="example-cluster-configuration-https-same-host">Example Cluster Configuration (HTTPS, same host)</h3>
+<p>You can run a cluster on the same host using the configuration above with a few changes. Gossip port and bind address should be different for each node and a data directory should be accessed only by a single node.</p>
+<h4 id="node-0-2">Node 0</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data0&quot;
+bind = &quot;https://localhost:10100&quot;
+
+[gossip]
+  port = 12000
+  seed = &quot;localhost:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = true
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+<h4 id="node-1-2">Node 1</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data1&quot;
+bind = &quot;https://localhost:10101&quot;
+
+[gossip]
+  port = 12001
+  seed = &quot;localhost:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+<h4 id="node-2-2">Node 2</h4>
+<pre><code>data-dir = &quot;/home/pilosa/data2&quot;
+bind = &quot;https://localhost:10102&quot;
+
+[gossip]
+  port = 12002
+  seed = &quot;localhost:12000&quot;
+  key = &quot;/home/pilosa/private/gossip.key32&quot;
+
+[cluster]
+  replicas = 1
+  coordinator = false
+
+[tls]
+  certificate = &quot;/home/pilosa/private/server.crt&quot;
+  key = &quot;/home/pilosa/private/server.key&quot;
+</code></pre>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v1.0/docs/configuration.md">View markdown source</a> on Github. Last updated 11 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:v1.0"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:v1.0"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

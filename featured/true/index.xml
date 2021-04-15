@@ -1,0 +1,179 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pilosa</title>
+    <link>https://www.pilosa.com/featured/true/</link>
+    <description>Recent content from Pilosa</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 18 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.pilosa.com/featured/true/" rel="self" type="application/rss+xml" />
+    
+      
+        <item>
+          <title>Pilosa 1.4 Released</title>
+          <link>https://www.pilosa.com/blog/pilosa-1-4-released/</link>
+          <pubDate>Wed, 18 Sep 2019 00:00:00 +0000</pubDate>
+          
+          <guid>https://www.pilosa.com/blog/pilosa-1-4-released/</guid>
+          <description>&lt;p&gt;Yesterday we cut Pilosa v1.4.0 — our first new minor version since
+April! While we haven&amp;rsquo;t made an official release since then, several
+of &lt;a href=&#34;https://www.molecula.com/&#34;&gt;Molecula&amp;rsquo;s&lt;/a&gt; clients have been using
+much of the new Pilosa code for some time and some of the improvements
+are &lt;strong&gt;vast&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;This release has a variety of fixes, changes, and additions, and you
+can get all the gory details in &lt;a href=&#34;https://github.com/pilosa/pilosa/blob/master/CHANGELOG.md&#34;&gt;the
+changelog&lt;/a&gt;.
+I would, however, like to call out a few of the more interesting
+developments, and go into more detail on the general theme of &amp;ldquo;worker
+pools&amp;rdquo;.&lt;/p&gt;
+&lt;h3 id=&#34;callouts&#34;&gt;Callouts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/1988&#34;&gt;Improved startup time&lt;/a&gt;
+by concurrently loading fragment data. This makes it possible to
+iterate faster when working with large data sets in Pilosa, and to
+recover from failures more quickly.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2041&#34;&gt;Using UnionInPlace for time range
+queries&lt;/a&gt; greatly reduces
+memory allocations for these queries which improves overall
+performance and stability. This makes a night and day difference for
+workloads which query time ranges.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/1902&#34;&gt;Made integer fields unbounded by using sign+magnitude
+representation&lt;/a&gt;. This
+means one no longer needs to specify the minimum or maximum values
+for an integer field ahead of time, and integers will use &lt;em&gt;exactly&lt;/em&gt;
+the number of bits they need to represent the data they have on a
+per-shard basis. The range grows and shrinks automatically.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2004&#34;&gt;Added fuzz tests&lt;/a&gt; to
+our roaring implementation, and fixed
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2021&#34;&gt;a&lt;/a&gt;
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2019&#34;&gt;number&lt;/a&gt;
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2017&#34;&gt;of&lt;/a&gt;
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2012&#34;&gt;subtle&lt;/a&gt;
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/1975&#34;&gt;bugs&lt;/a&gt;. Big shout out to
+our interns for tackling this project!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;worker-pools&#34;&gt;Worker Pools&lt;/h3&gt;
+&lt;h4 id=&#34;the-problem&#34;&gt;The Problem&lt;/h4&gt;
+&lt;p&gt;To motivate this section, I need to describe a particular subtle issue
+that has been plaguing us for some time. Pilosa runs a background task
+which uses a gossip protocol to maintain cluster membership and share
+metadata around the cluster. This task issues constant heartbeats to
+check that all the nodes in the cluster are still around and
+healthy. If a node hasn&amp;rsquo;t been heard from after a particular amount of
+time or number of retries, it is marked as dead and the cluster may
+drop into a non-working state depending on how many replicas it has
+configured. The problem we&amp;rsquo;d been having was that the gossip task
+would erroneously identify nodes as having died when the cluster was
+under load.&lt;/p&gt;
+&lt;p&gt;The root cause of this issue was very difficult to track down, and I&amp;rsquo;m
+not sure we&amp;rsquo;ve 100% nailed it, but this is the best theory we have at
+this time:&lt;/p&gt;
+&lt;p&gt;Pilosa tends to have a relatively large number of objects on the
+heap. This means that Go&amp;rsquo;s garbage collector has to do a lot of work
+during its marking phase scanning through all of the data even though
+it is mostly long-lived and static. Normally this isn&amp;rsquo;t too much of a
+problem, though it does take a percentage of system resources. Go&amp;rsquo;s GC
+does almost all of its work concurrently with two very short STW
+(stop-the-world) phases where it has to make sure all running threads
+get to a safe point, stop them, and then do a small amount of
+work. Most code is chock-full of preemption points where the runtime
+can quickly stop all threads, do the GC work, and get them running
+again within microseconds. It&amp;rsquo;s possible, however, to write code with
+very tight loops which can block GC from running for arbitrarily long
+times. This is documented
+&lt;a href=&#34;https://github.com/golang/go/issues/10958&#34;&gt;here&lt;/a&gt;, and is being worked
+on for future versions of Go.&lt;/p&gt;
+&lt;p&gt;What seems to happen is that Pilosa has many routines performing heavy
+query processing tasks which involve tight loops that may run for a
+few ms at a time. When the GC reaches a STW phase, it has to wait for
+all running routines to finish whatever tight loops they are in, and
+won&amp;rsquo;t let new routines be scheduled until it finishes its phase. So,
+every time GC has to run, there are two &amp;ldquo;spin down&amp;rdquo; phases where we have
+to wait for all running threads to get out of tight loops (meanwhile
+the threads which finish first are idle), &lt;em&gt;and&lt;/em&gt; a significant percentage
+of CPU resources are taken up by GC work.&lt;/p&gt;
+&lt;p&gt;This problem is compounded if there are many goroutines all vying for
+attention from the scheduler, and there&amp;rsquo;s no way to tell the scheduler
+that this one tiny background task in a single one of those goroutines
+is actually somewhat latency sensitive, and &amp;ldquo;hey could you maybe run
+this one thing pretty regularly so that it doesn&amp;rsquo;t look like this
+whole machine has fallen off the face of the planet causing a total
+failure of the cluster until it re-establishes contact??&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;So&amp;hellip; in addition to a variety of other improvements we&amp;rsquo;ve made to
+reduce the amount of data and pointers visible to GC, and to reuse
+memory rather than re-allocating it, we thought it might be best to
+reduce the number of goroutines competing for scheduling attention at
+any given time.&lt;/p&gt;
+&lt;h4 id=&#34;query-pool&#34;&gt;Query Pool&lt;/h4&gt;
+&lt;p&gt;We &lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2034&#34;&gt;implemented&lt;/a&gt; a
+goroutine worker pool for queries. This was one of those fun cases
+where things worked very well until several dimensions of scale were
+being exercised simultaneously. One particular workload had huge
+amounts of data — a thousand Pilosa shards &lt;em&gt;per node&lt;/em&gt; (each shard is
+roughly 1 million records), and was issuing dozens of concurrent
+queries.&lt;/p&gt;
+&lt;p&gt;Our original design had each query launching a separate goroutine
+&lt;em&gt;per-shard&lt;/em&gt;, which in this case meant that tens of thousands of
+goroutines were being created and destroyed every second. It is
+absolutely a testament to the creators of Go and the efficiency of its
+runtime that things were still more-or-less working at this scale.&lt;/p&gt;
+&lt;p&gt;The classic solution to this problem is to create a fixed pool of
+long-lived goroutines and pass items of work to them through a
+channel. In this case, the per-shard query processing work is pretty
+CPU intensive, so there isn&amp;rsquo;t much point in having concurrency beyond
+the number of CPU cores available. Luckily Go provides us with a
+mechanism for determining the number of logical CPUs available with
+&lt;code&gt;runtime.NumCPU()&lt;/code&gt;, so at startup time, we create a pool of goroutines
+of that size to process queries.&lt;/p&gt;
+&lt;p&gt;Amazingly, the actual performance issue that we were experiencing
+around this was not that 20,000 goroutines were popping in and out of
+existence each second, which the runtime handled pretty well, but that
+in some cases they were all contending for the same mutexes. We
+discovered via &lt;a href=&#34;https://golang.org/pkg/net/http/pprof/&#34;&gt;profiling&lt;/a&gt;
+that there was a lot of contention in our
+&lt;a href=&#34;https://opentracing.io/&#34;&gt;tracing&lt;/a&gt; subsystem which probabilistically
+samples queries and provides detailed timing and metadata about each
+processing step. Manually disabling tracing and other sources of lock
+contention resulted in similar performance to what we achieved after
+implementing the worker pool. With the worker pool, however, we were
+able to re-enable important services like tracing without running into
+lock contention issues.&lt;/p&gt;
+&lt;h4 id=&#34;ingest-pools&#34;&gt;Ingest Pools&lt;/h4&gt;
+&lt;p&gt;Query processing wasn&amp;rsquo;t the only area we found where we could benefit
+from worker pools. In
+&lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2024&#34;&gt;#2024&lt;/a&gt; we added a
+different sort of pool which helped to make data ingest more
+efficient. Pilosa often has to decide between applying writes in
+memory and appending them to a file, or taking a full snapshot of a
+whole data fragment. Previously, it made this decision on a
+fragment-by-fragment basis, which could result in many snapshots being
+taken simultaneously. Now, there is a small pool of background
+routines which combs through fragments with outstanding writes, and
+limits concurrent snapshotting to more efficiently use the available
+I/O throughput. When the system is under heavy load, it will naturally
+skew more towards append only writes, and each snapshot will be
+covering more outstanding writes.&lt;/p&gt;
+&lt;p&gt;We also implemented a &lt;a href=&#34;https://github.com/pilosa/pilosa/pull/2048&#34;&gt;worker pool for import
+jobs&lt;/a&gt; so that large
+numbers of concurrent imports wouldn&amp;rsquo;t spawn unlimited numbers of
+goroutines potentially created the same performance and contention
+issues we&amp;rsquo;d seen with queries.&lt;/p&gt;
+&lt;h3 id=&#34;wrapping-up&#34;&gt;Wrapping Up&lt;/h3&gt;
+&lt;p&gt;I&amp;rsquo;m very proud of the work the team has done between 1.3 and 1.4, but
+more than that, I&amp;rsquo;m excited for what we already have lined up for our
+next release. We decided to cut the 1.4 release with what we knew was
+a fairly stable codebase, even though there were a number of
+outstanding pull requests with interesting features and improvements.&lt;/p&gt;
+&lt;p&gt;Be on the lookout for another release before too long with interesting things like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;An extension interface for dynamically adding new query
+functionality to Pilosa.&lt;/li&gt;
+&lt;li&gt;An overhauled, and more scalable key translation system.&lt;/li&gt;
+&lt;li&gt;New types of queries (e.g. GROUP BY with aggregates over integer fields).&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/pilosa/pilosa/blob/master/CONTRIBUTING.md&#34;&gt;Contributions&lt;/a&gt; from viewers like you!&lt;/li&gt;
+&lt;/ul&gt;</description>
+        </item>
+      
+    
+  </channel>
+</rss>

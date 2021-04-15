@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>The Billion Taxi Ride Dataset with Pilosa &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Pilosa was originally built for the very specific use case of arbitrary audience
+segmentation on hundreds of millions of people with tens of millions of attributes.
+As we&rsquo;ve spun out a separate company around Pilosa, a natural first step was to
+test its efficacy on other types of problems.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="The Billion Taxi Ride Dataset with Pilosa"/>
+    <meta property="og:description" content="Pilosa was originally built for the very specific use case of arbitrary audience
+segmentation on hundreds of millions of people with tens of millions of attributes.
+As we&rsquo;ve spun out a separate company around Pilosa, a natural first step was to
+test its efficacy on other types of problems." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/billion-taxi-ride-dataset-with-pilosa/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/billion-taxi-banner.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-06-02T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/billion-taxi-banner.png" alt="The Billion Taxi Ride Dataset with Pilosa"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">The Billion Taxi Ride Dataset with Pilosa</h1>
+      <h6 class="h-6-caps-white">6/2/2017 • 5 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=The&#43;Billion&#43;Taxi&#43;Ride&#43;Dataset&#43;with&#43;Pilosa%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fbillion-taxi-ride-dataset-with-pilosa%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fbillion-taxi-ride-dataset-with-pilosa%2F&title=The&#43;Billion&#43;Taxi&#43;Ride&#43;Dataset&#43;with&#43;Pilosa&summary=Pilosa&#43;was&#43;originally&#43;built&#43;for&#43;the&#43;very&#43;specific&#43;use&#43;case&#43;of&#43;arbitrary&#43;audience&#43;segmentation&#43;on&#43;hundreds&#43;of&#43;millions&#43;of&#43;people&#43;with&#43;tens&#43;of&#43;millions&#43;of&#43;attributes.&#43;As&#43;we%26rsquo%3Bve&#43;spun&#43;out&#43;a&#43;separate&#43;company&#43;around&#43;Pilosa%2C&#43;a&#43;natural&#43;first&#43;step&#43;was&#43;to&#43;test&#43;its&#43;efficacy&#43;on&#43;other&#43;types&#43;of&#43;problems.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fbillion-taxi-ride-dataset-with-pilosa%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>Pilosa was originally built for the very specific use case of arbitrary audience
+segmentation on hundreds of millions of people with tens of millions of attributes.
+As we&rsquo;ve spun out a separate company around Pilosa, a natural first step was to
+test its efficacy on other types of problems.</p>
+<p>While the user segmentation use case has a very high number of attributes,
+the data is extremely sparse—most attributes are only associated with a handful
+of people, and most individuals only have a few hundred or a few thousand attributes.
+Pilosa handles this type of data gracefully; in just milliseconds, one can choose any
+boolean combination of the millions of attributes and find the segment of users which
+satisfies that combination.</p>
+<p><img src="/img/blog/billion-taxi-umbel.png" alt="Segmentation in Umbel"></p>
+<p><em>Image courtesy of Umbel</em></p>
+<p>For audience segmentation, we&rsquo;d happily pit Pilosa against anything out there on
+similar hardware. However, if we want Pilosa to be an index which serves as a
+general purpose query acceleration layer over other data stores, it will have to
+be effective at more than just segmentation queries, and more than just sparse,
+high cardinality data. In order to test Pilosa, we needed a dataset which had
+dense, lower cardinality data, and ideally one which has been explored by other
+solutions so that we could get a feel for how we might fare against them. The
+<a href="http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml">billion taxi ride dataset</a>
+fit the bill perfectly. There are myriad blog posts analyzing the dataset with
+various technologies; here are just a few:</p>
+<ul>
+<li><strong><a href="http://toddwschneider.com/posts/analyzing-1-1-billion-nyc-taxi-and-uber-trips-with-a-vengeance/">Analyzing 1.1 Billion NYC Taxi and Uber Trips, with a Vengeance</a></strong></li>
+<li><strong><a href="https://kx.com/2017/01/25/kx-1-1-billion-taxi-ride-benchmark-highlights-advantages-kdb-architecture/">Kx 1.1 billion taxi ride benchmark highlights advantages of kdb+ architecture</a></strong></li>
+<li><strong><a href="https://chriswhong.com/open-data/should-i-stay-or-should-i-go-nyc-taxis-at-the-airport/">Should I Stay or Should I Go? NYC Taxis at the Airport</a></strong></li>
+</ul>
+<p>Of particular usefulness to us are the series of posts by Mark Litwintschik and the <a href="http://tech.marksblogg.com/benchmarks.html">performance comparison</a> table he compiled. Here is the table for reference:</p>
+<p><img src="/img/blog/billion-taxi-table1.png" alt="Mark&rsquo;s benchmarks"></p>
+<p>We implemented the same four queries against Pilosa so that we could get some comparison of performance against other solutions.</p>
+<p>Here is the English description of each query:</p>
+<ol>
+<li>How many rides are there with each cab type?</li>
+<li>For each number of passengers, what is the average cost of all taxi rides?</li>
+<li>In each year, and for each passenger count, how many taxi rides were there?</li>
+<li>For each combination of passenger count, year, and trip distance, how many rides were there - results ordered by year, and then number of rides descending.</li>
+</ol>
+<p>Now we have a dataset and a set of queries which are far outside Pilosa&rsquo;s
+comfort zone, along with a long list of performance comparisons on different
+combinations of hardware and software.</p>
+<p>If you&rsquo;d like to learn more about how we modeled the dataset in Pilosa and
+structured the queries, please see our <a href="https://www.pilosa.com/use-cases/taming-transportation-data/">transportation use case post</a>.</p>
+<p>So instead of tens of millions of boolean attributes, we have just a few
+attributes with more complex types: integers, floating point, timestamp, etc.
+In short, this data is far more suitable to a relational database than the data
+for which Pilosa was designed.</p>
+<p>We stood up a 3-node Pilosa cluster on AWS c4.8xlarge instances, with an additional
+c4.8xlarge to load the data. We used our open source <a href="https://www.pilosa.com/docs/pdk/">pdk</a>
+tool to load the data into Pilosa with the following arguments:</p>
+<pre><code>pdk taxi -b 2000000 -c 50 -p &lt;pilosa-host-ip&gt;:10101 -f
+&lt;pdk_repo_location&gt;/usecase/taxi/greenAndYellowUrls.txt
+</code></pre><p>This took about 2 hours and 50 minutes, which includes downloading all of the csv
+files from S3, parsing them, and loading the data into Pilosa.</p>
+<p>If we were to add our results to Mark&rsquo;s table, it would look like the following:</p>
+<p><img src="/img/blog/billion-taxi-table2.png" alt="Mark&rsquo;s benchmarks with Pilosa"></p>
+<p><em>Note that the hardware and software are different for each setup, so direct comparisons are difficult.</em></p>
+<p>We should note that Pilosa &ldquo;cheats&rdquo; a bit on query 1; due to the way it stores
+data, Pilosa already has this result precomputed, so the query time is mostly
+network latency.</p>
+<p>For the remainder of the queries, however, Pilosa does remarkably well—in
+some cases beating out exotic hardware such as multi-GPU setups. The 0.177s time
+on query 3 was particularly startling—performance was along the lines of 8 Nvidia
+Pascal Titan Xs. It looks like kdb+/q is beating us pretty soundly,
+but keep in mind that those Xeon Phi 7210s have 256 hardware threads per chip,
+as well as 16GB of memory <em>on the package</em>. This gives them performance and
+memory bandwidth closer to GPUs than CPUs. They&rsquo;re also about $2400 a piece.</p>
+<p>For us, these results are enough to validate spending more time optimizing
+Pilosa for uses outside of its original intent. We know that Pilosa&rsquo;s internal
+bitmap compression format is not optimized for dense data, and more research has
+been done in this area with exciting results (e.g. <a href="https://arxiv.org/pdf/1603.06549.pdf">roaring-run</a>),
+so we have reason to believe that there is significant room for improvement in these numbers.</p>
+<p>UPDATE: After implementing run-length encoding, and some other optimizations, Pilosa is <em>significantly</em>  faster on many of these queries and beats every other system on Query 3!</p>
+<p><img src="/img/blog/billion-taxi-table3.png" alt="Mark&rsquo;s benchmarks with Pilosa - updated"></p>
+<hr>
+<p><em>Jaffee is a lead software engineer at Pilosa. When he’s not crunching a billion taxi rides, he enjoys jiu-jitsu, building mechanical keyboards, and spending time with family. Follow him on Twitter at <a href="https://twitter.com/mattjaffee?lang=en">@mattjaffee</a>.</em></p>
+<p><em>Alan is a software engineer at Pilosa. When he’s not mapping the universe, you can find him playing with laser cutters, building fidget spinners for his dog, or practicing his sick photography skills. Find him on Twitter <a href="https://twitter.com/gsnark">@gsnark</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee and Alan Bernstein">
+        <div class="body-bold"><a href="https://twitter.com/mattjaffee">Matt Jaffee and Alan Bernstein</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

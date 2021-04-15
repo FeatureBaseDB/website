@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Self Deploying Applications With Go &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="What if your apps handled their own ops? That&rsquo;s kind of like devops&#39; final form,
+right? Its ultimate evolution? The Charizard of devops, if you will.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Self Deploying Applications With Go"/>
+    <meta property="og:description" content="What if your apps handled their own ops? That&rsquo;s kind of like devops&#39; final form,
+right? Its ultimate evolution? The Charizard of devops, if you will." />
+    <meta property="og:url" content="https://www.pilosa.com/blog/self-deploying-applications/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/self-deploying/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-08-04T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/self-deploying/banner.jpg" alt="Self Deploying Applications With Go"/>
+    </div>
+    
+
+    <div class="single-hero-overlay green-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Self Deploying Applications With Go</h1>
+      <h6 class="h-6-caps-white">8/4/2017 • 7 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Self&#43;Deploying&#43;Applications&#43;With&#43;Go%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fself-deploying-applications%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fself-deploying-applications%2F&title=Self&#43;Deploying&#43;Applications&#43;With&#43;Go&summary=What&#43;if&#43;your&#43;apps&#43;handled&#43;their&#43;own&#43;ops%3F&#43;That%26rsquo%3Bs&#43;kind&#43;of&#43;like&#43;devops%27&#43;final&#43;form%2C&#43;right%3F&#43;Its&#43;ultimate&#43;evolution%3F&#43;The&#43;Charizard&#43;of&#43;devops%2C&#43;if&#43;you&#43;will.%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fself-deploying-applications%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>What if your apps handled their own ops? That&rsquo;s kind of like devops' final form,
+right? Its ultimate evolution? The Charizard of devops, if you will.</p>
+<p>Inspiration to write about this comes from Kelsey Hightower who had a good talk
+at Gophercon about
+<a href="https://www.youtube.com/watch?v=XPC-hFL-4lU">Self Deploying Kubernetes Applications</a>.
+Here&rsquo;s the TLDR;</p>
+<p><code>myapp --kubernetes --replicas=5</code></p>
+<p>myapp compiles itself statically for Linux, containerizes itself, and deploys to
+a Kubernetes cluster with 5 replicas. No config files needed.</p>
+<p>I thought this was extremely cool, and immediately went to check out Kubernetes
+to see if I could add something like it to Pilosa. Kubernetes' docs have a page
+dedicated to &ldquo;picking the right solution,&rdquo; which has 40+ different ways to get
+going with Kubernetes, none of which (as far as I could tell) were &ldquo;run this
+binary&rdquo;. Bleeeeccchhh - I don&rsquo;t want to dig through pages of documentation just
+for a quick experiment! I know based on what I&rsquo;ve seen of Kubernetes and its
+community that it&rsquo;s great software, and I&rsquo;m willing to bet we&rsquo;ll be deploying
+Pilosa to our own Kubernetes cluster one day soon. On this particular day,
+however, I was really smitten with the &ldquo;self-deploying applications&rdquo; idea, not
+the &ldquo;on Kubernetes&rdquo; part.</p>
+<p>I realized, in fact, that I&rsquo;d already done some work in this direction for
+Pilosa&rsquo;s benchmarking suite. The original idea was to build a tool which would,
+with a single command:</p>
+<ul>
+<li>provision cloud infrastructure on various providers</li>
+<li>install and start a Pilosa cluster on remote hosts</li>
+<li>allow for highly configurable benchmarks to be defined</li>
+<li>install and run benchmarks on remote &ldquo;agent&rdquo; hosts</li>
+<li>gather the results of the benchmarks</li>
+<li>gather host metrics (cpu, memory, etc.)</li>
+<li>store all the data from each benchmark run in a consistent format</li>
+<li>make and serve delicious iced beverages</li>
+</ul>
+<p>Wow, once that I put it in a list like that it looks pretty ridiculous - now I
+understand why it has taken us something like 8 months (albeit while working
+on <a href="https://github.com/pilosa/pilosa">Pilosa</a> itself as well). In any case,
+we&rsquo;ve actually achieved a few of those goals with a new tool
+called <a href="https://github.com/pilosa/tools">Pi</a> which we are open sourcing <em>today</em>.
+Pi is a tool specifically for benchmarking Pilosa, but I think it contains some
+reusable ideas and libraries that could be beneficial to the open source
+community at large (also we&rsquo;d love to get some help improving it).</p>
+<p>Right, but self deploying applications, that&rsquo;s why you&rsquo;re here. Let&rsquo;s set aside
+the cloud provisioning part of the equation for now, and say you have a set of
+fresh, clean, Linux hosts to which you have ssh access, and you want to
+benchmark Pilosa. You&rsquo;ve got Pilosa&rsquo;s codebase locally (in your <code>GOPATH</code>) as
+well as the mythical Pi tool. What&rsquo;s the least amount of work you could
+expect to do to run a benchmark against a Pilosa cluster and gather the results?</p>
+<p>How about running a single command, on your laptop, in a crowded, local coffee
+shop, in the heart of Austin TX?</p>
+<p><code>pi spawn --pilosa-hosts=&lt;...&gt; --agent-hosts=&lt;...&gt; --spawn-file=~/my.benchmark</code></p>
+<p>You hit enter, and a few minutes later you&rsquo;ve got benchmarking data in front of
+you. A multi-node Pilosa cluster was created along with a number of agent hosts
+to send queries to it. The agents spewed huge amounts of realistically
+distributed random data into the cluster, and then followed it up with a battery
+of complex queries.</p>
+<p>Keep in mind that before you ran Pi, that pool of remote hosts had no
+knowledge of Go, Pilosa, Pi, or anything else. They were just the stock
+Linux images from AWS or GCP or whatever.</p>
+<p>How can we do that? Let&rsquo;s break this down: first of all, we need to be able to
+connect with remote hosts via ssh inside a Go program. Turns out Go has a pretty
+great <a href="https://godoc.org/golang.org/x/crypto/ssh">ssh package</a> which handles most
+of this for us. Once we&rsquo;re connected to remote hosts, we can execute commands at
+a shell just like we would from a terminal! We get standard <code>Reader</code> and
+<code>Writer</code> interfaces for getting data into and out of those commands, so
+everything is pretty hunky-dory. But what do we run? These hosts don&rsquo;t have
+Pilosa or Pi installed, both of which we&rsquo;ll need if we want to start a cluster
+and benchmark it.</p>
+<p>Well, let&rsquo;s just run <code>cat</code> - these hosts definitely have that, right?
+I&rsquo;m pretty sure it&rsquo;s the law (or at least specified by POSIX) that Linux hosts
+must have <code>cat</code>. Specifically, we&rsquo;ll run <code>cat &gt; pilosa</code> - remember that
+<code>Writer</code>? It&rsquo;s actually an <code>io.WriteCloser</code>, and it goes straight to <code>cat</code>&rsquo;s
+<code>stdin</code>. So we just write the whole Pilosa binary right into there, close it,
+and the data is magically transported to a file on the remote host!</p>
+<p>&ldquo;Wait.&rdquo; you say&hellip; &ldquo;What binary? Your laptop in that hip coffee shop in ATX is a
+Macbook Pro (obviously), you don&rsquo;t have a Linux binary for Pilosa.&rdquo;</p>
+<p>As you may have guessed, Go saves the day again by making it <em>stupidly</em> easy to
+cross compile for other platforms. Now, I know what you&rsquo;re thinking: &ldquo;This is
+about to get SWEET; he&rsquo;s gonna import the packages for Go&rsquo;s compiler, build the
+new Pilosa binary directly in memory, and stream it straight into <code>cat</code> running
+on the remote host. I CAN&rsquo;T WAIT!&rdquo;</p>
+<p>Yeah, no, sorry - this is the guy that couldn&rsquo;t be bothered to run a VM to try
+out Kubernetes. I looked at the source for the toolchain for a hot minute and
+decided to use <code>os/exec</code> to run <code>go build</code> in a subprocess.</p>
+<p><code>com := exec.Command(&quot;go&quot;, &quot;build&quot;, &quot;-o&quot;, &quot;someTempFile&quot;, &quot;https://github.com/pilosa/pilosa&quot;)</code></p>
+<p>Oh, and we need to set the environment to make sure we build for Linux:</p>
+<p><code>com.Env = append(os.Environ(), &quot;GOOS=linux&quot;)</code></p>
+<p>Not bad - open the temp file, <code>cat</code> it to the remote host, a little <code>chmod</code>
+action to make it executable, and we&rsquo;re in business. Let&rsquo;s take a moment to
+reflect upon how much Go helped us there - not just the ease of cross
+compilation, but the fact that we can compile a standalone binary which is
+fairly lightweight (ok like 12 megs, but that&rsquo;s not <em>too</em> bad), and that&rsquo;s all
+we need in order to run our application on another host. No JVM, no interpreter
+(and no worrying about version compatibility of those things with our thing) -
+it&rsquo;s really just very refreshing - like a delicious iced beverage.</p>
+<p>Alright, so the Pilosa binary is in place; we can build a config file, and copy
+it over the same way, or just start Pilosa with command line arguments. Once it&rsquo;s
+running, we can stream any logs back to us, or drop them in a file on the remote
+host.</p>
+<p>Let us turn our attention to the task at hand - B E N C H M A R K I N G.
+Strictly speaking, we haven&rsquo;t created a <em>self</em>-deploying application yet, we&rsquo;ve
+created a Pilosa deploying application - remember it&rsquo;s Pi which is doing all
+this stuff. But we need to run Pi on remote hosts as well because Pi has all the
+benchmarking tools, and there&rsquo;s no reason this cross-compiling <code>cat</code>ing business
+won&rsquo;t work just as well on the source code of the very program which is running
+it.</p>
+<p>We cross-compile Pi, copy it to each of the &ldquo;agent&rdquo; hosts, figure out which
+benchmarks we&rsquo;re actually supposed to run, and run them! Pi&rsquo;s benchmarks report
+their results in JSON format on stdout which we happily collect and aggregate
+back in the coffee shop. This is CRAZY, but again, we owe a debt to Go for
+providing us with a concurrency model which makes this very straightforward.
+We&rsquo;re running multiple, different programs on multiple remote hosts, which are
+throwing huge amounts of data at each other and doing massive computation. All
+this from one program on one laptop with a crappy WiFi connection. Not to
+mention that we&rsquo;re streaming and combining the output from all those remote
+programs into a single cohesive result structure which fully describes the
+benchmark. This would truly be a nightmare in most languages.</p>
+<p>So, there you have it. A self-deploying application <em>without</em> Kubernetes. All
+you need is a pile of hosts to which you have ssh access and you too can make
+complex fleets of self-deploying programs.</p>
+<p>Check out the source code for <a href="https://github.com/pilosa/tools">Pi</a> (especially the
+<code>build</code> and <code>ssh</code> packages), and read the docs if you want to really know how to
+use it - I glossed over a bunch of details and made some stuff up to make it
+seem approachable 😉. Patches welcome!</p>
+<p><em>Jaffee is a lead software engineer at Pilosa. When he’s not building self-deploying applications in coffee shops, you can find him practicing jiu-jitsu, woodworking, or building mechanical keyboards. Find him on Twitter at <a href="https://twitter.com/mattjaffee?lang=en">@mattjaffee</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Matt Jaffee">
+        <div class="body-bold"><a href="https://twitter.com/mattjaffee">Matt Jaffee</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

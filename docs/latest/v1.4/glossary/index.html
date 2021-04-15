@@ -1,0 +1,4235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Glossary &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Glossary Anti-entropy:A periodic process that compares each shard and its replicas across the cluster to repair inconsistencies.
+Attribute:Attributes can be associated to both rows and columns. This metadata is kept separately from the core binary matrix in a BoltDB store.
+Bit:Bits are the fundamental unit of data in Pilosa. A bit lives in a field, at the intersection of a row and column.
+Bitmap:The on-disk and in-memory representation of a row.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Glossary"/>
+    <meta property="og:description" content="Glossary Anti-entropy:A periodic process that compares each shard and its replicas across the cluster to repair inconsistencies.
+Attribute:Attributes can be associated to both rows and columns. This metadata is kept separately from the core binary matrix in a BoltDB store.
+Bit:Bits are the fundamental unit of data in Pilosa. A bit lives in a field, at the intersection of a row and column.
+Bitmap:The on-disk and in-memory representation of a row." />
+    <meta property="og:url" content="https://www.pilosa.com/docs/latest/v1.4/glossary/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="0001-01-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+<div  class="page-container">
+
+  <div class="docs-nav-mobile py-2">
+    <center>
+
+      <input class="docsearch-input-mobile docsearch-input" type="text" placeholder="Search" />
+      <i class="docsearch-icon fa fa-search"></i>
+
+      <div class="dropdown">
+        <button class="dropdown-nav btn  dropdown-toggle " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class='inner-dropdown-nav'>
+            Glossary
+            <i class="fa fa-chevron-down" aria-hidden="true"></i>
+          </div>
+        </button>
+        <div  class="dropdown-menu-nav dropdown-menu " aria-labelledby="dropdownMenuButton">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </center>
+
+
+  </div>
+  </div>
+  <div class="docs-wrapper">
+  <div class="row container ">
+    <div class="docs-nav-container  col-4">
+
+      <div class="docsearch-container">
+        <input class="docsearch-input-desktop docsearch-input" type="text" placeholder="Search" />
+        <i class="docsearch-icon fa fa-search"></i>
+      </div>
+
+      <div  class='docs-nav' id="doc-nav">
+        
+
+<ul>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/introduction/" >Introduction</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/installation/" >Installation</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-macos">Installing on MacOS</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/installation/#installing-on-linux">Installing on Linux</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/getting-started/" >Getting Started</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#starting-pilosa">Starting Pilosa</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#sample-project">Sample Project</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/getting-started/#what-s-next">What&#39;s Next?</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/examples/" >Examples</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/examples/#transportation">Transportation</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/tutorials/" >Tutorials</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-secure-cluster">Setting Up a Secure Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#setting-up-a-docker-cluster">Setting Up a Docker Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#using-integer-field-values">Using Integer Field Values</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/tutorials/#storing-row-and-column-attributes">Storing Row and Column Attributes</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/data-model/" >Data Model</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#overview">Overview</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#index">Index</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#column">Column</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#row">Row</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#field">Field</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#time-quantum">Time Quantum</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#attribute">Attribute</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/data-model/#shard">Shard</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/architecture/" >Architecture</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/query-language/" >Query Language</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#conventions">Conventions</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#arguments-and-types">Arguments and Types</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#write-operations">Write Operations</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/query-language/#read-operations">Read Operations</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/configuration/" >Configuration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#command-line-flags">Command line flags</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#environment-variables">Environment variables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#config-file">Config file</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/configuration/#all-options">All Options</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/console/" >Console</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#installation">Installation</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#query">Query</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/console/#cluster-admin">Cluster Admin</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/api-reference/" >API Reference</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/pdk/" >PDK</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#examples-and-executables">Examples and Executables</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/pdk/#library">Library</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/client-libraries/" >Client Libraries</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#go">Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#python">Python</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/client-libraries/#java">Java</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/administration/" >Administration</a>
+            <ul>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#installing-in-production">Installing in production</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#importing-and-exporting-data">Importing and Exporting Data</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#versioning">Versioning</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#resizing-the-cluster">Resizing the Cluster</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/latest/administration/#backup%2frestore">Backup/restore</a>
+              </li>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/glossary/"  class="docs-active" >Glossary</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+          
+          <li>
+            <a href="/docs/latest/faq/" >FAQ</a>
+            <ul>
+            
+            </ul>
+          </li>
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+</ul>
+
+        <div class="docs-nav-btn-container">
+          <a href="/community/#support" class="btn-pilosa btn btn-success">Get support</a>
+        </div>
+
+      </div>
+    </div>
+
+    <div   class='single-body-content col-lg-8 pl-4 py-5' id="content">
+      
+      
+      <h2 id="glossary">Glossary</h2>
+<p><!-- raw HTML omitted --><a href="../configuration/#anti-entropy-interval">Anti-entropy</a>:<!-- raw HTML omitted --> A periodic process that compares each <a href="#shard">shard</a> and its <a href="#replica">replicas</a> across the <a href="#cluster">cluster</a> to repair inconsistencies.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#attribute">Attribute</a>:<!-- raw HTML omitted --> Attributes can be associated to both <a href="#row">rows</a> and <a href="#column">columns</a>. This metadata is kept separately from the core binary matrix in a <a href="https://github.com/boltdb/bolt">BoltDB</a> store.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#overview">Bit</a>:<!-- raw HTML omitted --> Bits are the fundamental unit of data in Pilosa. A bit lives in a <a href="#field">field</a>, at the intersection of a <a href="#row">row</a> and <a href="#column">column</a>.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#overview">Bitmap</a>:<!-- raw HTML omitted --> The on-disk and in-memory representation of a <a href="#row">row</a>. Implemented with <a href="#roaring-bitmap">Roaring</a>.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#bsi-range-encoding">BSI</a>:<!-- raw HTML omitted --> Bit-sliced indexing is the method Pilosa uses to represent multi-bit integers. Integer values are stored in <code>int</code> <a href="#field">fields</a>, and can be used for <a href="#range-bsi">Range</a>, <a href="#min">Min</a>, <a href="#max">Max</a>, and <a href="#sum">Sum</a> queries.</p>
+<p><!-- raw HTML omitted -->Cluster:<!-- raw HTML omitted --> A cluster consists of one or more <a href="#node">nodes</a> which share a cluster configuration. The cluster also defines how data is <a href="#replica">replicated</a> and how internode communication is coordinated. Pilosa does not have a leader node, all data is evenly distributed, and any node can respond to queries.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#column">Column</a>:<!-- raw HTML omitted --> Columns are the fundamental horizontal data axis within Pilosa. Columns are global to all <a href="#field">fields</a> within an <a href="#index">index</a>.</p>
+<p><!-- raw HTML omitted -->Fragment:<!-- raw HTML omitted --> A Fragment is the intersection of a <a href="#field">field</a> and a <a href="#shard">shard</a> in an <a href="#index">index</a>.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#field">Field</a>:<!-- raw HTML omitted --> Fields are used to group <a href="#row">rows</a> into different categories. Row IDs are namespaced by field such that the same row ID in a different field refers to a different row. For <a href="#topn">ranked</a> fields, rows are kept in sorted order within the field. Fields are one of five types: set, <a href="#bsi">int</a>, bool, time, and mutex. For more information, see <a href="../data-model/">data model</a> and <a href="../api-reference/#create-field">Creating fields</a>.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#field">Frame</a>:<!-- raw HTML omitted --> Prior to Pilosa 1.0, fields were known as frames.</p>
+<p><!-- raw HTML omitted --><a href="https://en.wikipedia.org/wiki/Gossip_protocol">Gossip</a>:<!-- raw HTML omitted --> A protocol used by Pilosa for internal communication.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#group-by">GroupBy</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query, with functionality similar to a SQL <code>GROUP BY</code> clause, that returns the count of the intersection of every combination of rows taking one row each from the specified <code>Rows</code> calls. GroupBy can be thought of as a multi-dimensional version of the <a href="#topn">TopN</a> query.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#index">Index</a>:<!-- raw HTML omitted --> An Index is a top level container in Pilosa, analogous to a database in an RDBMS. Basic queries cannot operate across multiple indexes.</p>
+<p><!-- raw HTML omitted --><a href="https://arxiv.org/pdf/1406.2294v1.pdf">Jump Consistent Hash</a>:<!-- raw HTML omitted --> A fast, minimal memory, consistent hash algorithm that evenly distributes the workload even when the number of buckets changes.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#max">Max</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns the maximum integer value stored in an <a href="#bsi">integer</a> <a href="#field">field</a>.</p>
+<p><!-- raw HTML omitted -->MaxShard:<!-- raw HTML omitted --> The total number of <a href="#shard">shards</a> allocated to handle the current set of <a href="#column">columns</a>. This value is important for all <a href="#node">nodes</a> to efficiently distribute queries. MaxShard is zero-indexed, so if an index contains six shards, its MaxShard will be 5.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#min">Min</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns the minimum integer value stored in an <a href="#bsi">integer</a> <a href="#field">field</a>.</p>
+<p><!-- raw HTML omitted -->Node:<!-- raw HTML omitted --> An individual running instance of Pilosa server which belongs to a <a href="#cluster">cluster</a>.</p>
+<p><!-- raw HTML omitted -->Partition:<!-- raw HTML omitted --> The <a href="#jump-consistent-hash">consistent hash</a> maps keys to partitions (or locations on the unit circle), based on a preset maximum number of partitions. Partitions are then evenly mapped to physical <a href="#node">nodes</a>. To add nodes to the <a href="#cluster">cluster</a>, the partitions must be remapped, and data is then associated across the new cluster topology. <code>DefaultPartitionN</code> is 256. It can be modified, but only at compile time, and before ingesting any data.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/">PQL</a>:<!-- raw HTML omitted --> Pilosa Query Language.</p>
+<p><!-- raw HTML omitted --><a href="https://developers.google.com/protocol-buffers/">Protobuf</a>:<!-- raw HTML omitted --> Protocol Buffers is a binary serialization format which Pilosa uses for internal messages, and can be used by clients as an alternative to JSON.</p>
+<p><!-- raw HTML omitted --><a href="../configuration/#cluster-replicas">Replica</a>:<!-- raw HTML omitted --> A copy of a <a href="#fragment">fragment</a> on a different <a href="#node">node</a> than the original. The <code>cluster.replicas</code> configuration parameter determines how many replicas of a fragment exist in the cluster. This includes the original, so a value of 1 means no extra copies are made.</p>
+<p><!-- raw HTML omitted --><a href="http://roaringbitmap.org">Roaring Bitmap</a>:<!-- raw HTML omitted --> the compressed bitmap format which Pilosa uses to <a href="../architecture/#roaring-bitmap-storage-format">implement bitmaps</a>, for both storage and logical query operations.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#row">Row</a>:<!-- raw HTML omitted --> Rows are the fundamental vertical data axis within Pilosa. They are namespaced to each <a href="#field">field</a> within an <a href="#index">index</a>. Represented as a <a href="#bitmap">Bitmap</a>.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#row-range">Row (Ranged)</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns bits based on comparison to timestamps, set according to the <a href="#time-quantum">time quantum</a>.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#row-bsi">Row (BSI)</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns bits based on comparison to integers stored in <a href="#bsi">BSI</a> <a href="#field">fields</a>.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#rows">Rows</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns a list of row IDs in the given field which have at least one bit set. The field argument is mandatory, the others are optional. <code>Rows</code> is the primary argument used with the <a href="#groupby">GroupBy</a> query.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#shard">Slice</a>:<!-- raw HTML omitted --> Prior to Pilosa 1.0, shards were known as slices.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#shard">Shard</a>:<!-- raw HTML omitted --> <a href="#column">Columns</a> are <a href="https://en.wikipedia.org/wiki/Shard_(database_architecture)">sharded</a> on a preset <a href="#shardwidth">width</a>. Shards are operated on in parallel and are evenly distributed across the cluster via a <a href="#jump-consistent-hash">consistent hash</a>.</p>
+<p><!-- raw HTML omitted -->ShardWidth:<!-- raw HTML omitted --> This is the number of <a href="#column">columns</a> in a <a href="#shard">shard</a>. <code>ShardWidth</code> defaults to 2<!-- raw HTML omitted -->20<!-- raw HTML omitted --> or about one million. It can be modified, but only at compile time, and before ingesting any data.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#sum">Sum</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns the sum of integers stored in an <a href="#bsi">integer</a> <a href="#field">field</a>.</p>
+<p><!-- raw HTML omitted --><a href="../data-model/#time-quantum">Time quantum</a>:<!-- raw HTML omitted --> Defines the granularity to be used for <a href="#range">ranged Row</a> queries on time <a href="#field">fields</a>.</p>
+<p><!-- raw HTML omitted --><a href="https://github.com/toml-lang/toml">TOML</a>:<!-- raw HTML omitted --> the language used for Pilosa&rsquo;s <a href="../configuration/">configuration file</a>.</p>
+<p><!-- raw HTML omitted --><a href="../query-language/#topn">TopN</a>:<!-- raw HTML omitted --> A <a href="#pql">PQL</a> query that returns a list of rows, sorted by the count of <a href="#column">columns</a> set in the <a href="#row">row</a>, within a specified <a href="#field">field</a>.</p>
+<p><!-- raw HTML omitted -->View:<!-- raw HTML omitted --> Views separate the different data layouts within a <a href="#field">Field</a>. The primary view is standard, which represents the typical <a href="#row">row</a>/<a href="#column">column</a> data. Time based field views are automatically generated for each <a href="#time-quantum">time quantum</a>. Views are internally managed by Pilosa, and never exposed directly via the API. This simplifies the functional interface by separating it from the physical data representation.</p>
+
+
+	  <hr />
+          <div class="info">
+              
+              
+              <a href="https://github.com/pilosa/pilosa/tree/v1.4.0/docs/glossary.md">View markdown source</a> on Github. Last updated 1 year, 7 months ago.
+          </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-desktop',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+docsearch({
+    apiKey: 'e1d9e5482fce111fb4d8030aaaf1d61a',
+    indexName: 'pilosa',
+    inputSelector: '.docsearch-input-mobile',
+    algoliaOptions: { 'facetFilters': ["version:latest"] },
+    debug: false 
+});
+$('pre:has(code.language-request)').addClass('request')
+$('pre:has(code.language-response)').addClass('response')
+</script>
+
+</body>
+</html>
+

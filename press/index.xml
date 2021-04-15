@@ -1,0 +1,45 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pilosa</title>
+    <link>https://www.pilosa.com/press/</link>
+    <description>Recent content from Pilosa</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 02 May 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.pilosa.com/press/" rel="self" type="application/rss+xml" />
+    
+      
+        <item>
+          <title>Pilosa Launches Breakthrough Open Source Software to Dramatically Accelerate Data Queries</title>
+          <link>https://www.pilosa.com/press/pilosa-launches-breakthrough-open-source-software/</link>
+          <pubDate>Tue, 02 May 2017 00:00:00 +0000</pubDate>
+          
+          <guid>https://www.pilosa.com/press/pilosa-launches-breakthrough-open-source-software/</guid>
+          <description>&lt;p&gt;Media Contact&lt;br&gt;
+Crystal Germond&lt;br&gt;
+JDI for Pilosa&lt;br&gt;
+&lt;a href=&#34;mailto:crystal@jones-dilworth.com&#34;&gt;crystal@jones-dilworth.com&lt;/a&gt;&lt;br&gt;
+857.654.6723&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.prweb.com/releases/2017/05/prweb14296784.htm&#34;&gt;View on PRWeb&lt;/a&gt;&lt;!-- raw HTML omitted --&gt;
+&lt;a href=&#34;https://www.pilosa.com/static/Pilosa%20Press%20Kit.zip&#34;&gt;Download presskit&lt;/a&gt;&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;Open distributed bitmap index makes big data act like small data.&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt; AUSTIN, May 2, 2017 &lt;!-- raw HTML omitted --&gt; – Pilosa, an open distributed bitmap index, today launched into public beta. Pilosa decouples the index from data storage and optimizes it for massive scale. The result is dramatically accelerated query speeds across multiple, massive data sets. Pilosa is available today on GitHub.&lt;/p&gt;
+&lt;p&gt;Pilosa solves a fundamental problem in data science. The volume of enterprise data has grown faster than Moore&amp;rsquo;s Law, yet the speed at which we can read it has stagnated. Despite several years of major advances in databases, the technology that retrieves data has gone untouched and read speeds have lagged far behind write speeds. Pilosa’s technology addresses this problem head-on, dramatically speeding up both queries to existing databases and the process of joining data from multiple stores.&lt;/p&gt;
+&lt;p&gt;“The next wave of scientific breakthroughs will come from research projects that work with datasets of a terabyte or more,” said Higinio (H.O.) Maycotte, CEO of Pilosa. “We know how to store that data, but nobody has focused on accelerating access to that data. That changes today. Our commitment to open source ensures that this fundamental problem is solved once and for all.”&lt;/p&gt;
+&lt;p&gt;Because Pilosa is a bitmap index, it is relatively small in volume and runs in-memory rather than on disk. The first version includes production-tested features including single and multi-node index support, replication, algorithm plugins, a data importer, and basic cluster management. There are eight patents in the first version alone.&lt;/p&gt;
+&lt;p&gt;The software helps data scientists and engineers make sense of multiple, massive data sets without purchasing more hardware and without hours-long batch job wait times. Benchmark tests indicate Pilosa queries consistently fast even at high volumes and without increasing complexity or processing rigor. No test exceeded 1.8 seconds and most queries were returned in fractions of a second. A simple query can traverse more than 2 billion edges in one second on commodity cloud hardware, approximating speeds only seen when leveraging expensive hardware such as GPUs.&lt;/p&gt;
+&lt;p&gt;“With Pilosa, you can work with all of your data, all at once. It’s exhilarating to experience this first hand,” said Troy Lanier, Vice President of Product at Pilosa. “Our focus today is really on building a community around this technology. We’ve already seen traction in bioinformatics and information security, but we’re excited to see where users take us. If you’re working with massive data sets, Pilosa can dramatically change the rules of the game.”&lt;/p&gt;
+&lt;p&gt;Pilosa is a free, open-source software available under an Apache 2.0 license. It can be downloaded on Github at &lt;a href=&#34;https://github.com/pilosa&#34;&gt;https://github.com/pilosa&lt;/a&gt;. To learn more about Pilosa, please visit: &lt;a href=&#34;https://www.pilosa.com/&#34;&gt;https://www.pilosa.com/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt; About Pilosa &lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;p&gt;Pilosa is an open distributed bitmap index. We dramatically accelerate query speed across multiple, massive data sets. Pilosa helps big data act much smaller. We created an index independent of storage then optimized it for high cardinality data at scale.&lt;/p&gt;
+&lt;p&gt;Pilosa was founded in 2017 with a commitment to building community-driven, open source software that unlocks the full power of data science.&lt;/p&gt;
+&lt;p&gt;Pilosa. Insanely fast queries on really big data.&lt;/p&gt;
+&lt;p&gt;To learn more about Pilosa, visit: &lt;a href=&#34;https://www.pilosa.com&#34;&gt;https://www.pilosa.com&lt;/a&gt;&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+</description>
+        </item>
+      
+    
+  </channel>
+</rss>

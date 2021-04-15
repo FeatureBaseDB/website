@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Genome Comparisons in 4 Milliseconds &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="6 Gigabits. That&rsquo;s about how much data is encoded in your DNA. That may sound like a lot, or a little depending on your comfort level, but with 7 billion humans on the planet, that we&rsquo;re in &ldquo;big data&rdquo; territory is undeniable. Can we bend Pilosa to a problem of this mind boggling size? How fast can we compare two genomes? Or two thousand? What about finding groups of related individuals, or certain disease markers? How do you even represent this kind of data as a binary matrix? Let&rsquo;s take a look&hellip;">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Genome Comparisons in 4 Milliseconds"/>
+    <meta property="og:description" content="6 Gigabits. That&rsquo;s about how much data is encoded in your DNA. That may sound like a lot, or a little depending on your comfort level, but with 7 billion humans on the planet, that we&rsquo;re in &ldquo;big data&rdquo; territory is undeniable. Can we bend Pilosa to a problem of this mind boggling size? How fast can we compare two genomes? Or two thousand? What about finding groups of related individuals, or certain disease markers? How do you even represent this kind of data as a binary matrix? Let&rsquo;s take a look&hellip;" />
+    <meta property="og:url" content="https://www.pilosa.com/blog/processing-genomes/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/blog/processing-genomes/banner.jpg"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2018-05-01T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item ">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="/img/blog/processing-genomes/banner.jpg" alt="Genome Comparisons in 4 Milliseconds"/>
+    </div>
+    
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white mb-4">Genome Comparisons in 4 Milliseconds</h1>
+      <h6 class="h-6-caps-white">5/1/2018 • 9 min read</h6>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Genome&#43;Comparisons&#43;in&#43;4&#43;Milliseconds%20https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fprocessing-genomes%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fprocessing-genomes%2F&title=Genome&#43;Comparisons&#43;in&#43;4&#43;Milliseconds&summary=6&#43;Gigabits.&#43;That%26rsquo%3Bs&#43;about&#43;how&#43;much&#43;data&#43;is&#43;encoded&#43;in&#43;your&#43;DNA.&#43;That&#43;may&#43;sound&#43;like&#43;a&#43;lot%2C&#43;or&#43;a&#43;little&#43;depending&#43;on&#43;your&#43;comfort&#43;level%2C&#43;but&#43;with&#43;7&#43;billion&#43;humans&#43;on&#43;the&#43;planet%2C&#43;that&#43;we%26rsquo%3Bre&#43;in&#43;%26ldquo%3Bbig&#43;data%26rdquo%3B&#43;territory&#43;is&#43;undeniable.&#43;Can&#43;we&#43;bend&#43;Pilosa&#43;to&#43;a&#43;problem&#43;of&#43;this&#43;mind&#43;boggling&#43;size%3F&#43;How&#43;fast&#43;can&#43;we&#43;compare&#43;two&#43;genomes%3F&#43;Or&#43;two&#43;thousand%3F&#43;What&#43;about&#43;finding&#43;groups&#43;of&#43;related&#43;individuals%2C&#43;or&#43;certain&#43;disease&#43;markers%3F&#43;How&#43;do&#43;you&#43;even&#43;represent&#43;this&#43;kind&#43;of&#43;data&#43;as&#43;a&#43;binary&#43;matrix%3F&#43;Let%26rsquo%3Bs&#43;take&#43;a&#43;look%26hellip%3B%0A&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fblog%2Fprocessing-genomes%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <p>6 Gigabits. That&rsquo;s about how much data is encoded in your DNA. That may sound like a lot, or a little depending on your comfort level, but with 7 billion humans on the planet, that we&rsquo;re in &ldquo;big data&rdquo; territory is undeniable. Can we bend Pilosa to a problem of this mind boggling size? How fast can we compare two genomes? Or two thousand? What about finding groups of related individuals, or certain disease markers? How do you even represent this kind of data as a binary matrix? Let&rsquo;s take a look&hellip;</p>
+<h3 id="a-crash-course-in-genome-sequencing">A Crash Course in Genome Sequencing</h3>
+<p>A genome is just a set of 23 pairs of really long strings, how difficult could it be to model it? As it turns out, the situation is quite a bit more nuanced.</p>
+<p>A human genome consists of approximately 3 billion base pairs. For a given sample, each of these is, naively, representable as single characters <code>A</code>, <code>T</code>, <code>G</code> or <code>C</code>, at one precisely specified coordinate in the genome. When sequencing a genome, things get a little more fuzzy. To start with, the data coming out of a sequencer isn&rsquo;t just a series of strings. It&rsquo;s <a href="https://medium.com/precision-medicine/how-big-is-the-human-genome-e90caa3409b0">hundreds of gigs</a> of short reads with corresponding metadata. After some processing, that same sample might be represented as a VCF file, showing the variants (mutations) relative to a reference genome.</p>
+<p>If a sequenced genome is stored as, more or less, a &ldquo;diff&rdquo; based on a reference genome, how is the reference stored? Data is available in many formats, but we chose to use the Genome Reference Consortium Human Build 37 (GRCh37) in FASTA format. This format is, ideally, very close to the &ldquo;really long string&rdquo; representation of a genome. A FASTA file has several sections, each of which might contain the series of <code>A</code>, <code>T</code>, <code>G</code>, <code>C</code>, at precisely-known offsets, for an entire chromosome. However, the format supports more than this: <code>N</code>, which represents <em>any</em> nucleotide, <code>-</code>, for a &ldquo;gap of indeterminate length&rdquo;, and various other characters which represent combinations of multiple bases. These other characters are useful for representing heterozygosity (among other things) where each of the chromosomes in a pair might have a different base at a particular position.  The reference file is very clean: almost entirely <code>ATGC</code>, and a small number of <code>N</code>s.</p>
+<p>For our proof of concept, instead of trying to find real genome data for thousands of individuals, (which might have some privacy issues), we simply generated additional genomes by randomly mutating the GRCh37 reference genome. Each generated genome would contain between 0.1% and 0.5% mutations uniformly distributed in the reference. For this test, we sidestepped problems with alignment or variant confidence; this allowed us to work with some representative data to explore queries and measure performance.</p>
+<h3 id="genomes-as-bitmaps">Genomes as Bitmaps</h3>
+<p>Let&rsquo;s revisit the basic Pilosa data model:</p>
+<p><img src="/img/docs/data-model.svg" alt="Pilosa data model">
+<em>Pilosa data model</em></p>
+<p>Pilosa stores relationships as ones and zeros in an index that can easily scale in both rows and columns, and performs operations across rows. Given this giant binary matrix, what is a sensible way to represent a genome? Of course, the answer depends on what you want to do with the index. We had tried two approaches in the past:</p>
+<ol>
+<li>One genome per column, each row representing a different nucleotide.</li>
+</ol>
+<p>This matches many Pilosa use cases, with columns as records, and rows as attributes. However, it is very awkward to handle, even for just a few genomes because each node in the cluster needs to know about all the rows. As more genomes are added, it can scale very well, but it has a lot of overhead at the outset and requires high memory machines even for small tests. Although each row only represents a single position on the genome, the internal memory needed to track each row is around 100 bytes. This doesn&rsquo;t sound like much, but if you have 1 billion rows, that means you need 100GB of memory!</p>
+<ol start="2">
+<li>One genome per row, each column representing a <a href="https://en.wikipedia.org/wiki/K-mer">k-mer</a> match to a sample genome.</li>
+</ol>
+<p><img src="/img/blog/processing-genomes/kmer-model.png" alt="K-mer data model">
+<em>K-mer data model</em></p>
+<p>The k-mer model works very well, but only stores the k-mer matches, not the genomes themselves. We want something that&rsquo;s both general and scalable.</p>
+<p>With the experience gained from these two approaches, plus some expert advice from <a href="https://twitter.com/gareth862">Gareth</a>, we settled on a new model. Pilosa is unique in that it can support extremely wide bitmaps. While most libraries and indexes won&rsquo;t natively support bitmaps for integers larger than 32 bits, Pilosa&rsquo;s custom <a href="https://roaringbitmap.org/">roaring</a> implementation supports 64 bit integers. This means that we can scale columns effectively forever (2<!-- raw HTML omitted -->64<!-- raw HTML omitted --> is really big). Pilosa also supports embarrassingly scalable bitmap operations as the number of columns grows, so we decided to use this to our advantage. We simply indexed each entire genome in a single bitmap!</p>
+<p>In other words, each row is a genome, and columns represent base pairs at specific positions in the genome. Specifically, each base pair is represented as a group of four columns, one each for <code>A</code>, <code>T</code>, <code>G</code> and <code>C</code>. For most positions on the genome, one of those four columns is set. In the heterozygous case, we can simply set multiple bits.</p>
+<p>For example, using a reference genome that begins <code>GTAA</code>, and another genome that begins <code>GTTA</code>, one tiny corner of our index will look like this:</p>
+<p><img src="/img/blog/processing-genomes/genome-model-simple.png" alt="Genome model simple">
+<em>Genome data model</em></p>
+<p>With 3 billion base pairs, we end up with 12 billion columns, and one row per sample. In Pilosa, the combination of index width and <a href="/docs/latest/glossary/#shardwidth"><code>shard width</code></a> affects parallel performance, as well as the number of open files. We took this opportunity to experiment with the shard width and found that increasing from our default size of 2<!-- raw HTML omitted -->20<!-- raw HTML omitted --> to 2<!-- raw HTML omitted -->23<!-- raw HTML omitted --> was a good balance.</p>
+<p>Sequenced genomes are the main entity in the index, but we can do more than that! For example, base pairs on chromosome 1 are all stored in the first billion or so columns (chromosome 1 is about 250M base pairs long). We can store a special &ldquo;mask&rdquo; bitmap that is all ones for those columns, and zero elsewhere. Do this for each of the 25 chromosomes (1-22, X, Y, and mitochondrial), and you gain the ability to select only base pairs on a given chromosome. Similarly, any gene that lives in a known region on a chromosome can be given a mask bitmap.</p>
+<p>Up to this point we have been describing DNA as one long string of data, but in reality DNA is tightly wrapped and compacted around nucleosomes. The specifics of this compacting allow for each cell type to have different characteristics by &ldquo;opening&rdquo; and &ldquo;closing&rdquo; specific portions of the DNA. We can use &ldquo;cell type masks&rdquo; to represent which regions of the genome are &ldquo;open&rdquo; in each cell type, allowing us to compare different tissue types against each other (such as normal and cancerous tissue) to understand how changes in the DNA landscape might be contributing to disease!</p>
+<p><img src="/img/blog/processing-genomes/genome-model-details.png" alt="Genome model details">
+<em>More genome bitmap tricks</em></p>
+<h4 id="now-what">Now what?</h4>
+<p>With this more general data model, some interesting queries become possible:</p>
+<ol>
+<li>
+<p>How similar are two people genetically? Pilosa allows for a number of comparison metrics here. Perhaps the simplest is a count of how many base pairs they share: <code>Count(Intersect())</code>. Any <a href="http://www.iiisci.org/journal/CV$/sci/pdfs/GS315JG.pdf">binary similarity metric</a> is also easy to compute by combining a small number of Pilosa queries. With the &ldquo;mask&rdquo; bitmaps shown above, it is trivial to run similar comparison queries restricted to specific chromosomes or genes.</p>
+</li>
+<li>
+<p>TopN: Which genomes are most similar to a particular genome? This might be used to identify people who are likely to have a disease, or certain disposition. A one-to-many comparison search on <a href="https://www.gedmatch.com">GEDMatch</a> was recently used to match a suspect in a decades-old <a href="https://www.washingtonpost.com/local/public-safety/to-find-alleged-golden-state-killer-investigators-first-found-his-great-great-great-grandparents/2018/04/30/3c865fe7-dfcc-4a0e-b6b2-0bec548d501f_story.html?utm_term=.87045d490fd3">serial killer case</a>. Perhaps there is an opportunity to speed up that kind of computation with Pilosa?</p>
+</li>
+<li>
+<p>Identifying families and relations: a search could find cliques of individuals, <em>without</em> a starting genome.</p>
+</li>
+</ol>
+<h4 id="performance">Performance</h4>
+<p>With speed as a main goal, we spun up a 360-core cluster with 600GB of total RAM (10 x c4.8xlarge, 60GB RAM, 36 vCPU). Because we know ahead of time which Pilosa column each position on the genome maps to, we were able to parallelize the ingestion of each genome based on Pilosa&rsquo;s shard width. Basically we cut each genome into portions that corresponded to 2<!-- raw HTML omitted -->23<!-- raw HTML omitted --> Pilosa columns, and gave each portion to a separate CPU core to process and send to Pilosa. Both client and cluster side, the ingestion was totally parallel.</p>
+<p>We were able to ingest new genomes on this cluster at a rate of less than 15 seconds each, or 216M SetBits (nucleotides) per second. This is already plenty fast, but there are several obvious improvements that could be made. Specifically, we built our import around the FASTA format, but with VCF files, we can run imports that only need to set one bit per variant, rather than one per base pair. Our import protocol is also built around specifying each bit as a row/column pair, but for this use case, we could specify the row once and then all the columns that need to be set, saving a ton of bandwith.</p>
+<!-- raw HTML omitted -->
+<p>With hundreds of genomes imported into this index, we were finally able to run some queries. Comparing two genomes, as in query #1 above, takes about 150 milliseconds. Query #2, identifying the most similar genomes to a given one, across the entire index, completes in just seconds. The best part? This scales to a large number of rows, allowing much faster queries across many more genomes.</p>
+<p>OK, but&hellip; 4 milliseconds? Where&rsquo;s that come from? We performed the following query <code>TopN(Difference(Bitmap(frame=sequences, row=1), Bitmap(frame=sequences, row=0)), frame=sequences)</code>. This is subtracting the reference genome from Person 1&rsquo;s genome to get all the places where Person 1 varies from the reference, and then using that as a filter to a TopN query. The result is a list of genomes ordered by the number of variants they have in common with Person 1. This query takes about 260ms on our cluster with 29 genomes loaded + the reference. 260ms/29 equals about 9ms per genome. We then loaded 100 genomes and ran the same query - the median run time was about 400ms or 4ms per genome! Upping the ante, we loaded 200 genomes - this time the median was 1.2s giving us about 6ms per genome. Interestingly, the minimum time we observed for this query was a fairly astounding 554ms which gives us hope that with some refinement, we may be able to process genome comparisons in under 3ms consistently.</p>
+<p>The work is ongoing, and you can follow new developments in the import process in the <a href="https://github.com/pilosa/pdk/tree/genome/usecase/genome">PDK repo</a>. If you are conducting genomics research that you&rsquo;d like to discuss with our team, please don&rsquo;t hesitate to reach out to <a href="mailto:info@pilosa.com">info@pilosa.com</a>. We&rsquo;re excited to continue making advancements in this space!</p>
+<hr>
+<p>Banner image by the original authors of the Protein Data Bank (PDB) structural data and open-source chemical structure viewer Jmol, CC BY-SA 3.0, <a href="https://commons.wikimedia.org/w/index.php?curid=21983632">https://commons.wikimedia.org/w/index.php?curid=21983632</a></p>
+<p><em>Alan is a software engineer at Pilosa. When he’s not mapping the universe, you can find him playing with laser cutters, building fidget spinners for his dog, or practicing his sick photography skills. Find him on Twitter <a href="https://twitter.com/gsnark">@gsnark</a>.</em></p>
+<p><em>Jaffee is a lead software engineer at Pilosa. When he’s not dabbling in bioinformatics, he enjoys jiu-jitsu, building mechanical keyboards, and spending time with family. Follow him on Twitter at <a href="https://twitter.com/mattjaffee?lang=en">@mattjaffee</a>.</em></p>
+
+      <div class="blog-card-author-content mt-5">
+        <img class='mr-3' src="/img/author_02.svg" alt="Avatar for Alan Bernstein and Matt Jaffee">
+        <div class="body-bold"><a href="https://twitter.com/slothware">Alan Bernstein and Matt Jaffee</a></div>      </div>
+  </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+
+    </div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+

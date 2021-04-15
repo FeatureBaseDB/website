@@ -1,0 +1,14 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pilosa</title>
+    <link>https://www.pilosa.com/featured/</link>
+    <description>Recent content from Pilosa</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 18 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.pilosa.com/featured/" rel="self" type="application/rss+xml" />
+    
+      
+    
+  </channel>
+</rss>

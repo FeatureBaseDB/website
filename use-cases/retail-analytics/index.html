@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Retail Analytics and the Star Schema Benchmark &#45; Pilosa</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Pilosa">
+    <meta name="description" content="Motivation Retail transactions happen everywhere, in huge quantities. Whether you&rsquo;re looking at customers, purchases, or products, the data volume is enormous, and always growing. While most retailers have been using a variety of business intelligence tools to glean important information about their consumers from these transactions, this has become increasingly difficult as more and more transactions occur both in-store and online. Extracting valuable insights from all of that data is essential for survival in the cut-throat digital age: retailers have the ability to build a 360-degree understanding of their customers, track brand sentiment, build customized promotions, and even improve their store layout from detailed analyses of their transactions.">
+    <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
+    <meta property="og:title" content="Retail Analytics and the Star Schema Benchmark"/>
+    <meta property="og:description" content="Motivation Retail transactions happen everywhere, in huge quantities. Whether you&rsquo;re looking at customers, purchases, or products, the data volume is enormous, and always growing. While most retailers have been using a variety of business intelligence tools to glean important information about their consumers from these transactions, this has become increasingly difficult as more and more transactions occur both in-store and online. Extracting valuable insights from all of that data is essential for survival in the cut-throat digital age: retailers have the ability to build a 360-degree understanding of their customers, track brand sentiment, build customized promotions, and even improve their store layout from detailed analyses of their transactions." />
+    <meta property="og:url" content="https://www.pilosa.com/use-cases/retail-analytics/"/>
+    <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
+    <meta property="og:site_name" content="Pilosa">
+    <meta property="og:updated_time" content="2017-10-13T00:00:00Z"/>
+    <meta property="og:app_id" content="238103373333819" />
+    <meta name="twitter:site" content="@Slothware" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="/css/bootstrap-pilosa.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700|Roboto+Mono" rel="stylesheet">
+    <script src="https://use.typekit.net/xyn6sfs.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://www.pilosa.com/">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+
+    
+    <link href="https://www.pilosa.com/index.xml" rel="alternate" type="application/rss+xml" title="Pilosa" />
+    <link href="https://www.pilosa.com/index.xml" rel="feed" type="application/rss+xml" title="Pilosa" />
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+     fbq('init', '790180054464967'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript>
+     <img height="1" width="1" 
+    src="https://www.facebook.com/tr?id=790180054464967&ev=PageView
+    &noscript=1"/>
+    </noscript>
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/2/docsearch.min.css" />
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-96186501-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </head>
+  <body>
+    <header >
+
+      <nav class="container navbar navbar-toggleable-md navbar-light mt-4 mb-3 d-flex" >
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+
+        <a class="navbar-brand " href="/">
+          <img  height='35px'  id="logo" src="/img/logo.svg" alt="Continuous Analysis on Really Big Data" title="Pilosa logo" class="d-inline-block align-center">
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item ">
+              <a href="/about/" class="nav-link">About <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item  active">
+              <a href="/use-cases/" class="nav-link">Use Cases</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/docs/introduction/" class="nav-link">Docs</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/community/" class="nav-link">Community</a>
+            </li>
+            <li class="nav-item ">
+              <a href="https://www.molecula.com/" class="nav-link">Enterprise</a>
+            </li>
+            <li class="nav-item ">
+              <a href="/blog/" class="nav-link">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a href="/about/#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+          
+        </div>
+      </nav>
+    </header>
+
+
+<div class="page-container">
+
+  <div class="single-hero-container">
+
+
+    <div class="single-hero-img">
+        <img style='object-fit: cover;'  height='500px'  width='100%'  src="" alt=""/>
+    </div>
+
+    <div class="single-hero-overlay blue-overlay"></div>
+    <div class="single-hero-header">
+      <h1 class="h-1-white-responsive mb-4">Retail Analytics and the Star Schema Benchmark</h1>
+    </div>
+  </div>
+
+  <div class="single-body-container py-5  row justify-content-center">
+    <div class="sticky-social pt-5">
+      <div class="sticky-social-icons">
+        <div class="sticky-social-icon twitter-color">
+            <a href="https://twitter.com/home?status=Retail&#43;Analytics&#43;and&#43;the&#43;Star&#43;Schema&#43;Benchmark%20https%3A%2F%2Fwww.pilosa.com%2Fuse-cases%2Fretail-analytics%2F">
+            <i class="fa fa-twitter white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon linkedin-color">
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.pilosa.com%2Fuse-cases%2Fretail-analytics%2F&title=Retail&#43;Analytics&#43;and&#43;the&#43;Star&#43;Schema&#43;Benchmark&summary=Motivation&#43;Retail&#43;transactions&#43;happen&#43;everywhere%2C&#43;in&#43;huge&#43;quantities.&#43;Whether&#43;you%26rsquo%3Bre&#43;looking&#43;at&#43;customers%2C&#43;purchases%2C&#43;or&#43;products%2C&#43;the&#43;data&#43;volume&#43;is&#43;enormous%2C&#43;and&#43;always&#43;growing.&#43;While&#43;most&#43;retailers&#43;have&#43;been&#43;using&#43;a&#43;variety&#43;of&#43;business&#43;intelligence&#43;tools&#43;to&#43;glean&#43;important&#43;information&#43;about&#43;their&#43;consumers&#43;from&#43;these&#43;transactions%2C&#43;this&#43;has&#43;become&#43;increasingly&#43;difficult&#43;as&#43;more&#43;and&#43;more&#43;transactions&#43;occur&#43;both&#43;in-store&#43;and&#43;online.&#43;Extracting&#43;valuable&#43;insights&#43;from&#43;all&#43;of&#43;that&#43;data&#43;is&#43;essential&#43;for&#43;survival&#43;in&#43;the&#43;cut-throat&#43;digital&#43;age%3A&#43;retailers&#43;have&#43;the&#43;ability&#43;to&#43;build&#43;a&#43;360-degree&#43;understanding&#43;of&#43;their&#43;customers%2C&#43;track&#43;brand&#43;sentiment%2C&#43;build&#43;customized&#43;promotions%2C&#43;and&#43;even&#43;improve&#43;their&#43;store&#43;layout&#43;from&#43;detailed&#43;analyses&#43;of&#43;their&#43;transactions.&source=">
+            <i class="fa fa-linkedin white" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="sticky-social-icon fb-color">
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.pilosa.com%2Fuse-cases%2Fretail-analytics%2F">
+            <i class="fa fa-facebook white" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="single-body-content col-md-6 mx-3">
+
+      <h2 id="motivation">Motivation</h2>
+<p>Retail transactions happen everywhere, in huge quantities. Whether you&rsquo;re looking at customers, purchases, or products, the data volume is enormous, and always growing. While most retailers have been using a variety of business intelligence tools to glean important information about their consumers from these transactions, this has become increasingly difficult as more and more transactions occur both in-store and online. Extracting valuable insights from all of that data is essential for survival in the cut-throat digital age: retailers have the ability to build a 360-degree understanding of their customers, track brand sentiment, build customized promotions, and even improve their store layout from detailed analyses of their transactions. However, many struggle to run fast, ad-hoc, drill-down queries, despite their growing importance in online marketplaces.</p>
+<p>That&rsquo;s part of why the Star Schema Benchmark exists: a well-known test of database query performance, modeled after classical data warehousing problems, with a retail transaction flavor. When we read this <a href="https://hortonworks.com/blog/sub-second-analytics-hive-druid/">blog post</a> from Hortonworks (in partnership with AtScale) about running the benchmark on Hive+Druid, we saw it as a challenge. Could we match their query times? Could we do better? Could we do it without all of the cumbersome caching and pre-computation required in the Hortonwork/AtScale benchmark? This is what we were up against:</p>
+<p><img src="/img/retail-analytics/results-druid.png" alt="Hortonworks Druid results">
+<em>Hortonworks Druid results, scale factor 1000, <a href="https://hortonworks.com/blog/sub-second-analytics-hive-druid/">courtesy of Hortonworks</a></em></p>
+<h2 id="the-data">The Data</h2>
+<p>The <a href="https://www.cs.umb.edu/~poneil/StarSchemaB.PDF">Star Schema Benchmark</a> (SSB) is a benchmark designed to measure transaction performance in data warehouse applications. It is based on the <a href="http://www.tpc.org/tpch/">TPC-H</a> benchmark, with some well thought-out modifications, including dropping irrelevant tables and fields, and denormalization. In particular, the data is reorganized into a <a href="https://en.wikipedia.org/wiki/Star_schema">star schema</a>.</p>
+<p>In the star schema terminology, the <em>fact table</em> contains <em>line orders</em>, with keys to four <em>dimension tables</em>, describing dates, customers, suppliers, and parts. Fields and relationships are shown in this diagram:</p>
+<p><img src="/img/retail-analytics/ssb-schema-aws.png" alt="SSB star schema diagram">
+<em>SSB star schema diagram, <a href="https://docs.aws.amazon.com/redshift/latest/dg/tutorial-loading-data-create-tables.html">courtesy of AWS</a></em></p>
+<p>We used the popular <a href="https://github.com/electrum/ssb-dbgen">ssb-dbgen</a> tool to generate actual data sets conforming to this schema. This is the same generator <a href="https://github.com/cartershanklin/hive-druid-ssb">used</a> for the Hortonworks/AtScale benchmark. Data produced by ssb-dbgen is distributed uniformly, and there is also a consistent correlation between certain fields. Although we are curious about what happens with more skewed distributions, we don&rsquo;t expect a significant performance impact with Pilosa.</p>
+<p>The data is defined in terms of a <em>Scale Factor</em> (<code>SF</code>). The size of each table (except <code>DATE</code>) varies directly with <code>SF</code>, either linearly (<code>LINEORDER</code>, <code>CUSTOMER</code>, <code>SUPPLIER</code>) or logarithmically (<code>PART</code>). This allows for a consistent data set of any desired size. We tested with SF 1, 10, and 100 before running our final import and queries with SF 1000, to match the Hortonworks/AtScale data set.</p>
+<p>The data set contains a large number of the core entity (purchased items) stored as records in the line-orders table. Each purchase consists of several products (&ldquo;line items&rdquo; in the order), and the line-order table is the denormalized combination of the <code>LINEITEM</code> and <code>ORDER</code> tables of the TPC-H schema. Almost every non-key field in the above schema diagram can be thought of as an attribute of a line-order.</p>
+<h2 id="mapping">Mapping</h2>
+<p>As it turns out, the star schema is an excellent match for the Pilosa data model. Pilosa was designed to work well with one core entity (in Pilosa&rsquo;s columns), which correspond directly to the rows of the SSB <code>LINEORDER</code> table. Each SSB attribute then gets its own frame, of varying cardinality, where each Pilosa row represents one possible value for that attribute. In short, Pilosa was designed as a grid of <em>people</em> × attributes. Recently, we&rsquo;ve shown how to use <em>taxi rides</em> as columns instead of people, as well as <em>network packets</em> and <em>molecular fingerprint components</em>. Now, we&rsquo;ll show how to use <em>items in a transaction</em> as the columns.</p>
+<p style='border-left:4px solid #3c5f8d; padding-left:2em; font-size:16px; margin:2em 0'>
+    
+Note: <i>Pilosa attributes</i> are a distinct concept, not being used here.
+
+</p>
+
+<p>For example, each line-order has a customer, with corresponding geographical information: city, nation, and region. These fields contain string data, which we represent in Pilosa by mapping to rowIDs via enumeration. Supplier attributes follow the exact same model. Part (i.e., products in auto-parts store) attributes are product information, but modeled similarly with enumeration.</p>
+<p>We also have a few more attributes describing purchase date. As in <a href="/use-cases/taming-transportation-data/">the transportation use case</a>, we avoided Pilosa&rsquo;s built-in timestamp support. This was in part because of the need to query on the &ldquo;week of year&rdquo; value, which is not an explicit timestamp component. We could have used Pilosa&rsquo;s timestamps for year and month; without a large number of time range queries, either approach is appropriate.</p>
+<p>Finally, we have the integer-valued attributes. In the past, higher-cardinality integer attributes had to be stored in Pilosa with one bitmap per value (O(cardinality)), or bucketed (low precision). Now that Pilosa supports storing integers with Bit-Sliced Indexes, there is no longer a tradeoff between precision and storage size. BSI integers use O(log(cardinality)) bitmaps, so there is no practical limit to the cardinality. For more details on BSI, check out <a href="https://twitter.com/travislturner?lang=en">Travis'</a> <a href="/blog/range-encoded-bitmaps/">introductory blog post</a> or our <a href="/docs/latest/data-model/#bsi-range-encoding">BSI docs</a>.</p>
+<h3 id="pilosa-data-model">Pilosa Data Model</h3>
+<p>In the end, the data model looks something like this:</p>
+<table>
+<thead>
+<tr>
+<th>Frame</th>
+<th>Description</th>
+<th>Type</th>
+<th>Cardinality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lo_quantity</td>
+<td>Number of items ordered</td>
+<td>BSI</td>
+<td>50</td>
+</tr>
+<tr>
+<td>lo_extendedprice</td>
+<td>Line-order price</td>
+<td>BSI</td>
+<td>high</td>
+</tr>
+<tr>
+<td>lo_discount</td>
+<td>Percentage discount</td>
+<td>BSI</td>
+<td>11 [0, 10]</td>
+</tr>
+<tr>
+<td>lo_revenue</td>
+<td>Line-order revenue</td>
+<td>BSI</td>
+<td>high</td>
+</tr>
+<tr>
+<td>lo_supplycost</td>
+<td>Part cost</td>
+<td>BSI</td>
+<td>high</td>
+</tr>
+<tr>
+<td>lo_profit</td>
+<td>Line-order profit</td>
+<td>BSI</td>
+<td>high</td>
+</tr>
+<tr>
+<td>c_city</td>
+<td>Customer city</td>
+<td>string enum</td>
+<td>250</td>
+</tr>
+<tr>
+<td>c_nation</td>
+<td>Customer nation</td>
+<td>string enum</td>
+<td>25</td>
+</tr>
+<tr>
+<td>c_region</td>
+<td>Customer region</td>
+<td>string enum</td>
+<td>5</td>
+</tr>
+<tr>
+<td>s_city</td>
+<td>Supplier city</td>
+<td>string enum</td>
+<td>250</td>
+</tr>
+<tr>
+<td>s_nation</td>
+<td>Supplier nation</td>
+<td>string enum</td>
+<td>25</td>
+</tr>
+<tr>
+<td>s_region</td>
+<td>Supplier region</td>
+<td>string enum</td>
+<td>10</td>
+</tr>
+<tr>
+<td>p_mfgr</td>
+<td>Part manufacturer</td>
+<td>string enum</td>
+<td>5</td>
+</tr>
+<tr>
+<td>p_category</td>
+<td>Part category</td>
+<td>string enum</td>
+<td>25</td>
+</tr>
+<tr>
+<td>p_brand1</td>
+<td>Part brand</td>
+<td>string enum</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>lo_year</td>
+<td>Year of purchase</td>
+<td>integer</td>
+<td>7 [1992, 1998]</td>
+</tr>
+<tr>
+<td>lo_month</td>
+<td>Month of purchase</td>
+<td>integer</td>
+<td>12 [1, 12]</td>
+</tr>
+<tr>
+<td>lo_weeknum</td>
+<td>Week of purchase</td>
+<td>integer</td>
+<td>53 [1, 53]</td>
+</tr>
+</tbody>
+</table>
+<p>Note that the source table is encoded in the prefix of the frame name.</p>
+<p>The SSB <code>DATE</code> table includes a number of redundant fields. All of the Pilosa queries are constructed with some combination of the three date fields listed in the table. Similar omissions were made with other tables. This has no effect on query speed performance, but it does decrease the memory requirements for the Pilosa cluster.</p>
+<h2 id="importing">Importing</h2>
+<p>If you&rsquo;ve read through some of our other use cases, you might have seen the Pilosa Development Kit (<a href="https://github.com/pilosa/pdk">PDK</a>) mentioned. This is our toolkit for shoving data into Pilosa as fast as possible. In addition to some generic components, the repo includes some example usage in the <code>usecase</code> directory, which is where you can find <a href="https://twitter.com/mattjaffee?lang=en">Jaffee&rsquo;s</a> work on the <a href="https://github.com/pilosa/pdk/tree/master/usecase/ssb">SSB import</a>.</p>
+<p>Conceptually, there isn&rsquo;t a lot of new ground here; the mapping described above is straightforward. As we&rsquo;ve added more use cases, we&rsquo;ve improved import performance, and generalized the tools. Common tasks include creating IDs, and mapping attribute values to/from IDs. Recent work improved support for ID/value mapping, backed by <a href="https://github.com/google/leveldb">LevelDB</a>.</p>
+<p>But, remember this for later: we did not use any application-specific caching. We simply imported the data according to the static schema.</p>
+<h3 id="hardware">Hardware</h3>
+<p>For our SF1000 index, we used a cluster of eight c4.8xlarge nodes on AWS. These machines have 36 vCPUs and 60 GiB of memory each. These are large, compute-optimized machines, although the cluster is notably smaller than the Hortonworks cluster of 10 nodes. Comparing benchmarks across disparate hardware can be tricky, but we&rsquo;re proud of the results we saw, no matter what metric is used.</p>
+<p>Here&rsquo;s a more detailed hardware comparison:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Pilosa</th>
+<th>Druid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>288 cores</td>
+<td>320 cores</td>
+</tr>
+<tr>
+<td>Host Type</td>
+<td>virtual (AWS)</td>
+<td>physical</td>
+</tr>
+<tr>
+<td>Cluster Size</td>
+<td>8 nodes</td>
+<td>10 nodes</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>60GB RAM/node</td>
+<td>256GB RAM/node</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>80GB EBS Volume</td>
+<td>6x 4TB SCSI disks/node</td>
+</tr>
+</tbody>
+</table>
+<h2 id="queries">Queries</h2>
+<p>Just as the SSB schema was modified from TPC-H, so were the queries. Not all TPC-H queries translated to the new schema, so a new set of four flights of three or four queries each was described. The queries in each flight are similar in structure and dimensionality, but sometimes highly variable in selectivity.</p>
+<p>Flight 1 (Q1.x) sums revenue over a time range, a range of discount values, and a range of quantity values, then simply lists the results. In SQL, Q1.1 looks like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#66d9ef">sum</span>(lo_extendedprice<span style="color:#f92672">*</span>lo_discount) <span style="color:#66d9ef">as</span> revenue
+<span style="color:#66d9ef">from</span> lineorder, date
+<span style="color:#66d9ef">where</span> lo_orderdate <span style="color:#f92672">=</span> d_datekey
+<span style="color:#66d9ef">and</span> d_year <span style="color:#f92672">=</span> <span style="color:#ae81ff">1993</span>
+<span style="color:#66d9ef">and</span> lo_discount between1 <span style="color:#66d9ef">and</span> <span style="color:#ae81ff">3</span>
+<span style="color:#66d9ef">and</span> lo_quantity <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">25</span>;
+</code></pre></div><p>The same query in Pilosa:</p>
+<pre><code class="language-pql" data-lang="pql">Sum(
+	Intersect(
+		Bitmap(frame=lo_year, rowID=1993),
+		Range(frame=lo_discount, lo_discount &gt;= 1),
+		Range(frame=lo_discount, lo_discount &lt;= 3),
+		Range(frame=lo_quantity, lo_quantity &lt; 25)
+	),
+frame=lo_revenue_computed, field=lo_revenue_computed)
+</code></pre><p>There are two things to note here:</p>
+<ul>
+<li><code>lo_discount &gt;= 1</code> and similar clauses, the syntax for integer <a href="/docs/latest/query-language/#range-bsi">range queries</a> on <a href="/docs/latest/data-model/#bsi-range-encoding">BSI</a> fields.</li>
+<li><code>Sum(&lt;bitmap&gt;, frame=&lt;frame&gt;, field=&lt;field&gt;)</code>, the syntax for integer <a href="/docs/latest/query-language/#sum">summation</a> on BSI fields.</li>
+</ul>
+<p>In the context of the Pilosa data model, the Q1.x queries produce zero-dimensional results - a single scalar value. This means they can be computed directly with a single Pilosa query. All other SSB flights involve grouping and ordering, which increases the dimensionality of the results, requiring multiple independent Pilosa queries. This is a qualitative difference that demonstrates Pilosa usage well, so let&rsquo;s look at one more query.</p>
+<p style='border-left:4px solid #3c5f8d; padding-left:2em; font-size:16px; margin:2em 0'>
+    
+
+Note that Pilosa does support one-dimensional sorted results in many situations via the <code>TopN</code> query - as explored in <a href="https://www.pilosa.com/use-cases/taming-transportation-data/">the transportation use case</a> - but the BSI <code>Sum</code> query is not currently compatible with <code>TopN</code>.
+
+
+</p>
+
+<p>Flight 2 sums revenue over a time range, and a range of brands. The results are grouped by (year, brand). In SQL:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#66d9ef">sum</span>(lo_revenue), d_year, p_brand1
+<span style="color:#66d9ef">from</span> lineorder, date, part, supplier
+<span style="color:#66d9ef">where</span> lo_orderdate <span style="color:#f92672">=</span> d_datekey
+<span style="color:#66d9ef">and</span> lo_partkey <span style="color:#f92672">=</span> p_partkey
+<span style="color:#66d9ef">and</span> lo_suppkey <span style="color:#f92672">=</span> s_suppkey
+<span style="color:#66d9ef">and</span> p_category <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;MFGR#12&#39;</span>
+<span style="color:#66d9ef">and</span> s_region <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;AMERICA&#39;</span>
+<span style="color:#66d9ef">group</span> <span style="color:#66d9ef">by</span> d_year, p_brand1
+<span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> d_year, p_brand1;
+</code></pre></div><p>One way to accomplish this in Pilosa is with this query template:</p>
+<pre><code class="language-pql" data-lang="pql">Sum(
+	Intersect(
+		Bitmap(frame=p_brand1, rowID=&lt;BRAND&gt;),
+		Bitmap(frame=lo_year, rowID=&lt;YEAR&gt;),
+		Bitmap(frame=s_region, rowID=0),
+	),
+	frame=lo_revenue, field=lo_revenue)
+</code></pre><p>Note the <code>&lt;BRAND&gt;</code> and <code>&lt;YEAR&gt;</code> placeholders (the <code>p_category = 'MFGR#12'</code> clause is equivalent to selecting a certain set of brands). We need the sum for each (year, brand) combination, and the <code>Sum</code> query does not perform any grouping itself. Instead, in our application, we run one query for each (year, brand) pair. In case you&rsquo;re not familiar with the SSB details, this means we iterate this Pilosa query over seven years, and 40 brands, for a total of 280 queries.</p>
+<p>280 queries, to produce results that are described by one SQL query! That might sound odd, but this is where Pilosa really shines: we can run many of them concurrently, and <strong>every</strong> CPU on the cluster will be fully utilized until the queryset finishes. It finishes very quickly, even with many nested operations, and then we can move on to the next queryset. Our results are clear: running all those queries is no problem.</p>
+<p>Q3.x and Q4.x have different structure, but they are not especially complicated or surprising. Their queries tend to both produce results of higher dimensionality, and require more iterations, but they&rsquo;re still no challenge for Pilosa.</p>
+<p>One last point: the order of those <code>Bitmap</code> queries inside an <code>Intersect</code> can have a meaningful impact on query speed. We set them up in the correct order manually, but it wasn&rsquo;t a guessing game; we followed some simple, clear rules to decide. When we have a query planner, this will be transparent.</p>
+<h3 id="results">Results</h3>
+<p>Here are the final numbers:</p>
+<p><img src="/img/retail-analytics/results-comparison.png" alt="Pilosa vs Druid results">
+<em>Pilosa vs Druid results, Scale Factor 1000</em></p>
+<table>
+<thead>
+<tr>
+<th>Query</th>
+<th>Pilosa</th>
+<th>Druid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1</td>
+<td>.669</td>
+<td>0.782</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>.486</td>
+<td>0.673</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>.505</td>
+<td>0.853</td>
+</tr>
+<tr>
+<td>2.1</td>
+<td>1.562</td>
+<td>1.08</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td>.3666</td>
+<td>2.69</td>
+</tr>
+<tr>
+<td>2.3</td>
+<td>.0699</td>
+<td>0.577</td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>1.453</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>1.335</td>
+<td>0.673</td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>.154</td>
+<td>0.481</td>
+</tr>
+<tr>
+<td>3.4</td>
+<td>.0236</td>
+<td>0.769</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td>1.082</td>
+<td>0.994</td>
+</tr>
+<tr>
+<td>4.2</td>
+<td>1.170</td>
+<td>0.731</td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>1.934</td>
+<td>0.635</td>
+</tr>
+</tbody>
+</table>
+<p>We can summarize with an average of all 13 query times: Pilosa clocks in at 831ms, compared to Druid&rsquo;s 960ms.</p>
+<p>Again, it&rsquo;s important to point out that there is no application-specific caching in use here. After importing the data according to the static schema, all queries are ad-hoc. Q2.3 and Q3.4 are so fast, 70ms and 27ms, that you might assume otherwise. Actually, these queries are just great demonstrations of Pilosa&rsquo;s original use-case of individual, ad-hoc queries on huge data sets.</p>
+<p>You&rsquo;ll notice Pilosa tends to slow down on the high-iteration queries: 2.1, 3.2, 4.3. This is expected; for a given query, when CPUs are saturated, all we can do is throw more hardware at the problem. However, in some cases there are smarter ways to build these queries, that can drastically cut back on the number of iterations necessary. For example, using the equivalent of a <code>LIMIT 100</code> can allow the application to use some heuristics to discard much of the tail end of the result rows - <em>before</em> the queries happen.</p>
+<p>The queries were run with a small <a href="https://github.com/pilosa/demo-ssb">demo app</a>, which defines a group of Pilosa queries for each SSB query, runs them with appropriate batching/concurrency settings, and collates the results and benchmark times.</p>
+<p style='border-left:4px solid #3c5f8d; padding-left:2em; font-size:16px; margin:2em 0'>
+    
+Note that, as in the Druid benchmark, sorting of results is not included. The effect should be negligible especially for the lower-iteration queries; even the largest result set of 800 rows can be sorted during post-processing or display with almost no overhead.
+
+</p>
+
+<p>We&rsquo;re very proud of Pilosa&rsquo;s performance, those numbers are extremely competitive. But the final numbers hide all of the effort that went into them. If you&rsquo;re interested in that story, be sure to keep up with our blog, where an upcoming post will go into excruciating technical detail.</p>
+<h3 id="references">References</h3>
+<p><a href="https://hortonworks.com/blog/sub-second-analytics-hive-druid/">Hortonworks inspiration</a></p>
+<p><a href="https://www.cs.umb.edu/~poneil/StarSchemaB.PDF">SSB description</a></p>
+<p><a href="https://github.com/electrum/ssb-dbgen">ssb-dbgen</a></p>
+<p><a href="https://github.com/pilosa/pdk">PDK</a> for ingest</p>
+<p><a href="https://github.com/pilosa/demo-ssb">Demo app</a> for querying</p>
+<p><a href="https://github.com/pilosa/pilosa">Pilosa repo</a></p>
+<p><a href="https://www.pilosa.com/docs/">Pilosa docs</a></p>
+
+
+    </div>
+</div>
+
+  <div class="get-more-container ">
+    <div class="container py-5">
+      <div class="get-more-content align-items-center">
+        <div class="col-lg">
+          <h2 class="h-2-blue">
+            Get even more from Pilosa
+          </h2>
+          <p class="get-more-text">
+            Stay updated on our progress and upcoming events.
+        </div>
+
+          <form class="col-lg" action='//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a' method='POST'>
+            <input class='input-light' type="email" name='EMAIL' placeholder="Your email">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button  type="submit" class="btn-pilosa btn btn-success ">Sign up</button>
+          </form>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+</div>
+<footer   >
+  <div  class='container py-5' >
+    <div class="footer-row ">
+      <div  class='brand mb-4'>
+        <a href="/"><img width='150px' src="/img/logo_white_inverse.svg" alt="Continuous Analysis on Really Big Data"></a>
+        <div class="footer-install-container">
+          <a href="/docs/installation/" class="btn-pilosa btn btn-info mt-4 col">Install</a>
+        </div>
+      </div>
+      <div class='links mb-4'>
+        <div class="category">
+          <a class='category-header' href="/docs/getting-started/">Get Started</a>
+          <a href="/docs/installation/">Install</a>
+          <a href="/docs/getting-started/">Getting Started</a>
+          <a href="/docs/faq/">FAQ</a>
+          <a href="/community/#support">Support</a>
+        </div>
+        <div class="category">
+          <a class='category-header' href="/community/">Community</a>
+          <a href="/community/code-of-conduct/">Code of Conduct</a>
+          <a href="/blog/">Blog</a>
+          <a href="https://github.com/pilosa/">Github</a>
+          <a href="https://twitter.com/slothware">Twitter</a>
+        </div>
+        <div class="category">
+          <a class="category-header" >Product</a>
+          <a href="/pdf/PILOSA%20-%20Technical%20White%20Paper.pdf">White Paper</a>
+          <a href="/community/">Community</a>
+          <a href="https://www.molecula.com/">Enterprise</a>
+          
+          <a href="/legal/">Legal</a>
+        </div>
+        <div class="category">
+          <a class="category-header" href="/about/">Company</a>
+          <a  href="/about/">About</a>
+          <a  href="/careers/">Careers</a>
+          <a  href="/press/">Press</a>
+          <a  href="/about/#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div  class="footer-row">
+      <p class="footer-learn-more mt-2 mb-1">Learn more about Pilosa</p>
+      <form class="footer-form" action="//pilosa.us15.list-manage.com/subscribe/post?u=804d9b2d65c9213cfa08eb7c3&amp;id=12e90aaa9a" method="post">
+        <input class='footer-input m-2' placeholder="Your email" name="EMAIL" type="text">
+        <button  type="submit" class=" btn-pilosa btn btn-success m-2">Sign up</button>
+      </form>
+    </div>
+    <div class="footer-icons mt-3">
+      <a href="https://www.facebook.com/pilosaco"><i class="fa fa-facebook-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/slothware"><i class="fa fa-twitter mr-4" aria-hidden="true"></i></a>
+      <a href="https://linkedin.com/company/pilosa"><i class="fa fa-linkedin-square mr-4" aria-hidden="true"></i></a>
+      <a href="https://github.com/pilosa"><i class="fa fa-github mr-4" aria-hidden="true"></i></a>
+    </div>
+    <div class="footer-row legal mt-3">
+      <a href="/legal/">&copy; Molecula Corp. <script type="text/javascript">document.write(new Date().getFullYear());</script> All right Reserved.</a>
+      &nbsp;
+      <a href="/legal/privacy/">Privacy</a>
+        &nbsp;<a >and</a>  &nbsp;
+      <a href="/legal/terms-of-service/">Terms of Service</a>
+    </div>
+  </div>
+
+
+</footer>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script type="text/javascript">
+ 
+var google_conversion_id = 853926337;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+ 
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/853926337/?guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<script src="//static.leadpages.net/leadbars/current/embed.js" data-bar="DrXNmop4qNAr8KGqa9Afxb" data-bar-domain="molecula.lpages.co" async defer></script>
+
+
+
+</body>
+</html>
+
