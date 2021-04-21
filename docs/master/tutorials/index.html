@@ -6,11 +6,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="title" content="Pilosa">
-    <meta name="description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting all communication with nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.
+    <meta name="description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting all communication with nodes in a cluster using TLS, including Mutual TLS Authentication. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.
 This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS.">
     <meta name="keywords" content="Pilosa,index,bitmap index,database,distributed database,distributed index,distributed bitmap index,queries,big data">
     <meta property="og:title" content="Tutorials"/>
-    <meta property="og:description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting all communication with nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.
+    <meta property="og:description" content="Tutorials Setting Up a Secure Cluster Introduction Pilosa supports encrypting all communication with nodes in a cluster using TLS, including Mutual TLS Authentication. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.
 This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS." />
     <meta property="og:url" content="https://www.pilosa.com/docs/master/tutorials/"/>
     <meta property="og:image" content="https://www.pilosa.com/img/logo-medium.png"/>
@@ -611,41 +611,6 @@ if (!doNotTrack) {
     
   
     
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-      
-      
-    
       
       
     
@@ -658,9 +623,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -764,9 +726,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/getting-started/" >Getting Started</a>
@@ -784,14 +743,31 @@ if (!doNotTrack) {
             
               
               <li>
+                <a href="/docs/master/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
                 <a href="/docs/master/getting-started/#what-s-next">What&#39;s Next?</a>
               </li>
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -878,9 +854,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/tutorials/"  class="docs-active" >Tutorials</a>
@@ -908,9 +881,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -1044,9 +1014,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/architecture/" >Architecture</a>
@@ -1054,9 +1021,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -1121,9 +1085,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -1249,9 +1210,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/console/" >Console</a>
@@ -1317,9 +1275,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/api-reference/" >API Reference</a>
@@ -1327,9 +1282,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -1433,9 +1385,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/client-libraries/" >Client Libraries</a>
@@ -1458,9 +1407,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -1579,9 +1525,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/glossary/" >Glossary</a>
@@ -1589,9 +1532,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2239,41 +2179,6 @@ if (!doNotTrack) {
     
   
     
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-      
-      
-    
       
       
     
@@ -2286,9 +2191,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2392,9 +2294,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/getting-started/" >Getting Started</a>
@@ -2412,14 +2311,31 @@ if (!doNotTrack) {
             
               
               <li>
+                <a href="/docs/master/getting-started/#using-curl">Using Curl</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-go">Using Go</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-java">Using Java</a>
+              </li>
+            
+              
+              <li>
+                <a href="/docs/master/getting-started/#using-python">Using Python</a>
+              </li>
+            
+              
+              <li>
                 <a href="/docs/master/getting-started/#what-s-next">What&#39;s Next?</a>
               </li>
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2506,9 +2422,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/tutorials/"  class="docs-active" >Tutorials</a>
@@ -2536,9 +2449,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2672,9 +2582,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/architecture/" >Architecture</a>
@@ -2682,9 +2589,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2749,9 +2653,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -2877,9 +2778,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/console/" >Console</a>
@@ -2945,9 +2843,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/api-reference/" >API Reference</a>
@@ -2955,9 +2850,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -3061,9 +2953,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/client-libraries/" >Client Libraries</a>
@@ -3086,9 +2975,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -3207,9 +3093,6 @@ if (!doNotTrack) {
     
       
       
-    
-      
-      
           
           <li>
             <a href="/docs/master/glossary/" >Glossary</a>
@@ -3217,9 +3100,6 @@ if (!doNotTrack) {
             
             </ul>
           </li>
-      
-    
-      
       
     
       
@@ -3386,10 +3266,10 @@ if (!doNotTrack) {
 <!-- raw HTML omitted -->
 <h3 id="setting-up-a-secure-cluster">Setting Up a Secure Cluster</h3>
 <h4 id="introduction">Introduction</h4>
-<p>Pilosa supports encrypting all communication with nodes in a cluster using TLS. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.</p>
-<p>This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS. <a href="https://msdn.microsoft.com/en-us/commandline/wsl/about">Windows Subsystem for Linux (WSL)</a> works equally well on Windows 10 systems.</p>
+<p>Pilosa supports encrypting all communication with nodes in a cluster using TLS, including <a href="https://en.wikipedia.org/wiki/Mutual_authentication">Mutual TLS Authentication</a>. In this tutorial, we will be setting up a three node Pilosa cluster running on the same computer. The same steps can be used for a multi-computer cluster but that requires setting up firewalls and other platform-specific configuration which is beyond the scope of this tutorial.</p>
+<p>This tutorial assumes that you are using a UNIX-like system, such as Linux or MacOS. Operating systems that do not support the POSIX-compliant mmap system call, such as Windows, are not supported.</p>
 <h4 id="installing-pilosa-and-creating-the-directory-structure">Installing Pilosa and Creating the Directory Structure</h4>
-<p>If you haven&rsquo;t already done so, install Pilosa server on your computer. For Linux and WSL (Windows Subsystem for Linux) use the <a href="../installation/#installing-on-linux">Installing on Linux</a> instructions. For MacOS use the <a href="../installation/#installing-on-macos">Installing on MacOS</a>. We do not support precompiled releases for other platforms, but you can always compile it yourself from source. See <a href="../installation/#build-from-source">Build from Source</a>.</p>
+<p>If you haven&rsquo;t already done so, install Pilosa server on your computer. For Linux use the <a href="../installation/#installing-on-linux">Installing on Linux</a> instructions. For MacOS use the <a href="../installation/#installing-on-macos">Installing on MacOS</a>. We do not support precompiled releases for other platforms, but you can always compile it yourself from source. See <a href="../installation/#build-from-source">Build from Source</a>.</p>
 <p>After installing Pilosa, you may have to add it to your <code>$PATH</code>. Check that you can run Pilosa from the command line:</p>
 <pre><code class="language-request" data-lang="request">pilosa --help
 </code></pre><pre><code class="language-response" data-lang="response">Pilosa is a fast index to turbocharge your database.
@@ -3399,8 +3279,8 @@ tools for administering pilosa, importing/exporting data,
 backing up, and more. Complete documentation is available
 at https://www.pilosa.com/docs/.
 
-Version: v1.0.0
-Build Time: 2018-05-14T22:14:01+0000
+Pilosa v1.4.0
+Build Time: 2019-09-23T14:33:07+0000
 
 Usage:
   pilosa [command]
@@ -3411,6 +3291,7 @@ Available Commands:
   export          Export data from pilosa.
   generate-config Print the default configuration.
   help            Help about any command
+  holder          Load Pilosa.
   import          Bulk load data into pilosa.
   inspect         Get stats on a pilosa data file.
   server          Run Pilosa.
@@ -3423,16 +3304,40 @@ Use &quot;pilosa [command] --help&quot; for more information about a command.
 </code></pre><p>First, create a directory in which to put all of the files for this tutorial. Then switch to that directory:</p>
 <pre><code>mkdir $HOME/pilosa-tls-tutorial &amp;&amp; cd $_
 </code></pre><h4 id="creating-the-tls-certificate-and-gossip-key">Creating the TLS Certificate and Gossip Key</h4>
-<p>Securing a Pilosa cluster consists of securing the communication between nodes using TLS and Gossip encryption. <a href="https://www.pilosa.com/enterprise/">Pilosa Enterprise</a> additionally supports authentication and other security features, but those are not covered in this tutorial.</p>
-<p>The first step is acquiring an SSL certificate. You can buy a commercial certificate or retrieve a <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a> certificate, but we will be using a self signed certificate for practical reasons. Using self-signed certificates is not recommended in production since it makes man-in-the-middle attacks easy.</p>
-<p>The following command creates a 2048-bit, self-signed wildcard certificate for <code>*.pilosa.local</code> which expires 10 years later.</p>
-<pre><code>openssl req -x509 -newkey rsa:2048 -keyout pilosa.local.key -out pilosa.local.crt -days 3650 -nodes -subj &quot;/C=US/ST=Texas/L=Austin/O=Pilosa/OU=Com/CN=*.pilosa.local&quot;
-</code></pre><p>The command above creates two files in the current directory:</p>
+<p>Securing a Pilosa cluster consists of securing the communication between nodes using TLS and Gossip encryption.</p>
+<p>The first step is acquiring the necessary TLS certificates. Operating your own public key infrastructure (PKI) is outside of the scope of this tutorial, but it is easy to get started with <a href="https://github.com/square/certstrap">certstrap</a> for testing/development purposes. For production, you can use OpenSSL or any other software that provides PKI using X.509 certificates, including <a href="https://learn.hashicorp.com/vault/secrets-management/sm-pki-engine">Hashicorp Vault</a>. It is not recommended to use certstrap in production.</p>
+<p>First, create a certificate authority (CA):</p>
+<pre><code>$ certstrap init --common-name ca
+Created out/ca.key
+Created out/ca.crt
+Created out/ca.crl
+</code></pre><p>The command above creates three files in the <code>out/</code> directory:</p>
 <ul>
-<li><code>pilosa.local.crt</code> is the SSL certificate.</li>
-<li><code>pilosa.local.key</code> is the private key file which must be kept as secret.</li>
+<li><code>ca.key</code> is the CA private key file which must be kept as secret.</li>
+<li><code>ca.crt</code> is the CA TLS certificate.</li>
+<li><code>ca.crl</code> is the Certificate Revocation List (CRL).</li>
 </ul>
-<p>Having created the SSL certificate, we can now create the gossip encryption key. The gossip encryption key file must be exactly 16, 24, or 32 bytes to select one of AES-128, AES-192, or AES-256 encryption. Reading random bytes from cryptographically secure <code>/dev/random</code> serves our purpose very well:</p>
+<p>Next, create and sign a wildcard certificate for pilosa:</p>
+<pre><code>$ certstrap request-cert --cn &quot;*.pilosa.local&quot;
+Created out/*.pilosa.local.key
+Created out/*.pilosa.local.csr
+
+$ certstrap sign &quot;*.pilosa.local&quot; --CA ca
+Created out/*.pilosa.local.crt from out/*.pilosa.local.csr signed by out/ca.key
+</code></pre><p>The commands above create three files in the <code>out/</code> directory:</p>
+<ul>
+<li><code>*.pilosa.local.key</code> is the private key file which must be kept as secret.</li>
+<li><code>*.pilosa.local.csr</code> is the certificate signing request (CSR).</li>
+<li><code>*.pilosa.local.crt</code> is the signed TLS certificate.</li>
+</ul>
+<p>You can also create a separate client certificate signed by the same CA to test mutual TLS using curl:</p>
+<pre><code>$ certstrap request-cert --cn &quot;curl&quot;
+Created out/curl.key
+Created out/curl.csr
+
+$ certstrap sign &quot;curl&quot; --CA ca
+Created out/curl.crt from out/curl.csr signed by out/ca.key
+</code></pre><p>Having created the TLS certificates, we can now create the gossip encryption key. The gossip encryption key file must be exactly 16, 24, or 32 bytes to select one of AES-128, AES-192, or AES-256 encryption. Reading random bytes from cryptographically secure <code>/dev/random</code> serves our purpose very well:</p>
 <pre><code>head -c 32 /dev/random &gt; pilosa.local.gossip32
 </code></pre><p>We now have a file called <code>pilosa.local.gossip32</code> in the current directory which contains 32 random bytes.</p>
 <h4 id="creating-the-configuration-files">Creating the Configuration Files</h4>
@@ -3448,9 +3353,10 @@ Use &quot;pilosa [command] --help&quot; for more information about a command.
 <span style="color:#a6e22e">coordinator</span> = <span style="color:#66d9ef">true</span>
 
 [<span style="color:#a6e22e">tls</span>]
-<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
-<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
-<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+<span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/ca.crt&#34;</span>
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">enable</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">client</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verification</span> = <span style="color:#66d9ef">true</span>
 
 [<span style="color:#a6e22e">gossip</span>]
 <span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
@@ -3463,9 +3369,10 @@ Use &quot;pilosa [command] --help&quot; for more information about a command.
 <span style="color:#a6e22e">bind</span> = <span style="color:#e6db74">&#34;https://02.pilosa.local:10502&#34;</span>
 
 [<span style="color:#a6e22e">tls</span>]
-<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
-<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
-<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+<span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/ca.crt&#34;</span>
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">enable</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">client</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verification</span> = <span style="color:#66d9ef">true</span>
 
 [<span style="color:#a6e22e">gossip</span>]
 <span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
@@ -3478,9 +3385,10 @@ Use &quot;pilosa [command] --help&quot; for more information about a command.
 <span style="color:#a6e22e">bind</span> = <span style="color:#e6db74">&#34;https://03.pilosa.local:10503&#34;</span>
 
 [<span style="color:#a6e22e">tls</span>]
-<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;pilosa.local.crt&#34;</span>
-<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;pilosa.local.key&#34;</span>
-<span style="color:#a6e22e">skip</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verify</span> = <span style="color:#66d9ef">true</span>
+<span style="color:#a6e22e">ca</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/ca.crt&#34;</span>
+<span style="color:#a6e22e">certificate</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.crt&#34;</span>
+<span style="color:#a6e22e">key</span> = <span style="color:#e6db74">&#34;out/*.pilosa.local.key&#34;</span>
+<span style="color:#a6e22e">enable</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">client</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">verification</span> = <span style="color:#66d9ef">true</span>
 
 [<span style="color:#a6e22e">gossip</span>]
 <span style="color:#a6e22e">seeds</span> = [<span style="color:#e6db74">&#34;01.pilosa.local:15000&#34;</span>]
@@ -3491,7 +3399,7 @@ Use &quot;pilosa [command] --help&quot; for more information about a command.
 <li><code>data-dir</code> points to the directory where the Pilosa server writes its data. If it doesn&rsquo;t exist, the server will create it.</li>
 <li><code>bind</code> is the address to which the server listens for incoming requests. The address is composed of three parts: scheme, host, and port. The default scheme is <code>http</code> so we explicitly specify <code>https</code> to use the HTTPS protocol for communication between nodes.</li>
 <li><code>[cluster]</code> section contains the settings for a cluster. We set <code>coordinator = true</code> for only the first node to choose that as the coordinator node. See <a href="../configuration/#cluster-coordinator">Cluster Configuration</a> for other settings.</li>
-<li><code>[tls]</code> section contains the TLS settings, including the path to the SSL certificate and the corresponding key. Set <code>skip-verify</code> to <code>true</code> in order to disable host name verification and other security measures. Do not set <code>skip-verify</code> to <code>true</code> on production servers.</li>
+<li><code>[tls]</code> section contains the TLS settings, including the path to the TLS certificate and the corresponding key. The <code>ca-certificate</code> setting is optional and will default to your system CAs. You may also disable server-to-server verification by setting <code>skip-verify</code> to <code>true</code>, which we don&rsquo;t recommend for production.</li>
 <li><code>[gossip]</code> section contains settings for the gossip protocol. <code>seeds</code> contains the list of nodes from which to seed cluster membership. There must be at least one gossip seed. The <code>port</code> setting is the gossip listen address for the node. If all nodes of the cluster are running on the same computer, the gossip listen address should be different for each node. Otherwise, it can be set to the same value. Finally, the <code>key</code> points to the gossip encryption key we created earlier.</li>
 </ul>
 <h4 id="final-touches-before-running-the-cluster">Final Touches Before Running the Cluster</h4>
@@ -3514,37 +3422,38 @@ pilosa server -c node2.config.toml
 <pre><code>cd $HOME/pilosa-tls-tutorial
 pilosa server -c node3.config.toml
 </code></pre><p>Let&rsquo;s ensure that all three Pilosa servers are running and they are connected:</p>
-<pre><code class="language-request" data-lang="request">curl -k --ipv4 https://01.pilosa.local:10501/status
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://01.pilosa.local:10501/status
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;state&quot;:&quot;NORMAL&quot;,&quot;nodes&quot;:[{&quot;id&quot;:&quot;98ebd177-c082-4c54-8d48-7e7c75857b52&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;02.pilosa.local&quot;,&quot;port&quot;:10502},&quot;isCoordinator&quot;:false},{&quot;id&quot;:&quot;a33dc0d6-c35f-4559-984a-e582bf032a21&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;03.pilosa.local&quot;,&quot;port&quot;:10503},&quot;isCoordinator&quot;:false},{&quot;id&quot;:&quot;e24ac014-ee2f-4cb0-b565-74df6c551f0a&quot;,&quot;uri&quot;:{&quot;scheme&quot;:&quot;https&quot;,&quot;host&quot;:&quot;01.pilosa.local&quot;,&quot;port&quot;:10501},&quot;isCoordinator&quot;:true}]}
-</code></pre><p>The <code>-k</code> flag is used to tell curl that it shouldn&rsquo;t bother checking the certificate the server provides, and the <code>--ipv4</code> flag avoids an issue on MacOS where the curl request takes a long time if the address resolves to <code>127.0.0.1</code>. You can leave it out on Linux and WSL.</p>
+</code></pre><p>The <code>-k</code> flag is used to tell curl that it shouldn&rsquo;t bother checking the certificate the server provides, and the <code>--ipv4</code> flag avoids an issue on MacOS where the curl request takes a long time if the address resolves to <code>127.0.0.1</code>. You can leave it out on Linux.</p>
 <p>If everything is set up correctly, the cluster state should be <code>NORMAL</code>.</p>
 <h4 id="running-queries">Running Queries</h4>
 <p>Having confirmed that our cluster is running normally, let&rsquo;s perform a few queries. First, we need to create an index and a field:</p>
-<pre><code class="language-request" data-lang="request">curl https://01.pilosa.local:10501/index/sample-index \
-     -k --ipv4 \
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://01.pilosa.local:10501/index/sample-index \
      -X POST
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;success&quot;:true}
 </code></pre><p>This will create index <code>sample-index</code> with default options. Let&rsquo;s create the field now:</p>
-<pre><code class="language-request" data-lang="request">curl https://01.pilosa.local:10501/index/sample-index/field/sample-field \
-     -k --ipv4 \
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://01.pilosa.local:10501/index/sample-index/field/sample-field \
      -X POST
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;success&quot;:true}
 </code></pre><p>We just created field <code>sample-field</code> with default options.</p>
 <p>Let&rsquo;s run a <code>Set</code> query:</p>
-<pre><code class="language-request" data-lang="request">curl https://01.pilosa.local:10501/index/sample-index/query \
-     -k --ipv4 \
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://01.pilosa.local:10501/index/sample-index/query \
      -X POST \
      -d 'Set(100, sample-field=1)'
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[true]}
 </code></pre><p>Confirm that the value was indeed set:</p>
-<pre><code class="language-request" data-lang="request">curl https://01.pilosa.local:10501/index/sample-index/query \
-     -k --ipv4 \
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://01.pilosa.local:10501/index/sample-index/query \
      -X POST \
      -d 'Row(sample-field=1)'
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[100]}]}
 </code></pre><p>The same response should be returned when querying other nodes in the cluster:</p>
-<pre><code class="language-request" data-lang="request">curl https://02.pilosa.local:10501/index/sample-index/query \
-     -k --ipv4 \
+<pre><code class="language-request" data-lang="request">curl --cacert out/ca.crt --cert out/curl.crt --key out/curl.key \
+     https://02.pilosa.local:10502/index/sample-index/query \
      -X POST \
      -d 'Row(sample-field=1)'
 </code></pre><pre><code class="language-response" data-lang="response">{&quot;results&quot;:[{&quot;attrs&quot;:{},&quot;columns&quot;:[100]}]}
@@ -3838,7 +3747,7 @@ pilosa server -c node3.config.toml
           <div class="info">
               
               
-              <a href="https://github.com/pilosa/pilosa/tree/master/docs/tutorials.md">View markdown source</a> on Github. Last updated 4 months ago.
+              <a href="https://github.com/pilosa/pilosa/tree/master/docs/tutorials.md">View markdown source</a> on Github. Last updated 6 months ago.
           </div>
     </div>
   </div>

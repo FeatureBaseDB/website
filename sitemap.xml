@@ -8,12 +8,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/introduction/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/introduction/</loc>
   </url>
   
@@ -93,12 +87,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/installation/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/installation/</loc>
   </url>
   
   
@@ -188,12 +176,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/getting-started/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/getting-started/</loc>
   </url>
   
@@ -278,12 +260,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/examples/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/examples/</loc>
   </url>
   
@@ -339,12 +315,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/tutorials/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/tutorials/</loc>
   </url>
   
   
@@ -434,12 +404,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/data-model/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/data-model/</loc>
   </url>
   
@@ -524,12 +488,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/architecture/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/architecture/</loc>
   </url>
   
@@ -597,12 +555,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/query-language/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/query-language/</loc>
   </url>
   
   
@@ -687,12 +639,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/configuration/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/configuration/</loc>
   </url>
   
   
@@ -806,12 +752,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/console/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/console/</loc>
   </url>
   
@@ -891,12 +831,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/api-reference/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/api-reference/</loc>
   </url>
   
   
@@ -986,12 +920,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/pdk/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/pdk/</loc>
   </url>
   
@@ -1071,12 +999,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/client-libraries/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/client-libraries/</loc>
   </url>
   
   
@@ -1166,12 +1088,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/administration/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/administration/</loc>
   </url>
   
@@ -1256,12 +1172,6 @@
   
   
   <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/glossary/</loc>
-  </url>
-  
-  
-  
-  <url>
     <loc>https://www.pilosa.com/docs/master/glossary/</loc>
   </url>
   
@@ -1341,12 +1251,6 @@
   
   <url>
     <loc>https://www.pilosa.com/docs/latest/faq/</loc>
-  </url>
-  
-  
-  
-  <url>
-    <loc>https://www.pilosa.com/docs/latest/v1.4/faq/</loc>
   </url>
   
   
